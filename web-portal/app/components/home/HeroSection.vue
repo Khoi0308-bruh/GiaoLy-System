@@ -56,17 +56,17 @@ const handleSearch = () => {
 </script>
 
 <template>
-  <div class="relative w-full mb-14 mt-4">
+  <div class="relative w-full mb-16 -mt-4">
     <!-- ═══════════════════════════════════════════════════════
-         MAIN HERO BANNER (Cinematic Aspect Ratio + Rounded XL)
+         MAIN HERO BANNER (Edge-to-Edge Cinematic)
     ════════════════════════════════════════════════════════════ -->
-    <div class="relative w-full rounded-3xl overflow-hidden shadow-2xl bg-slate-900 border border-stone-200/50 dark:border-stone-800">
+    <div class="relative w-full overflow-hidden bg-slate-900 shadow-xl">
       <!-- UCarousel từ Nuxt UI -->
       <UCarousel
         :items="bannerList"
         :ui="{
-          root: 'relative overflow-hidden w-full h-[420px] sm:h-[480px] md:h-[540px] lg:h-[580px]',
-          container: 'h-full',
+          root: 'relative overflow-hidden w-full h-[500px] sm:h-[600px] md:h-[650px] lg:h-[700px]',
+          container: 'h-full w-full',
           item: 'w-full basis-full h-full relative select-none'
         }"
         indicators

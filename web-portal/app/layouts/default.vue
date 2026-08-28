@@ -71,91 +71,18 @@
     </header>
 
     <!-- ──────────────────────────────────────────────────────
-         BODY: MAIN + RIGHT SIDEBAR
+         BODY: MAIN
     ─────────────────────────────────────────────────────────── -->
     <div class="pt-[64px] flex min-h-screen">
       <!-- ════════════════════════════════
-           CENTER COLUMN (Feed / Content)
+           CENTER COLUMN (Full Width)
       ════════════════════════════════════ -->
-      <main class="flex-1 min-w-0 lg:mr-[320px] xl:mr-[360px] flex flex-col pt-4">
-        <div class="w-full max-w-[1200px] mx-auto px-4 sm:px-6 flex-1">
+      <main class="flex-1 min-w-0 flex flex-col pt-4 w-full">
+        <div :class="[$route.path === '/' ? 'w-full flex-1' : 'w-full max-w-[1200px] mx-auto px-4 sm:px-6 flex-1']">
           <slot />
         </div>
         <LayoutFooterSection />
       </main>
-
-      <!-- ════════════════════════════════
-           RIGHT SIDEBAR (Widgets)
-      ════════════════════════════════════ -->
-      <aside class="hidden lg:block fixed right-0 top-[64px] bottom-0 w-[320px] xl:w-[360px] overflow-y-auto bg-slate-50/50 dark:bg-[#242526] border-l border-slate-100 dark:border-stone-800 p-4">
-        <div class="mb-5">
-          <h3 class="text-sm font-bold text-slate-800 dark:text-stone-400 uppercase tracking-wider mb-3 px-1">
-            🎓 Tra Cứu Điểm Nhanh
-          </h3>
-          <div class="catholic-card p-4">
-            <PortalVerifyWidget />
-          </div>
-        </div>
-
-        <!-- Ngành TNTT Quick Access -->
-        <div class="mb-5">
-          <h3 class="text-sm font-bold text-stone-600 dark:text-stone-400 uppercase tracking-wider mb-3 px-1">
-            ✝ Các Ngành
-          </h3>
-          <div class="space-y-1">
-            <div
-              v-for="branch in branches"
-              :key="branch.name"
-              class="flex items-center gap-3 p-2.5 rounded-xl hover:bg-stone-50 dark:hover:bg-[#3a3b3c] transition-colors cursor-pointer group"
-            >
-              <div
-                class="w-9 h-9 rounded-full flex items-center justify-center shrink-0 shadow-sm font-black text-white text-sm"
-                :class="branch.bg"
-              >
-                {{ branch.abbr }}
-              </div>
-              <div>
-                <p class="text-sm font-semibold text-stone-800 dark:text-stone-200">
-                  {{ branch.name }}
-                </p>
-                <p class="text-xs text-stone-400">
-                  {{ branch.age }}
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Thông tin liên hệ -->
-        <div>
-          <h3 class="text-sm font-bold text-stone-600 dark:text-stone-400 uppercase tracking-wider mb-3 px-1">
-            📋 Liên Hệ
-          </h3>
-          <div class="bg-stone-50 dark:bg-[#3a3b3c] rounded-2xl p-4 space-y-2 border border-stone-100 dark:border-stone-700">
-            <div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
-              <UIcon
-                name="i-heroicons-map-pin"
-                class="w-4 h-4 text-blue-500 shrink-0"
-              />
-              <span>Giáo Xứ – Sứ Đoàn TNTT</span>
-            </div>
-            <div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
-              <UIcon
-                name="i-heroicons-phone"
-                class="w-4 h-4 text-green-500 shrink-0"
-              />
-              <span>Liên hệ Ban Học Vụ</span>
-            </div>
-            <div class="flex items-center gap-2 text-sm text-stone-600 dark:text-stone-400">
-              <UIcon
-                name="i-heroicons-envelope"
-                class="w-4 h-4 text-red-500 shrink-0"
-              />
-              <span>tntt@giaoxu.org</span>
-            </div>
-          </div>
-        </div>
-      </aside>
     </div>
 
     <!-- ──────────────────────────────────────────────────────
@@ -285,12 +212,4 @@ const sidebarItems: SidebarItem[] = [
   }
 ]
 
-// Branches for right sidebar
-const branches = [
-  { name: 'Ấu Nhi', abbr: 'Â', age: 'Lớp 1–3', bg: 'bg-tntt-pink-500' },
-  { name: 'Thiếu Nhi', abbr: 'T', age: 'Lớp 4–6', bg: 'bg-tntt-green-500' },
-  { name: 'Nghĩa Sĩ', abbr: 'N', age: 'Lớp 7–9', bg: 'bg-tntt-blue-600' },
-  { name: 'Hiệp Sĩ', abbr: 'H', age: 'Lớp 10–12', bg: 'bg-tntt-gold-500' },
-  { name: 'Huynh Trưởng', abbr: 'HT', age: 'Ban điều hành', bg: 'bg-tntt-brown-600' }
-]
 </script>
