@@ -1,0 +1,1 @@
+import{b as e,mt as t}from"./BKdLzFmX.js";import{d as n}from"./CZ9Uzlky.js";import{t as r}from"./CNs_Ozdc2.js";var i={__name:`index`,setup(i){return r({middleware:[function(e,t){return n(`/login`)}]}),(n,r)=>(t(),e(`div`,null,`Redirecting...`))}};export{i as default};

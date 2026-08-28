@@ -1,0 +1,12 @@
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\GiaoLy.Domain.csproj.AssemblyReference.cache
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\GiaoLy.Domain.GeneratedMSBuildEditorConfig.editorconfig
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\GiaoLy.Domain.AssemblyInfoInputs.cache
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\GiaoLy.Domain.AssemblyInfo.cs
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\GiaoLy.Domain.csproj.CoreCompileInputs.cache
+C:\GiaoLy\GiaoLy.Domain\bin\Debug\net10.0\GiaoLy.Domain.deps.json
+C:\GiaoLy\GiaoLy.Domain\bin\Debug\net10.0\GiaoLy.Domain.dll
+C:\GiaoLy\GiaoLy.Domain\bin\Debug\net10.0\GiaoLy.Domain.pdb
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\GiaoLy.Domain.dll
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\refint\GiaoLy.Domain.dll
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\GiaoLy.Domain.pdb
+C:\GiaoLy\GiaoLy.Domain\obj\Debug\net10.0\ref\GiaoLy.Domain.dll

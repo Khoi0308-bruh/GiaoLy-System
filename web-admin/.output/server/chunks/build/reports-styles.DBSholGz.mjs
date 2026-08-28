@@ -1,0 +1,9 @@
+//#region pages/admin/reports.vue?vue&type=style&index=0&lang.css?inline&used
+var reports_vue_vue_type_style_index_0_lang_default = "@keyframes blob{0%{transform:translate(0)scale(1)}33%{transform:translate(30px,-50px)scale(1.1)}66%{transform:translate(-20px,20px)scale(.9)}to{transform:translate(0)scale(1)}}.animate-blob{animation:10s infinite blob}.animation-delay-2000{animation-delay:2s}@keyframes fade-in-up{0%{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}.animate-fade-in-up{animation:.5s cubic-bezier(.16,1,.3,1) forwards fade-in-up}@media print{.absolute.inset-0,.fixed,aside,button,header,nav{display:none!important}.md\\:ml-20,.md\\:ml-64{margin-left:0!important}.animate-fade-in-up{opacity:1!important;animation:none!important;transform:none!important}.bg-white\\/40,.bg-white\\/50{background:#fff!important}*{text-shadow:none!important;box-shadow:none!important}}";
+
+const reportsStyles_DBSholGz = [
+  reports_vue_vue_type_style_index_0_lang_default
+];
+
+export { reportsStyles_DBSholGz as default };
+//# sourceMappingURL=reports-styles.DBSholGz.mjs.map

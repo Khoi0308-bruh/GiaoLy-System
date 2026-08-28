@@ -1,0 +1,72 @@
+@import "tailwindcss";
+
+@theme {
+  --color-catholic-red: #800000;
+  --color-catholic-gold: #DAA520;
+  
+  --font-sans: "Outfit", "sans-serif";
+  --font-serif: "Merriweather", "serif";
+  
+  --animate-marquee: marquee 25s linear infinite;
+  --animate-sweep: sweep 0.8s ease-in-out;
+  --animate-fade-in: fade-in 0.8s ease-out forwards;
+  --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  @keyframes marquee {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+  }
+  @keyframes sweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+  @keyframes fade-in {
+    0% { opacity: 0; transform: translateY(10px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+  @keyframes slide-up {
+    0% { opacity: 0; transform: translateY(30px); }
+    100% { opacity: 1; transform: translateY(0); }
+  }
+}
+
+@layer base {
+  body {
+    @apply font-sans antialiased text-slate-900 bg-slate-50;
+  }
+}
+
+@layer components {
+  /* Hiệu ứng nổi bật chấm active trên menu */
+  .nav-link-refined {
+    @apply relative flex items-center px-4 py-2 text-sm font-semibold tracking-wide uppercase transition-all duration-300;
+  }
+  .nav-link-refined:hover,
+  .nav-link-refined.active {
+    @apply text-amber-500;
+  }
+  .nav-dot-floating {
+    @apply absolute left-0 bottom-[-4px] h-[4px] w-0 rounded-full bg-amber-500 transition-all duration-300;
+  }
+  .nav-link-refined:hover .nav-dot-floating,
+  .nav-link-refined.active .nav-dot-floating {
+    @apply w-full;
+  }
+
+  /* Thẻ card phong cách mới */
+  .catholic-card {
+    @apply bg-white rounded-xl border border-slate-100 shadow-sm transition-all duration-500;
+  }
+  .catholic-card:hover {
+    @apply -translate-y-2 border-amber-200 shadow-xl shadow-amber-500/10;
+  }
+
+  /* Không cuộn ngang mượt */
+  .no-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
+  .no-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+}
