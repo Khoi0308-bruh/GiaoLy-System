@@ -28,8 +28,20 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<DateTime?>("ActivatedAt")
                         .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ArchivedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -42,12 +54,36 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("ReopenReason")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateTime?>("ReopenedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Status")
+                        .IsUnique()
+                        .HasFilter("[Status] = 'Active'");
 
                     b.ToTable("AcademicYears");
                 });
@@ -58,18 +94,50 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<string>("AnnouncementType")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<string>("Audience")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
                     b.Property<string>("Author")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<Guid>("AuthorUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<int>("Branch")
                         .HasColumnType("int");
+
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<Guid?>("ClassRoomId")
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Content")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("ContentHtml")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("ExpiresAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("ExpiryDate")
@@ -78,19 +146,133 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<bool>("IsUrgent")
                         .HasColumnType("bit");
 
+                    b.Property<DateTime>("PublishedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<int>("TargetAudience")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Type")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.ToTable("Announcements");
+                    b.HasIndex("AuthorUserId");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("ClassRoomId");
+
+                    b.HasIndex("Audience", "PublishedAt")
+                        .HasDatabaseName("IX_Announcements_Published");
+
+                    b.ToTable("Announcements", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.AuditLog", b =>
+                {
+                    b.Property<long>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("bigint");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<long>("Id"));
+
+                    b.Property<string>("Action")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("CorrelationId")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("EntityId")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("EntityType")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("IpAddress")
+                        .HasMaxLength(45)
+                        .HasColumnType("nvarchar(45)");
+
+                    b.Property<string>("NewValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("OccurredAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("OldValues")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("UserAgent")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<Guid?>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("UserName")
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("OccurredAt");
+
+                    b.HasIndex("EntityType", "EntityId");
+
+                    b.ToTable("AuditLogs", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.BackgroundJobRun", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("FinishedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("JobName")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("LockedBy")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Message")
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<DateTime>("StartedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("JobName");
+
+                    b.HasIndex("StartedAt");
+
+                    b.ToTable("BackgroundJobRuns", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Banner", b =>
@@ -102,9 +284,13 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ImageUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -112,17 +298,68 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<string>("Link")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("LinkUrl")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
                     b.Property<int>("OrderIndex")
                         .HasColumnType("int");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Banners");
+                    b.ToTable("Banners", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Branch", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<byte?>("MaxAge")
+                        .HasColumnType("tinyint");
+
+                    b.Property<byte?>("MinAge")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.ToTable("Branches");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.CampEvent", b =>
@@ -131,30 +368,106 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid?>("AcademicYearId")
+                        .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("EndDate")
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateOnly>("EndDate")
+                        .HasColumnType("date");
+
                     b.Property<decimal>("Fee")
-                        .HasColumnType("decimal(18,2)");
+                        .HasColumnType("decimal(12,0)");
 
                     b.Property<string>("Location")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
-                    b.Property<DateTime>("StartDate")
+                    b.Property<DateOnly?>("RegistrationDeadline")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("CampEvents");
+                    b.HasIndex("AcademicYearId");
+
+                    b.HasIndex("BranchId");
+
+                    b.ToTable("CampEvents", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.CampPayment", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal>("Amount")
+                        .HasColumnType("decimal(12,0)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateOnly>("PaidOn")
+                        .HasColumnType("date");
+
+                    b.Property<string>("ReceiptNumber")
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<Guid>("ReceivedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("RegistrationId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("ReversesPaymentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ReceiptNumber")
+                        .IsUnique()
+                        .HasDatabaseName("UX_CampPayments_Receipt")
+                        .HasFilter("[ReceiptNumber] IS NOT NULL");
+
+                    b.HasIndex("ReceivedBy");
+
+                    b.HasIndex("RegistrationId")
+                        .HasDatabaseName("IX_CampPayments_Registration");
+
+                    b.HasIndex("ReversesPaymentId");
+
+                    b.ToTable("CampPayments", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.CampRegistration", b =>
@@ -166,23 +479,42 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<Guid>("CampEventId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<bool>("IsPaid")
-                        .HasColumnType("bit");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("RegisteredBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("TeamNumber")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("CampRegistrations");
+                    b.HasIndex("RegisteredBy");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("CampEventId", "StudentId")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_CampRegistrations_EventStudent");
+
+                    b.ToTable("CampRegistrations", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Certificate", b =>
@@ -197,7 +529,11 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("CertificateType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Godparent")
                         .IsRequired()
@@ -206,22 +542,126 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<DateTime>("IssueDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("IssuedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("IssuedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("PdfSha256")
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("RevokeReason")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("RevokedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("SignedBy")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Snapshot")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("StudentSacramentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("VerificationCode")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(24)
+                        .HasColumnType("nvarchar(24)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("IssuedBy");
 
-                    b.ToTable("Certificates");
+                    b.HasIndex("RevokedBy");
+
+                    b.HasIndex("StudentSacramentId");
+
+                    b.HasIndex("VerificationCode")
+                        .IsUnique();
+
+                    b.HasIndex("StudentId", "CertificateType")
+                        .IsUnique()
+                        .HasFilter("[Status] = 'Issued'");
+
+                    b.ToTable("Certificates", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.ClassLevel", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<byte>("LevelKey")
+                        .HasColumnType("tinyint");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<int?>("NextLevelId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
+                    b.HasIndex("LevelKey")
+                        .IsUnique();
+
+                    b.HasIndex("NextLevelId");
+
+                    b.ToTable("ClassLevels");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.ClassRoom", b =>
@@ -236,9 +676,18 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<int>("Branch")
                         .HasColumnType("int");
 
+                    b.Property<int>("ClassLevelId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ClassName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid?>("LeaderId")
                         .HasColumnType("uniqueidentifier");
@@ -248,16 +697,56 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("RoomName")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Section")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("AcademicYearId");
+                    b.HasIndex("ClassLevelId");
 
-                    b.HasIndex("LeaderId");
+                    b.HasIndex("AcademicYearId", "ClassLevelId", "Section")
+                        .IsUnique()
+                        .HasFilter("[DeletedAt] IS NULL");
 
                     b.ToTable("ClassRooms");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.ClassRoomTeacher", b =>
+                {
+                    b.Property<Guid>("ClassRoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("AssignedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsLead")
+                        .HasColumnType("bit");
+
+                    b.HasKey("ClassRoomId", "UserId");
+
+                    b.HasIndex("ClassRoomId")
+                        .IsUnique()
+                        .HasFilter("[IsLead] = 1");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("ClassRoomTeachers");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Document", b =>
@@ -269,19 +758,34 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<Guid?>("AcademicYearId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("AccessLevel")
-                        .HasColumnType("int");
+                    b.Property<string>("AccessLevel")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
-                    b.Property<int>("Branch")
+                    b.Property<int?>("BranchId")
                         .HasColumnType("int");
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<string>("ContentType")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("FileName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
 
                     b.Property<string>("FilePath")
                         .IsRequired()
@@ -290,24 +794,35 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<long>("FileSize")
                         .HasColumnType("bigint");
 
-                    b.Property<string>("SchoolYear")
+                    b.Property<string>("Sha256")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("StoredFileName")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
-                    b.Property<DateTime>("UploadDate")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<string>("UploadedBy")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<Guid>("UploadedBy")
+                        .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Documents");
+                    b.HasIndex("AcademicYearId");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("UploadedBy");
+
+                    b.ToTable("Documents", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.DraftAction", b =>
@@ -356,23 +871,39 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<Guid>("ClassRoomId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<DateTime>("DutyDate")
+                    b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateOnly>("DutyDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("Note")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("RoleName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<Guid>("UserId")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("Id");
 
-                    b.ToTable("DutyAssignments");
+                    b.HasIndex("ClassRoomId");
+
+                    b.HasIndex("DutyDate")
+                        .HasDatabaseName("IX_DutyAssignments_Date");
+
+                    b.HasIndex("UserId", "ClassRoomId", "DutyDate", "RoleName")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_DutyAssignments_Slot");
+
+                    b.ToTable("DutyAssignments", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Enrollment", b =>
@@ -381,25 +912,53 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("AcademicYearId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid>("ClassRoomId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
                     b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
 
                     b.Property<string>("Status")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassRoomId");
+                    b.HasIndex("AcademicYearId");
 
                     b.HasIndex("StudentId");
+
+                    b.HasIndex("ClassRoomId", "Status");
+
+                    b.HasIndex("StudentId", "AcademicYearId")
+                        .IsUnique()
+                        .HasFilter("[Status] = 'Active'");
 
                     b.ToTable("Enrollments");
                 });
@@ -410,25 +969,34 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("ClassRoomId")
+                    b.Property<Guid>("ClassRoomId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid?>("LeaderId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PatronSaint")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
                     b.HasIndex("ClassRoomId");
-
-                    b.HasIndex("LeaderId");
 
                     b.ToTable("Families");
                 });
@@ -439,46 +1007,246 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("Absences")
+                    b.Property<int?>("Absences")
                         .HasColumnType("int");
 
-                    b.Property<double>("AttendanceRate")
-                        .HasColumnType("float");
+                    b.Property<decimal?>("BigTest")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("decimal(4,2)");
 
-                    b.Property<double>("BigTest")
-                        .HasColumnType("float");
+                    b.Property<DateTime?>("ComputedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<decimal?>("ComputedGpa")
+                        .HasPrecision(3, 1)
+                        .HasColumnType("decimal(3,1)");
+
+                    b.Property<string>("ComputedStatus")
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("EnrollmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<decimal?>("FinalExam")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("decimal(4,2)");
+
+                    b.Property<decimal?>("Oral")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("decimal(4,2)");
+
+                    b.Property<string>("Remarks")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<decimal?>("SmallTest")
+                        .HasPrecision(4, 2)
+                        .HasColumnType("decimal(4,2)");
+
+                    b.Property<int?>("TotalSessions")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EnrollmentId")
+                        .IsUnique();
+
+                    b.ToTable("Grades", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.GradeUnlock", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
 
                     b.Property<Guid>("ClassRoomId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("FinalExam")
-                        .HasColumnType("float");
+                    b.Property<DateTime?>("ClosedAt")
+                        .HasColumnType("datetime2");
 
-                    b.Property<double>("GPA")
-                        .HasColumnType("float");
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
 
-                    b.Property<bool>("IsQualified")
-                        .HasColumnType("bit");
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
-                    b.Property<double>("Oral")
-                        .HasColumnType("float");
+                    b.Property<DateTime>("UnlockedAt")
+                        .HasColumnType("datetime2");
 
-                    b.Property<double>("SmallTest")
-                        .HasColumnType("float");
+                    b.Property<Guid>("UnlockedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UnlockedBy");
+
+                    b.HasIndex("ClassRoomId", "ExpiresAt");
+
+                    b.ToTable("GradeUnlocks", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Guardian", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Email")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("FullName")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Occupation")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Phone")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Religion")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("Phone");
+
+                    b.ToTable("Guardians");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.GuardianLink", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Relationship")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
 
                     b.Property<Guid>("StudentId")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<int>("TotalSessions")
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("VerifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("VerifiedBy");
+
+                    b.HasIndex("UserId", "StudentId")
+                        .IsUnique();
+
+                    b.ToTable("GuardianLinks");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.ImportJob", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AppliedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<int>("ErrorRows")
+                        .HasColumnType("int");
+
+                    b.Property<string>("FileName")
+                        .IsRequired()
+                        .HasMaxLength(260)
+                        .HasColumnType("nvarchar(260)");
+
+                    b.Property<string>("FileSha256")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<string>("ImportType")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<string>("ReportJson")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<int>("TotalRows")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UploadedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("ValidRows")
+                        .HasColumnType("int");
+
+                    b.Property<int>("WarningRows")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("ClassRoomId");
+                    b.HasIndex("FileSha256");
 
-                    b.HasIndex("StudentId");
+                    b.HasIndex("UploadedBy", "CreatedAt");
 
-                    b.ToTable("Grades");
+                    b.ToTable("ImportJobs");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Leader", b =>
@@ -488,21 +1256,33 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("AvatarPath")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<int>("Branch")
                         .HasColumnType("int");
 
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<string>("HolyName")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
@@ -512,15 +1292,22 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("Position")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<string>("Term")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("Leaders");
+                    b.HasIndex("BranchId");
+
+                    b.ToTable("Leaders", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.LessonPlan", b =>
@@ -532,6 +1319,9 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<Guid>("AuthorId")
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<Guid>("AuthorUserId")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<Guid?>("ClassRoomId")
                         .HasColumnType("uniqueidentifier");
 
@@ -539,23 +1329,47 @@ namespace GiaoLy.Domain.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<DateTime?>("LastModified")
                         .HasColumnType("datetime2");
 
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
                     b.Property<string>("Tags")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Visibility")
+                        .IsRequired()
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("LessonPlans");
+                    b.HasIndex("AuthorUserId");
+
+                    b.HasIndex("ClassRoomId");
+
+                    b.ToTable("LessonPlans", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.LiturgicalEvent", b =>
@@ -566,8 +1380,8 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("Color")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("nvarchar(50)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
@@ -576,30 +1390,42 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateOnly>("EventDate")
+                        .HasColumnType("date");
 
                     b.Property<bool>("IsOverride")
                         .HasColumnType("bit");
 
                     b.Property<string>("Level")
                         .IsRequired()
-                        .HasMaxLength(100)
-                        .HasColumnType("nvarchar(100)");
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasMaxLength(255)
-                        .HasColumnType("nvarchar(255)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("WordOfGodOverride")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("WordOfGodReference")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.HasKey("Id");
 
-                    b.ToTable("LiturgicalEvents");
+                    b.HasIndex("EventDate", "IsOverride")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_LiturgicalEvents_DateOverride");
+
+                    b.ToTable("LiturgicalEvents", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.NewsArticle", b =>
@@ -610,21 +1436,37 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("Category")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime>("CrawledAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("CrawledDate")
                         .HasColumnType("datetime2");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("ImageUrl")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("Link")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
+
+                    b.Property<string>("LinkHash")
+                        .IsRequired()
+                        .HasMaxLength(64)
+                        .HasColumnType("nvarchar(64)");
+
+                    b.Property<DateTime>("PublishedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("PublishedDate")
                         .HasColumnType("datetime2");
@@ -634,17 +1476,29 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("Summary")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LinkHash")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_NewsArticles_LinkHash");
+
                     b.HasIndex("SourceId");
 
-                    b.ToTable("NewsArticles");
+                    b.HasIndex("IsActive", "PublishedAt")
+                        .HasDatabaseName("IX_NewsArticles_Published");
+
+                    b.ToTable("NewsArticles", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.NewsSource", b =>
@@ -653,20 +1507,32 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("RssUrl")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
-                    b.ToTable("NewsSources");
+                    b.HasIndex("RssUrl")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_NewsSources_Rss");
+
+                    b.ToTable("NewsSources", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Permission", b =>
@@ -677,19 +1543,209 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
+                        .HasMaxLength(80)
+                        .HasColumnType("nvarchar(80)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Module")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(150)
+                        .HasColumnType("nvarchar(150)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Code")
+                        .IsUnique();
+
                     b.ToTable("Permissions");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.PromotionBatch", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("AppliedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("AppliedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("CreatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("SourceYearId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<string>("Summary")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<Guid>("TargetYearId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppliedBy");
+
+                    b.HasIndex("CreatedBy");
+
+                    b.HasIndex("TargetYearId");
+
+                    b.HasIndex("SourceYearId", "TargetYearId")
+                        .IsUnique()
+                        .HasFilter("[Status] <> 'Applied' AND [Status] <> 'Cancelled'");
+
+                    b.ToTable("PromotionBatches", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.PromotionDraft", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("AppliedEnrollmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("BatchId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DecidedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("DecidedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("FromEnrollmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("GradeSnapshot")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Outcome")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<string>("Reason")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .IsRequired()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid?>("SuggestedClassRoomId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AppliedEnrollmentId");
+
+                    b.HasIndex("DecidedBy");
+
+                    b.HasIndex("FromEnrollmentId");
+
+                    b.HasIndex("StudentId");
+
+                    b.HasIndex("SuggestedClassRoomId");
+
+                    b.HasIndex("BatchId", "StudentId")
+                        .IsUnique();
+
+                    b.ToTable("PromotionDrafts", (string)null);
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.RefreshToken", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("CreatedByIp")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("DeviceInfo")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("ExpiresAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ReplacedByTokenId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("RevokedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("TokenHash")
+                        .IsRequired()
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("TokenHash")
+                        .IsUnique();
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("RefreshTokens");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Role", b =>
@@ -700,17 +1756,40 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("Code")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Description")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<bool>("IsSystem")
+                        .HasColumnType("bit");
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("ScopeType")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
 
                     b.ToTable("Roles");
                 });
@@ -766,16 +1845,34 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
 
                     b.Property<int>("Order")
                         .HasColumnType("int");
 
                     b.Property<string>("SacramentType")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<int>("SortOrder")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
@@ -788,29 +1885,53 @@ namespace GiaoLy.Domain.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("ClassRoomId")
-                        .HasColumnType("uniqueidentifier");
+                    b.Property<DateOnly>("BouquetDate")
+                        .HasColumnType("date");
+
+                    b.Property<string>("BouquetType")
+                        .IsRequired()
+                        .HasMaxLength(40)
+                        .HasColumnType("nvarchar(40)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<Guid>("EnrollmentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GivenBy")
+                        .HasColumnType("uniqueidentifier");
+
                     b.Property<string>("Note")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<int>("Points")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("StudentId")
+                    b.Property<Guid?>("ReversesBouquetId")
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Type")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
                     b.HasKey("Id");
 
-                    b.ToTable("SpiritualBouquets");
+                    b.HasIndex("GivenBy");
+
+                    b.HasIndex("ReversesBouquetId");
+
+                    b.HasIndex("EnrollmentId", "BouquetDate")
+                        .HasDatabaseName("IX_SpiritualBouquets_Enrollment");
+
+                    b.ToTable("SpiritualBouquets", (string)null);
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Student", b =>
@@ -820,13 +1941,16 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Address")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
 
                     b.Property<string>("Allergies")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("Area")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<DateTime?>("BaptismDate")
                         .HasColumnType("datetime2");
@@ -844,13 +1968,22 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.Property<string>("BloodType")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
 
                     b.Property<int>("Branch")
                         .HasColumnType("int");
 
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ClassName")
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Code")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
 
                     b.Property<DateTime?>("CommunionDate")
                         .HasColumnType("datetime2");
@@ -873,6 +2006,12 @@ namespace GiaoLy.Domain.Migrations
                     b.Property<string>("ConfirmationPlace")
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
                     b.Property<Guid?>("FamilyId")
                         .HasColumnType("uniqueidentifier");
 
@@ -890,11 +2029,27 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasMaxLength(200)
-                        .HasColumnType("nvarchar(200)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("FullNameNormalized")
+                        .IsRequired()
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
 
                     b.Property<string>("Gender")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(10)
+                        .HasColumnType("nvarchar(10)");
+
+                    b.Property<DateTime?>("GuardianConsentAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("HasPhotoConsent")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("HealthNotes")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
 
                     b.Property<string>("HolyName")
                         .IsRequired()
@@ -902,6 +2057,12 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<bool>("IsActive")
                         .HasColumnType("bit");
+
+                    b.Property<DateOnly?>("JoinedOn")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly?>("LeftOn")
+                        .HasColumnType("date");
 
                     b.Property<string>("MotherJob")
                         .HasColumnType("nvarchar(max)");
@@ -916,7 +2077,8 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Notes")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(1000)
+                        .HasColumnType("nvarchar(1000)");
 
                     b.Property<string>("ParentName")
                         .HasColumnType("nvarchar(max)");
@@ -925,13 +2087,208 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("PhotoUrl")
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("Status")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("BirthDate");
+
+                    b.HasIndex("BranchId");
+
+                    b.HasIndex("Code")
+                        .IsUnique();
+
                     b.HasIndex("FamilyId");
 
+                    b.HasIndex("FullNameNormalized");
+
                     b.ToTable("Students");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentGuardian", b =>
+                {
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("GuardianId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsPrimary")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Relationship")
+                        .IsRequired()
+                        .HasMaxLength(30)
+                        .HasColumnType("nvarchar(30)");
+
+                    b.HasKey("StudentId", "GuardianId");
+
+                    b.HasIndex("GuardianId");
+
+                    b.HasIndex("StudentId")
+                        .IsUnique()
+                        .HasFilter("[IsPrimary] = 1");
+
+                    b.ToTable("StudentGuardians");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentNote", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("AuthorId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("DeletedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("IsPrivate")
+                        .HasColumnType("bit");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("AuthorId");
+
+                    b.HasIndex("StudentId", "CreatedAt");
+
+                    b.ToTable("StudentNotes");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentRequirementProgress", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateOnly?>("CompletedOn")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("EvaluatorUserId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<bool>("IsCompleted")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("RequirementId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("EvaluatorUserId");
+
+                    b.HasIndex("RequirementId");
+
+                    b.HasIndex("StudentId", "RequirementId")
+                        .IsUnique();
+
+                    b.ToTable("StudentRequirementProgresses");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentSacrament", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("BookNumber")
+                        .HasMaxLength(60)
+                        .HasColumnType("nvarchar(60)");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Minister")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<string>("Note")
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<string>("Place")
+                        .HasMaxLength(200)
+                        .HasColumnType("nvarchar(200)");
+
+                    b.Property<DateOnly?>("ReceivedOn")
+                        .HasColumnType("date");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<string>("SacramentType")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("nvarchar(20)");
+
+                    b.Property<string>("Sponsor")
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("VerifiedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("VerifiedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("VerifiedBy");
+
+                    b.HasIndex("StudentId", "SacramentType")
+                        .IsUnique();
+
+                    b.ToTable("StudentSacraments");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.StudentScore", b =>
@@ -966,6 +2323,70 @@ namespace GiaoLy.Domain.Migrations
                     b.ToTable("StudentScores");
                 });
 
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentStatusChange", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime>("ChangedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("ChangedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("NewStatus")
+                        .IsRequired()
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<string>("OldStatus")
+                        .HasMaxLength(12)
+                        .HasColumnType("nvarchar(12)");
+
+                    b.Property<string>("Reason")
+                        .IsRequired()
+                        .HasMaxLength(500)
+                        .HasColumnType("nvarchar(500)");
+
+                    b.Property<Guid>("StudentId")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ChangedBy");
+
+                    b.HasIndex("StudentId", "ChangedAt");
+
+                    b.ToTable("StudentStatusChanges");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.SystemSetting", b =>
+                {
+                    b.Property<string>("Key")
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
+
+                    b.Property<string>("Description")
+                        .HasMaxLength(300)
+                        .HasColumnType("nvarchar(300)");
+
+                    b.Property<DateTime>("UpdatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<Guid?>("UpdatedBy")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("Value")
+                        .IsRequired()
+                        .HasMaxLength(2000)
+                        .HasColumnType("nvarchar(2000)");
+
+                    b.HasKey("Key");
+
+                    b.ToTable("SystemSettings", (string)null);
+                });
+
             modelBuilder.Entity("GiaoLy.Domain.Entities.User", b =>
                 {
                     b.Property<Guid>("Id")
@@ -973,90 +2394,307 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("uniqueidentifier");
 
                     b.Property<string>("Address")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("AvatarPath")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Bio")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<int?>("Branch")
                         .HasColumnType("int");
 
+                    b.Property<int?>("BranchId")
+                        .HasColumnType("int");
+
                     b.Property<string>("ChristianName")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("datetime2");
 
-                    b.Property<DateTime?>("DateOfBirth")
+                    b.Property<DateOnly?>("DateOfBirth")
+                        .HasColumnType("date");
+
+                    b.Property<DateTime?>("DeletedAt")
                         .HasColumnType("datetime2");
 
                     b.Property<string>("Email")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FailedLoginCount")
+                        .HasColumnType("int");
 
                     b.Property<string>("FullName")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(120)
+                        .HasColumnType("nvarchar(120)");
+
+                    b.Property<bool>("IsActive")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("LastLoginAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("LockoutUntil")
+                        .HasColumnType("datetime2");
+
+                    b.Property<bool>("MustChangePassword")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime?>("PasswordChangedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("PasswordHash")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(100)
+                        .HasColumnType("nvarchar(100)");
 
                     b.Property<string>("PhoneNumber")
-                        .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<string>("Role")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<Guid?>("RoleId")
+                    b.Property<Guid>("RoleId")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<byte[]>("RowVersion")
+                        .IsConcurrencyToken()
+                        .ValueGeneratedOnAddOrUpdate()
+                        .HasColumnType("rowversion");
+
+                    b.Property<Guid>("SecurityStamp")
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("Username")
                         .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                        .HasMaxLength(50)
+                        .HasColumnType("nvarchar(50)");
 
                     b.HasKey("Id");
 
                     b.HasIndex("RoleId");
 
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("Users");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Announcement", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "AuthorUser")
+                        .WithMany()
+                        .HasForeignKey("AuthorUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.Branch", "BranchEntity")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.ClassRoom", "ClassRoom")
+                        .WithMany()
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AuthorUser");
+
+                    b.Navigation("BranchEntity");
+
+                    b.Navigation("ClassRoom");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.CampEvent", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.AcademicYear", "AcademicYear")
+                        .WithMany()
+                        .HasForeignKey("AcademicYearId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.Branch", "Branch")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AcademicYear");
+
+                    b.Navigation("Branch");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.CampPayment", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "ReceivedByUser")
+                        .WithMany()
+                        .HasForeignKey("ReceivedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.CampRegistration", "Registration")
+                        .WithMany("Payments")
+                        .HasForeignKey("RegistrationId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.CampPayment", "ReversesPayment")
+                        .WithMany()
+                        .HasForeignKey("ReversesPaymentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("ReceivedByUser");
+
+                    b.Navigation("Registration");
+
+                    b.Navigation("ReversesPayment");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.CampRegistration", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.CampEvent", "CampEvent")
+                        .WithMany("Registrations")
+                        .HasForeignKey("CampEventId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "RegisteredByUser")
+                        .WithMany()
+                        .HasForeignKey("RegisteredBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CampEvent");
+
+                    b.Navigation("RegisteredByUser");
+
+                    b.Navigation("Student");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Certificate", b =>
                 {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Issuer")
+                        .WithMany()
+                        .HasForeignKey("IssuedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Revoker")
+                        .WithMany()
+                        .HasForeignKey("RevokedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
                         .WithMany()
                         .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
+                    b.HasOne("GiaoLy.Domain.Entities.StudentSacrament", "StudentSacrament")
+                        .WithMany()
+                        .HasForeignKey("StudentSacramentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Issuer");
+
+                    b.Navigation("Revoker");
+
                     b.Navigation("Student");
+
+                    b.Navigation("StudentSacrament");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.ClassLevel", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.Branch", "Branch")
+                        .WithMany("ClassLevels")
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.ClassLevel", "NextLevel")
+                        .WithMany()
+                        .HasForeignKey("NextLevelId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Branch");
+
+                    b.Navigation("NextLevel");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.ClassRoom", b =>
                 {
                     b.HasOne("GiaoLy.Domain.Entities.AcademicYear", "AcademicYear")
-                        .WithMany()
+                        .WithMany("ClassRooms")
                         .HasForeignKey("AcademicYearId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("GiaoLy.Domain.Entities.User", "Leader")
-                        .WithMany()
-                        .HasForeignKey("LeaderId");
+                    b.HasOne("GiaoLy.Domain.Entities.ClassLevel", "ClassLevel")
+                        .WithMany("ClassRooms")
+                        .HasForeignKey("ClassLevelId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("AcademicYear");
 
-                    b.Navigation("Leader");
+                    b.Navigation("ClassLevel");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.ClassRoomTeacher", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.ClassRoom", "ClassRoom")
+                        .WithMany("Teachers")
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("ClassRoom");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Document", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.AcademicYear", "AcademicYear")
+                        .WithMany()
+                        .HasForeignKey("AcademicYearId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.Branch", "BranchEntity")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "UploadedByUser")
+                        .WithMany()
+                        .HasForeignKey("UploadedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AcademicYear");
+
+                    b.Navigation("BranchEntity");
+
+                    b.Navigation("UploadedByUser");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.DraftAction", b =>
@@ -1084,7 +2722,7 @@ namespace GiaoLy.Domain.Migrations
                     b.Navigation("TargetAcademicYear");
                 });
 
-            modelBuilder.Entity("GiaoLy.Domain.Entities.Enrollment", b =>
+            modelBuilder.Entity("GiaoLy.Domain.Entities.DutyAssignment", b =>
                 {
                     b.HasOne("GiaoLy.Domain.Entities.ClassRoom", "ClassRoom")
                         .WithMany()
@@ -1092,11 +2730,38 @@ namespace GiaoLy.Domain.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                    b.HasOne("GiaoLy.Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
+
+                    b.Navigation("ClassRoom");
+
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Enrollment", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.AcademicYear", "AcademicYear")
+                        .WithMany()
+                        .HasForeignKey("AcademicYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.ClassRoom", "ClassRoom")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany("Enrollments")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("AcademicYear");
 
                     b.Navigation("ClassRoom");
 
@@ -1106,44 +2771,210 @@ namespace GiaoLy.Domain.Migrations
             modelBuilder.Entity("GiaoLy.Domain.Entities.Family", b =>
                 {
                     b.HasOne("GiaoLy.Domain.Entities.ClassRoom", "ClassRoom")
-                        .WithMany()
-                        .HasForeignKey("ClassRoomId");
-
-                    b.HasOne("GiaoLy.Domain.Entities.User", "Leader")
-                        .WithMany()
-                        .HasForeignKey("LeaderId");
+                        .WithMany("Families")
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("ClassRoom");
-
-                    b.Navigation("Leader");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Grade", b =>
                 {
+                    b.HasOne("GiaoLy.Domain.Entities.Enrollment", "Enrollment")
+                        .WithOne("Grade")
+                        .HasForeignKey("GiaoLy.Domain.Entities.Grade", "EnrollmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Enrollment");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.GradeUnlock", b =>
+                {
                     b.HasOne("GiaoLy.Domain.Entities.ClassRoom", "ClassRoom")
                         .WithMany()
                         .HasForeignKey("ClassRoomId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
-                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                    b.HasOne("GiaoLy.Domain.Entities.User", "User")
                         .WithMany()
-                        .HasForeignKey("StudentId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .HasForeignKey("UnlockedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("ClassRoom");
 
+                    b.Navigation("User");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.GuardianLink", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "User")
+                        .WithMany("GuardianLinks")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Verifier")
+                        .WithMany()
+                        .HasForeignKey("VerifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.Navigation("Student");
+
+                    b.Navigation("User");
+
+                    b.Navigation("Verifier");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.ImportJob", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Uploader")
+                        .WithMany()
+                        .HasForeignKey("UploadedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Uploader");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Leader", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.Branch", "BranchEntity")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("BranchEntity");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.LessonPlan", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "AuthorUser")
+                        .WithMany()
+                        .HasForeignKey("AuthorUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.ClassRoom", "ClassRoom")
+                        .WithMany()
+                        .HasForeignKey("ClassRoomId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("AuthorUser");
+
+                    b.Navigation("ClassRoom");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.NewsArticle", b =>
                 {
                     b.HasOne("GiaoLy.Domain.Entities.NewsSource", "Source")
                         .WithMany("NewsArticles")
-                        .HasForeignKey("SourceId");
+                        .HasForeignKey("SourceId")
+                        .OnDelete(DeleteBehavior.Cascade);
 
                     b.Navigation("Source");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.PromotionBatch", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Applier")
+                        .WithMany()
+                        .HasForeignKey("AppliedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Creator")
+                        .WithMany()
+                        .HasForeignKey("CreatedBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.AcademicYear", "SourceYear")
+                        .WithMany()
+                        .HasForeignKey("SourceYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.AcademicYear", "TargetYear")
+                        .WithMany()
+                        .HasForeignKey("TargetYearId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Applier");
+
+                    b.Navigation("Creator");
+
+                    b.Navigation("SourceYear");
+
+                    b.Navigation("TargetYear");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.PromotionDraft", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.Enrollment", "AppliedEnrollment")
+                        .WithMany()
+                        .HasForeignKey("AppliedEnrollmentId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.PromotionBatch", "Batch")
+                        .WithMany("Drafts")
+                        .HasForeignKey("BatchId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Decider")
+                        .WithMany()
+                        .HasForeignKey("DecidedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.Enrollment", "FromEnrollment")
+                        .WithMany()
+                        .HasForeignKey("FromEnrollmentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany()
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.ClassRoom", "SuggestedClassRoom")
+                        .WithMany()
+                        .HasForeignKey("SuggestedClassRoomId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("AppliedEnrollment");
+
+                    b.Navigation("Batch");
+
+                    b.Navigation("Decider");
+
+                    b.Navigation("FromEnrollment");
+
+                    b.Navigation("Student");
+
+                    b.Navigation("SuggestedClassRoom");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.RefreshToken", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "User")
+                        .WithMany("RefreshTokens")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.RolePermission", b =>
@@ -1165,13 +2996,129 @@ namespace GiaoLy.Domain.Migrations
                     b.Navigation("Role");
                 });
 
+            modelBuilder.Entity("GiaoLy.Domain.Entities.SpiritualBouquet", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.Enrollment", "Enrollment")
+                        .WithMany()
+                        .HasForeignKey("EnrollmentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "GivenByUser")
+                        .WithMany()
+                        .HasForeignKey("GivenBy")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.SpiritualBouquet", "ReversesBouquet")
+                        .WithMany()
+                        .HasForeignKey("ReversesBouquetId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Enrollment");
+
+                    b.Navigation("GivenByUser");
+
+                    b.Navigation("ReversesBouquet");
+                });
+
             modelBuilder.Entity("GiaoLy.Domain.Entities.Student", b =>
                 {
+                    b.HasOne("GiaoLy.Domain.Entities.Branch", "BranchEntity")
+                        .WithMany()
+                        .HasForeignKey("BranchId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
                     b.HasOne("GiaoLy.Domain.Entities.Family", "Family")
                         .WithMany("Students")
-                        .HasForeignKey("FamilyId");
+                        .HasForeignKey("FamilyId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.Navigation("BranchEntity");
 
                     b.Navigation("Family");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentGuardian", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.Guardian", "Guardian")
+                        .WithMany("StudentGuardians")
+                        .HasForeignKey("GuardianId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany("Guardians")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Guardian");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentNote", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Author")
+                        .WithMany()
+                        .HasForeignKey("AuthorId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany("StudentNotes")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Author");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentRequirementProgress", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Evaluator")
+                        .WithMany()
+                        .HasForeignKey("EvaluatorUserId")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.SacramentRequirement", "Requirement")
+                        .WithMany("Progresses")
+                        .HasForeignKey("RequirementId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany("RequirementProgresses")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Evaluator");
+
+                    b.Navigation("Requirement");
+
+                    b.Navigation("Student");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentSacrament", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany("Sacraments")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Verifier")
+                        .WithMany()
+                        .HasForeignKey("VerifiedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.Navigation("Student");
+
+                    b.Navigation("Verifier");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.StudentScore", b =>
@@ -1185,18 +3132,82 @@ namespace GiaoLy.Domain.Migrations
                     b.Navigation("Student");
                 });
 
+            modelBuilder.Entity("GiaoLy.Domain.Entities.StudentStatusChange", b =>
+                {
+                    b.HasOne("GiaoLy.Domain.Entities.User", "Changer")
+                        .WithMany()
+                        .HasForeignKey("ChangedBy")
+                        .OnDelete(DeleteBehavior.Restrict);
+
+                    b.HasOne("GiaoLy.Domain.Entities.Student", "Student")
+                        .WithMany("StatusChanges")
+                        .HasForeignKey("StudentId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Changer");
+
+                    b.Navigation("Student");
+                });
+
             modelBuilder.Entity("GiaoLy.Domain.Entities.User", b =>
                 {
                     b.HasOne("GiaoLy.Domain.Entities.Role", "RoleEntity")
                         .WithMany("Users")
-                        .HasForeignKey("RoleId");
+                        .HasForeignKey("RoleId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
                     b.Navigation("RoleEntity");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.AcademicYear", b =>
+                {
+                    b.Navigation("ClassRooms");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Branch", b =>
+                {
+                    b.Navigation("ClassLevels");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.CampEvent", b =>
+                {
+                    b.Navigation("Registrations");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.CampRegistration", b =>
+                {
+                    b.Navigation("Payments");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.ClassLevel", b =>
+                {
+                    b.Navigation("ClassRooms");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.ClassRoom", b =>
+                {
+                    b.Navigation("Enrollments");
+
+                    b.Navigation("Families");
+
+                    b.Navigation("Teachers");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Enrollment", b =>
+                {
+                    b.Navigation("Grade");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.Family", b =>
                 {
                     b.Navigation("Students");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Guardian", b =>
+                {
+                    b.Navigation("StudentGuardians");
                 });
 
             modelBuilder.Entity("GiaoLy.Domain.Entities.NewsSource", b =>
@@ -1209,11 +3220,43 @@ namespace GiaoLy.Domain.Migrations
                     b.Navigation("RolePermissions");
                 });
 
+            modelBuilder.Entity("GiaoLy.Domain.Entities.PromotionBatch", b =>
+                {
+                    b.Navigation("Drafts");
+                });
+
             modelBuilder.Entity("GiaoLy.Domain.Entities.Role", b =>
                 {
                     b.Navigation("RolePermissions");
 
                     b.Navigation("Users");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.SacramentRequirement", b =>
+                {
+                    b.Navigation("Progresses");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.Student", b =>
+                {
+                    b.Navigation("Enrollments");
+
+                    b.Navigation("Guardians");
+
+                    b.Navigation("RequirementProgresses");
+
+                    b.Navigation("Sacraments");
+
+                    b.Navigation("StatusChanges");
+
+                    b.Navigation("StudentNotes");
+                });
+
+            modelBuilder.Entity("GiaoLy.Domain.Entities.User", b =>
+                {
+                    b.Navigation("GuardianLinks");
+
+                    b.Navigation("RefreshTokens");
                 });
 #pragma warning restore 612, 618
         }
