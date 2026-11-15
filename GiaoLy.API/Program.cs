@@ -1,32 +1,34 @@
 using GiaoLy.API.Authorization;
+using GiaoLy.API.Common;
+using GiaoLy.API.Middleware;
 using GiaoLy.API.Services;
 using GiaoLy.Domain.Data;
+using GiaoLy.Infrastructure;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.IdentityModel.Tokens;
-using System.Text;
-
 using QuestPDF.Infrastructure;
+using System.Text;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 
 var builder = WebApplication.CreateBuilder(args);
 var config = builder.Configuration;
 
 QuestPDF.Settings.License = LicenseType.Community;
 
-// ── 1. Connection String ─────────────────────────────────────────────────────
-var connectionString = config.GetConnectionString("DefaultConnection");
+// ── 0. Configuration Validation (Validate on start) ──────────────────────────
+ConfigurationValidator.ValidateRequiredConfigurations(config, builder.Environment);
 
-// ── 2. DbContextPool (Giai đoạn 5 — Thay AddDbContext để tái sử dụng connection) ──
-// AddDbContextPool tái sử dụng DbContext instances thay vì tạo mới mỗi request.
-// Giúp server Free (RAM 512MB) chịu tải tốt hơn, tránh tràn bộ nhớ.
-// Lưu ý: AppDbContext chỉ nhận DbContextOptions → Hợp lệ để dùng Pool.
-builder.Services.AddDbContextPool<AppDbContext>(options =>
-    options.UseSqlServer(connectionString), poolSize: 128);
+// ── 1. Infrastructure & Persistence (DbContextPool + AuditInterceptor + Scopes + Identity Services) ──
+builder.Services.AddInfrastructure(config);
+
+// ── 2. Rate Limiting ──────────────────────────────────────────────────────────
+builder.Services.AddGiaoLyRateLimiting(config);
 
 // ── 3. JWT Authentication ────────────────────────────────────────────────────
-var jwtKey = config["Jwt:Key"]
-    ?? throw new InvalidOperationException("Jwt:Key chưa được cấu hình! Set biến môi trường Jwt__Key trên server.");
+var jwtKey = config["Jwt:Key"]!;
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -43,47 +45,41 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// ── 4. Authorization + ABAC Policy (Giai đoạn 3) ───────────────────────────
-// IHttpContextAccessor: Cho phép Handler đọc route parameter từ URL hiện tại
-builder.Services.AddHttpContextAccessor();
-// Đăng ký ABAC Handler là Scoped để có thể inject DbContext
+// ── 4. Authorization Policies & Handlers ─────────────────────────────────────
+builder.Services.AddSingleton<IAuthorizationPolicyProvider, PermissionAuthorizationPolicyProvider>();
+builder.Services.AddScoped<IAuthorizationHandler, PermissionAuthorizationHandler>();
 builder.Services.AddScoped<IAuthorizationHandler, IsClassTeacherHandler>();
 builder.Services.AddAuthorization(options =>
 {
-    // Policy "IsClassTeacher": Kiểm tra người dùng có phải GLV phụ trách lớp không.
-    // Admin (Role 1) và Secretary (Role 2) tự động bypass trong Handler.
     options.AddPolicy("IsClassTeacher", policy =>
         policy.Requirements.Add(new IsClassTeacherRequirement()));
 });
 
-// ── 5. Background Service ────────────────────────────────────────────────────
-builder.Services.AddHostedService<GradebookFinalizerService>(); // Tự động khóa sổ điểm
-builder.Services.AddHostedService<CatholicNewsCrawlerService>(); // Cào tin Công giáo vào DB (2AM VN mỗi ngày)
-builder.Services.AddMemoryCache();
+// ── 5. Background Services & Caching ─────────────────────────────────────────
+builder.Services.AddHostedService<GradebookFinalizerService>();
+builder.Services.AddHostedService<CatholicNewsCrawlerService>();
+// IMemoryCache đã được đăng ký một lần trong AddInfrastructure() — không đăng ký lại ở đây.
 
-// Named HttpClient cho NewsController.ImageProxy (timeout 5s)
+// Named HttpClient for News ImageProxy (timeout 5s)
 builder.Services.AddHttpClient("ImageProxy", client =>
 {
     client.Timeout = TimeSpan.FromSeconds(5);
 });
 
-
-// ── 6. Other Services ────────────────────────────────────────────────────────
-builder.Services.AddScoped<LiturgicalService>(); // Lịch Phụng vụ (Đổi thành Scoped để dùng DbContext)
+// ── 6. Other Services & Controllers ──────────────────────────────────────────
+// LiturgicalService chỉ có một đăng ký: ILiturgicalService → Infrastructure (đã có trong AddInfrastructure).
 builder.Services.AddControllers()
     .AddJsonOptions(opts =>
     {
-        // Serialize enum thành string (VD: "All", "Urgent") thay vì số nguyên (0, 1)
-        // Giúp Frontend dễ đọc và tránh lỗi mismatch khi filter
-        opts.JsonSerializerOptions.Converters.Add(new System.Text.Json.Serialization.JsonStringEnumConverter());
+        opts.JsonSerializerOptions.PropertyNamingPolicy = JsonNamingPolicy.CamelCase;
+        opts.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter());
     });
-
 
 // ── 7. Swagger ───────────────────────────────────────────────────────────────
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
-// ── 8. CORS – Đọc cấu hình từ appsettings ────────────────────────────
+// ── 8. CORS ──────────────────────────────────────────────────────────────────
 var allowedOrigins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() 
                      ?? new[] { "http://localhost:3000", "http://localhost:3001" };
 
@@ -93,12 +89,22 @@ builder.Services.AddCors(options =>
         policy.WithOrigins(allowedOrigins)
               .AllowAnyMethod()
               .AllowAnyHeader()
-              .AllowCredentials()); // Thêm AllowCredentials nếu cần
+              .AllowCredentials());
 });
 
 var app = builder.Build();
 
-// ── Middleware Pipeline ───────────────────────────────────────────────────────
+// ── Middleware Pipeline (Order per blueprint Section 2.5) ────────────────────
+// Forwarded headers chỉ được tin từ proxy khai báo trong ReverseProxy:* (mặc định: loopback).
+var forwardedHeadersOptions = ForwardedHeadersSetup.Build(config, app.Services.GetRequiredService<ILoggerFactory>().CreateLogger("ForwardedHeaders"));
+if (forwardedHeadersOptions is not null)
+{
+    app.UseForwardedHeaders(forwardedHeadersOptions);
+}
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseMiddleware<CorrelationIdMiddleware>();
+app.UseMiddleware<SecurityHeadersMiddleware>();
+
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -106,19 +112,23 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowNuxt");
+app.UseRateLimiter();
 app.UseHttpsRedirection();
-app.UseAuthentication(); // Phải đứng trước Authorization
+
+app.UseAuthentication();
+app.UseMiddleware<SessionValidationMiddleware>();
 app.UseAuthorization();
+
 app.MapControllers();
 
-// ── Database Seeder (Giai đoạn 1C — Truyền config để đọc mật khẩu từ ENV) ──
+// ── Database Seeder ──────────────────────────────────────────────────────────
 using (var scope = app.Services.CreateScope())
 {
     var services = scope.ServiceProvider;
     try
     {
         var context = services.GetRequiredService<AppDbContext>();
-        DbSeeder.SeedData(context, config); // config chứa App:DefaultPassword từ ENV
+        DbSeeder.SeedData(context, config, app.Environment);
     }
     catch (Exception ex)
     {
