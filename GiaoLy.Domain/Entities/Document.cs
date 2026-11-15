@@ -1,19 +1,32 @@
-namespace GiaoLy.Domain.Entities;
+using System;
 
-public enum DocumentAccessLevel { Public, Internal }
+namespace GiaoLy.Domain.Entities;
 
 public class Document
 {
-    public Guid Id { get; set; }
-    public string FileName { get; set; } = string.Empty;       // Tên hiển thị
-    public string FilePath { get; set; } = string.Empty;       // Đường dẫn lưu server
-    public string Category { get; set; } = "Giáo án";         // Giáo án, Nhạc đoàn, Văn bản, Tài liệu học
-    public int Branch { get; set; }                            // 0: Chung, 1-4: từng ngành
-    public string SchoolYear { get; set; } = "2025-2026";      // Niên khóa (text label)
-    public Guid? AcademicYearId { get; set; }                  // FK Niên khóa (nếu có)
-    public DocumentAccessLevel AccessLevel { get; set; } = DocumentAccessLevel.Public;
-    public string Tags { get; set; } = string.Empty;           // Tag phân tách bằng dấu phẩy
-    public DateTime UploadDate { get; set; } = DateTime.Now;
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string FileName { get; set; } = string.Empty;
+    public string StoredFileName { get; set; } = string.Empty;
+    public string Category { get; set; } = "Giáo án";
+    public int? BranchId { get; set; }
+    public Guid? AcademicYearId { get; set; }
+    public string AccessLevel { get; set; } = "Internal"; // 'Public', 'Internal'
+    public string? Tags { get; set; }
     public long FileSize { get; set; }
-    public string UploadedBy { get; set; } = string.Empty;     // Ai upload
-}
+    public string ContentType { get; set; } = "application/octet-stream";
+    public string Sha256 { get; set; } = string.Empty;
+    public Guid UploadedBy { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+
+    // Compatibility properties
+    public string FilePath { get => StoredFileName; set => StoredFileName = value; }
+    public int Branch => BranchId ?? 0;
+    public DateTime UploadDate => CreatedAt;
+
+    // Navigation properties
+    public Branch? BranchEntity { get; set; }
+    public AcademicYear? AcademicYear { get; set; }
+    public User? UploadedByUser { get; set; }
+}

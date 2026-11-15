@@ -1,30 +1,71 @@
 namespace GiaoLy.Domain.Entities;
 
-/// <summary>
-/// Entity Lớp học trong một Niên khóa.
-/// LeaderId: ID của Huynh trưởng phụ trách lớp — dùng để xác thực quyền ABAC.
-///   Không dùng MainTeacher (string) để so sánh vì chuỗi tên có thể trùng, sai chính tả.
-///   Phải dùng Guid liên kết trực tiếp đến bảng Users để đảm bảo chính xác tuyệt đối.
-/// </summary>
 public class ClassRoom
 {
-    public Guid Id { get; set; }
-    public string ClassName { get; set; } = string.Empty; // Ví dụ: Khối Ấu 1 - Lớp A
+    private string _legacyClassName = string.Empty;
+    private int _legacyBranch;
+    private Guid? _legacyLeaderId;
+    private string _legacyMainTeacher = string.Empty;
+
+    public Guid Id { get; set; } = Guid.NewGuid();
+
     public Guid AcademicYearId { get; set; }
     public AcademicYear? AcademicYear { get; set; }
 
-    public int Branch { get; set; } // Ngành (1: Ấu, 2: Thiếu, 3: Nghĩa, 4: Hiệp)
-    public string MainTeacher { get; set; } = string.Empty; // Tên GLV Chủ nhiệm (giữ lại cho hiển thị UI)
+    public int ClassLevelId { get; set; }
+    public ClassLevel? ClassLevel { get; set; }
 
-    /// <summary>
-    /// ID của Huynh trưởng phụ trách lớp (liên kết bảng Users).
-    /// Dùng bởi IsClassTeacherHandler để so sánh với userId trong JWT Token.
-    /// Nullable: Lớp chưa được phân công GLV thì để null.
-    /// </summary>
-    public Guid? LeaderId { get; set; }
+    public string Section { get; set; } = string.Empty; // Phân lớp: "A", "B", hoặc rỗng
+    public string? RoomName { get; set; }
 
-    /// <summary>Navigation property đến User — dùng khi cần Include thông tin GLV.</summary>
-    public User? Leader { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    public DateTime? DeletedAt { get; set; }
+    public byte[]? RowVersion { get; set; }
 
-    public string RoomName { get; set; } = string.Empty;
+    public ICollection<ClassRoomTeacher> Teachers { get; set; } = new List<ClassRoomTeacher>();
+    public ICollection<Family> Families { get; set; } = new List<Family>();
+    public ICollection<Enrollment> Enrollments { get; set; } = new List<Enrollment>();
+
+    // Computed / Compatibility properties
+    public string Name => ClassName;
+
+    public string ClassName
+    {
+        get
+        {
+            if (ClassLevel != null)
+            {
+                return string.IsNullOrWhiteSpace(Section) ? ClassLevel.Name : $"{ClassLevel.Name} - {Section}";
+            }
+            return !string.IsNullOrWhiteSpace(_legacyClassName) ? _legacyClassName : string.Empty;
+        }
+        set => _legacyClassName = value;
+    }
+
+    public int Branch
+    {
+        get => ClassLevel?.BranchId ?? _legacyBranch;
+        set => _legacyBranch = value;
+    }
+
+    public Guid? LeaderId
+    {
+        get
+        {
+            var lead = Teachers.FirstOrDefault(t => t.IsLead);
+            return lead?.UserId ?? _legacyLeaderId;
+        }
+        set => _legacyLeaderId = value;
+    }
+
+    public string MainTeacher
+    {
+        get
+        {
+            var lead = Teachers.FirstOrDefault(t => t.IsLead);
+            return lead?.User?.FullName ?? _legacyMainTeacher;
+        }
+        set => _legacyMainTeacher = value;
+    }
 }

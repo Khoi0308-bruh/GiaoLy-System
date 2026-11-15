@@ -24,10 +24,10 @@
             <span>Kho Lưu Trữ</span>
           </div>
           <h1 class="text-4xl md:text-5xl font-black text-stone-900 dark:text-white flex items-center gap-3 drop-shadow-sm uppercase tracking-tight">
-            {{ t('libraryTitle') }}
+            Thư Viện Tài Liệu
           </h1>
           <p class="text-stone-500 text-lg mt-2 font-serif italic">
-            {{ t('libraryDesc') }}
+            Tài liệu giáo lý, giáo án mẫu và biểu mẫu sinh hoạt phong trào Thiếu Nhi Thánh Thể
           </p>
         </div>
       </div>
@@ -264,7 +264,7 @@
                   />
                   <UButton
                     icon="i-heroicons-x-mark"
-                    color="gray"
+                    color="neutral"
                     variant="soft"
                     size="sm"
                     class="rounded-xl bg-stone-100 dark:bg-stone-800"
@@ -329,7 +329,7 @@
               />
               <UButton
                 icon="i-heroicons-x-mark"
-                color="gray"
+                color="neutral"
                 variant="soft"
                 size="sm"
                 @click="closeMobilePreview"
@@ -364,11 +364,10 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'public' })
-useHead({ title: 'Thư Viện Số - Thiếu Nhi Thánh Thể' })
+definePageMeta({ layout: 'default' })
+useHead({ title: 'Thư Viện Tài Liệu - Thiếu Nhi Thánh Thể' })
 
-const { t } = useI18n()
-const auth = useAuthStore()
+const auth = reactive({ user: null })
 const config = useRuntimeConfig()
 
 // Modals & States
@@ -420,7 +419,8 @@ watch([searchQuery, selectedCategory, selectedBranch], () => {
 })
 
 // Fetch documents from server
-const { data: documents, pending } = await useApiFetch('/Document', {
+const { data: documents, pending } = await useFetch('/api/Document', {
+  baseURL: config.public.apiBase,
   query: fetchParams,
   default: () => [],
   onResponse({ response }) {

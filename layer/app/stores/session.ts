@@ -1,0 +1,145 @@
+import { defineStore } from 'pinia'
+import type { PermissionCode } from '~/shared/permissions'
+
+export interface Me {
+  id: string
+  userName: string
+  fullName: string
+  mustChangePassword: boolean
+  role: { code: string, name: string, scopeType: 'All' | 'Branch' | 'Classroom' | 'Guardian' }
+  permissions: string[]
+  branch?: { id: number, name: string } | null
+  classRooms?: { id: string, name: string }[]
+  email?: string | null
+  phoneNumber?: string | null
+  avatarPath?: string | null
+  avatarUrl?: string | null
+}
+
+/**
+ * BE trả hồ sơ dạng phẳng (username, roleCode, scopeType, branchId…),
+ * store và các trang lại dùng cấu trúc lồng (role.scopeType, userName…).
+ * Chuẩn hoá ngay tại biên để chỉ có một hình dạng dữ liệu trong toàn bộ app.
+ */
+interface MeRaw {
+  id: string
+  username?: string
+  userName?: string
+  fullName: string
+  mustChangePassword?: boolean
+  role?: Me['role']
+  roleCode?: string
+  roleName?: string | null
+  scopeType?: string
+  permissions?: string[]
+  branch?: Me['branch']
+  classRooms?: Me['classRooms']
+  email?: string | null
+  phoneNumber?: string | null
+  avatarPath?: string | null
+  avatarUrl?: string | null
+}
+
+function normalize(raw: MeRaw): Me {
+  const scopeType = (raw.scopeType ?? raw.role?.scopeType ?? 'All') as Me['role']['scopeType']
+
+  return {
+    id: raw.id,
+    userName: raw.userName ?? raw.username ?? '',
+    fullName: raw.fullName,
+    mustChangePassword: raw.mustChangePassword ?? false,
+    role: raw.role ?? {
+      code: raw.roleCode ?? '',
+      name: raw.roleName ?? raw.roleCode ?? '',
+      scopeType
+    },
+    permissions: raw.permissions ?? [],
+    branch: raw.branch ?? null,
+    classRooms: raw.classRooms ?? [],
+    email: raw.email ?? null,
+    phoneNumber: raw.phoneNumber ?? null,
+    avatarPath: raw.avatarPath ?? null,
+    avatarUrl: raw.avatarUrl ?? null
+  }
+}
+
+export const useSessionStore = defineStore('session', () => {
+  const config = useRuntimeConfig()
+  const accessToken = ref<string | null>(null)
+  const me = ref<Me | null>(null)
+  const ready = ref(false)
+  let refreshing: Promise<boolean> | null = null
+
+  const permissions = computed(() => new Set(me.value?.permissions ?? []))
+  const can = (code: PermissionCode | string) => permissions.value.has(code)
+  const canAny = (codes: (PermissionCode | string)[]) => codes.some(c => permissions.value.has(c))
+
+  async function refresh(): Promise<boolean> {
+    if (refreshing) return refreshing
+    refreshing = (async () => {
+      try {
+        const res = await $fetch<{ accessToken: string }>('/api/v1/auth/refresh', {
+          method: 'POST',
+          baseURL: config.public.apiBase,
+          credentials: 'include'
+        })
+        accessToken.value = res.accessToken
+        return true
+      } catch {
+        accessToken.value = null
+        return false
+      } finally {
+        refreshing = null
+      }
+    })()
+    return refreshing
+  }
+
+  async function loadMe() {
+    const raw = await $fetch<MeRaw>('/api/v1/auth/me', {
+      baseURL: config.public.apiBase,
+      credentials: 'include',
+      headers: { Authorization: `Bearer ${accessToken.value}` }
+    })
+    me.value = normalize(raw)
+  }
+
+  async function bootstrap() {
+    if (await refresh()) {
+      try { await loadMe() } catch { me.value = null }
+    }
+    ready.value = true
+  }
+
+  async function login(username: string, password: string) {
+    const res = await $fetch<{ accessToken: string }>('/api/v1/auth/login', {
+      method: 'POST',
+      baseURL: config.public.apiBase,
+      credentials: 'include',
+      body: { username, password }
+    })
+    accessToken.value = res.accessToken
+    await loadMe()
+    ready.value = true
+  }
+
+  async function logout() {
+    try {
+      await $fetch('/api/v1/auth/logout', {
+        method: 'POST',
+        baseURL: config.public.apiBase,
+        credentials: 'include',
+        headers: { Authorization: `Bearer ${accessToken.value}` }
+      })
+    } finally {
+      clear()
+    }
+  }
+
+  function clear() {
+    accessToken.value = null
+    me.value = null
+  }
+
+  return { accessToken, me, ready, permissions, can, canAny, refresh, loadMe, bootstrap, login, logout, clear }
+})

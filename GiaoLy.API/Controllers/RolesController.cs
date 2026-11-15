@@ -1,165 +1,73 @@
-using GiaoLy.Domain.Data;
-using GiaoLy.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
+using GiaoLy.API.Authorization;
+using GiaoLy.API.Common;
+using GiaoLy.Application.Identity.Contracts;
+using GiaoLy.Application.Identity.Dtos;
+using GiaoLy.Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GiaoLy.API.Helpers;
 
 namespace GiaoLy.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
 public class RolesController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IRoleService _roleService;
 
-    public RolesController(AppDbContext context)
+    public RolesController(IRoleService roleService)
     {
-        _context = context;
+        _roleService = roleService;
     }
 
-    [HttpGet]
-    [RequirePermission("roles.view")]
-    public async Task<IActionResult> GetRoles()
+    [HttpGet("api/v1/roles")]
+    [HttpGet("api/roles")]
+    [RequirePermission(Permissions.Roles.View)]
+    public async Task<IActionResult> GetRoles(CancellationToken ct)
     {
-        var roles = await _context.Roles
-            .Select(r => new
-            {
-                r.Id,
-                r.Name,
-                r.Code,
-                r.Description,
-                UserCount = r.Users.Count
-            })
-            .ToListAsync();
-
-        return Ok(roles);
+        var result = await _roleService.GetRolesAsync(ct);
+        return result.ToActionResult();
     }
 
-    [HttpGet("{id}")]
-    [RequirePermission("roles.view")]
-    public async Task<IActionResult> GetRole(Guid id)
+    [HttpPost("api/v1/roles")]
+    [HttpPost("api/roles")]
+    [RequirePermission(Permissions.Roles.Create)]
+    public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest request, CancellationToken ct)
     {
-        var role = await _context.Roles
-            .Include(r => r.RolePermissions)
-            .FirstOrDefaultAsync(r => r.Id == id);
-
-        if (role == null) return NotFound();
-
-        return Ok(new
-        {
-            role.Id,
-            role.Name,
-            role.Code,
-            role.Description,
-            Permissions = role.RolePermissions.Select(rp => rp.PermissionId).ToList()
-        });
+        var result = await _roleService.CreateRoleAsync(request, ct);
+        return result.ToActionResult();
     }
 
-    [HttpPost]
-    [RequirePermission("roles.create")]
-    public async Task<IActionResult> CreateRole([FromBody] Role dto)
+    [HttpPut("api/v1/roles/{id:guid}")]
+    [HttpPut("api/roles/{id:guid}")]
+    [RequirePermission(Permissions.Roles.Update)]
+    public async Task<IActionResult> UpdateRole(Guid id, [FromBody] UpdateRoleRequest request, CancellationToken ct)
     {
-        var role = new Role
-        {
-            Name = dto.Name,
-            Code = dto.Code,
-            Description = dto.Description
-        };
-
-        _context.Roles.Add(role);
-        await _context.SaveChangesAsync();
-
-        return Ok(role);
+        var result = await _roleService.UpdateRoleAsync(id, request, ct);
+        return result.ToActionResult();
     }
 
-    [HttpPut("{id}")]
-    [RequirePermission("roles.update")]
-    public async Task<IActionResult> UpdateRole(Guid id, [FromBody] Role dto)
+    [HttpDelete("api/v1/roles/{id:guid}")]
+    [HttpDelete("api/roles/{id:guid}")]
+    [RequirePermission(Permissions.Roles.Delete)]
+    public async Task<IActionResult> DeleteRole(Guid id, CancellationToken ct)
     {
-        var role = await _context.Roles.FindAsync(id);
-        if (role == null) return NotFound();
-
-        role.Name = dto.Name;
-        role.Code = dto.Code;
-        role.Description = dto.Description;
-
-        await _context.SaveChangesAsync();
-        return Ok(role);
+        var result = await _roleService.DeleteRoleAsync(id, ct);
+        return result.ToActionResult();
     }
 
-    [HttpDelete("{id}")]
-    [RequirePermission("roles.delete")]
-    public async Task<IActionResult> DeleteRole(Guid id)
+    [HttpGet("api/v1/permissions")]
+    [HttpGet("api/permissions")]
+    [RequirePermission(Permissions.Roles.View)]
+    public async Task<IActionResult> GetPermissions(CancellationToken ct)
     {
-        var role = await _context.Roles.FindAsync(id);
-        if (role == null) return NotFound();
-
-        _context.Roles.Remove(role);
-        await _context.SaveChangesAsync();
-        return Ok(new { message = "Xóa thành công" });
+        var result = await _roleService.GetPermissionsAsync(ct);
+        return result.ToActionResult();
     }
 
-    [HttpGet("permissions")]
-    [RequirePermission("roles.view")]
-    public async Task<IActionResult> GetPermissions()
+    [HttpPut("api/v1/roles/{id:guid}/permissions")]
+    [HttpPut("api/roles/{id:guid}/permissions")]
+    [RequirePermission(Permissions.Roles.Assign)]
+    public async Task<IActionResult> AssignPermissions(Guid id, [FromBody] AssignPermissionsRequest request, CancellationToken ct)
     {
-        var permissions = await _context.Permissions
-            .OrderBy(p => p.Module)
-            .ThenBy(p => p.Name)
-            .ToListAsync();
-
-        return Ok(permissions);
-    }
-
-    [HttpPost("{roleId}/permissions")]
-    [RequirePermission("roles.assign")]
-    public async Task<IActionResult> AssignPermissions(Guid roleId, [FromBody] List<Guid> permissionIds)
-    {
-        var role = await _context.Roles
-            .Include(r => r.RolePermissions)
-            .FirstOrDefaultAsync(r => r.Id == roleId);
-
-        if (role == null) return NotFound();
-
-        _context.RolePermissions.RemoveRange(role.RolePermissions);
-        
-        foreach (var pId in permissionIds)
-        {
-            _context.RolePermissions.Add(new RolePermission
-            {
-                RoleId = roleId,
-                PermissionId = pId
-            });
-        }
-
-        await _context.SaveChangesAsync();
-        return Ok(new { message = "Cập nhật quyền thành công" });
-    }
-
-    [HttpPost("migrate-users")]
-    [RequirePermission("roles.update")]
-    public async Task<IActionResult> MigrateUsers()
-    {
-        var users = await _context.Users.Where(u => u.RoleId == null).ToListAsync();
-        var roles = await _context.Roles.ToListAsync();
-
-        int count = 0;
-        foreach (var user in users)
-        {
-            var targetRole = roles.FirstOrDefault(r => r.Code == user.Role);
-            if (targetRole != null)
-            {
-                user.RoleId = targetRole.Id;
-                count++;
-            }
-        }
-
-        if (count > 0)
-        {
-            await _context.SaveChangesAsync();
-        }
-
-        return Ok(new { message = $"Đã chuyển đổi thành công {count} tài khoản sang hệ thống RBAC mới." });
+        var result = await _roleService.AssignPermissionsAsync(id, request, ct);
+        return result.ToActionResult();
     }
 }

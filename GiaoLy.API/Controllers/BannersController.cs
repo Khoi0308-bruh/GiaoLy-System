@@ -1,85 +1,77 @@
-using GiaoLy.Domain.Data;
-using GiaoLy.Domain.Entities;
-using GiaoLy.API.Helpers;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using GiaoLy.API.Authorization;
+using GiaoLy.API.Common;
+using GiaoLy.Application.Banners.Contracts;
+using GiaoLy.Application.Banners.Dtos;
+using GiaoLy.Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
 
 namespace GiaoLy.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
 public class BannersController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IBannerService _bannerService;
 
-    public BannersController(AppDbContext context)
+    public BannersController(IBannerService bannerService)
     {
-        _context = context;
+        _bannerService = bannerService;
     }
 
-    // GET: api/banners/active (For Web Portal)
-    [HttpGet("active")]
+    [HttpGet("api/v1/public/banners")]
+    [HttpGet("api/banners/active")]
     [AllowAnonymous]
-    public async Task<ActionResult<IEnumerable<Banner>>> GetActiveBanners()
+    public async Task<IActionResult> GetPublicBanners(CancellationToken ct)
     {
-        return await _context.Banners
-            .Where(b => b.IsActive)
-            .OrderBy(b => b.OrderIndex)
-            .ThenByDescending(b => b.CreatedAt)
-            .ToListAsync();
+        var result = await _bannerService.GetPublicBannersAsync(ct);
+        return result.ToActionResult();
     }
 
-    // GET: api/banners (For Admin)
-    [HttpGet]
-    [RequirePermission("system.manage")]
-    public async Task<ActionResult<IEnumerable<Banner>>> GetAllBanners()
+    [HttpGet("api/v1/banners")]
+    [HttpGet("api/banners")]
+    [RequirePermission(Permissions.Content.BannersManage)]
+    public async Task<IActionResult> GetAllBanners(CancellationToken ct)
     {
-        return await _context.Banners
-            .OrderBy(b => b.OrderIndex)
-            .ThenByDescending(b => b.CreatedAt)
-            .ToListAsync();
+        var result = await _bannerService.GetAllBannersAsync(ct);
+        return result.ToActionResult();
     }
 
-    [HttpPost]
-    [RequirePermission("system.manage")]
-    public async Task<ActionResult<Banner>> CreateBanner(Banner banner)
+    [HttpGet("api/v1/banners/{id:guid}")]
+    [RequirePermission(Permissions.Content.BannersManage)]
+    public async Task<IActionResult> GetBannerById(Guid id, CancellationToken ct)
     {
-        banner.Id = Guid.NewGuid();
-        banner.CreatedAt = DateTime.UtcNow;
-        _context.Banners.Add(banner);
-        await _context.SaveChangesAsync();
-        return CreatedAtAction(nameof(GetAllBanners), new { id = banner.Id }, banner);
+        var result = await _bannerService.GetBannerByIdAsync(id, ct);
+        return result.ToActionResult();
     }
 
-    [HttpPut("{id}")]
-    [RequirePermission("system.manage")]
-    public async Task<IActionResult> UpdateBanner(Guid id, Banner banner)
+    [HttpPost("api/v1/banners")]
+    [HttpPost("api/banners")]
+    [RequirePermission(Permissions.Content.BannersManage)]
+    public async Task<IActionResult> CreateBanner([FromBody] CreateBannerRequest request, CancellationToken ct)
     {
-        if (id != banner.Id) return BadRequest();
-
-        var existing = await _context.Banners.FindAsync(id);
-        if (existing == null) return NotFound();
-
-        existing.Title = banner.Title;
-        existing.ImageUrl = banner.ImageUrl;
-        existing.Link = banner.Link;
-        existing.OrderIndex = banner.OrderIndex;
-        existing.IsActive = banner.IsActive;
-
-        await _context.SaveChangesAsync();
-        return NoContent();
+        var result = await _bannerService.CreateBannerAsync(request, ct);
+        return result.ToActionResult();
     }
 
-    [HttpDelete("{id}")]
-    [RequirePermission("system.manage")]
-    public async Task<IActionResult> DeleteBanner(Guid id)
+    [HttpPut("api/v1/banners/{id:guid}")]
+    [HttpPut("api/banners/{id:guid}")]
+    [RequirePermission(Permissions.Content.BannersManage)]
+    public async Task<IActionResult> UpdateBanner(Guid id, [FromBody] UpdateBannerRequest request, CancellationToken ct)
     {
-        var banner = await _context.Banners.FindAsync(id);
-        if (banner == null) return NotFound();
+        var result = await _bannerService.UpdateBannerAsync(id, request, ct);
+        return result.ToActionResult();
+    }
 
-        _context.Banners.Remove(banner);
-        await _context.SaveChangesAsync();
-        return NoContent();
+    [HttpDelete("api/v1/banners/{id:guid}")]
+    [HttpDelete("api/banners/{id:guid}")]
+    [RequirePermission(Permissions.Content.BannersManage)]
+    public async Task<IActionResult> DeleteBanner(Guid id, CancellationToken ct)
+    {
+        var result = await _bannerService.DeleteBannerAsync(id, ct);
+        return result.ToActionResult();
     }
 }

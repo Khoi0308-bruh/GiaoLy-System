@@ -2,4 +2,5 @@
   <Project Path="GiaoLy.API/GiaoLy.API.csproj" />
   <Project Path="GiaoLy.Application/GiaoLy.Application.csproj" />
   <Project Path="GiaoLy.Domain/GiaoLy.Domain.csproj" />
+  <Project Path="GiaoLy.Infrastructure/GiaoLy.Infrastructure.csproj" />
 </Solution>

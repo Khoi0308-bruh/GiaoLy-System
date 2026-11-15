@@ -1,67 +1,305 @@
 @import "tailwindcss";
 
+/* ════════════════════════════════════════════════════════════════════
+   THIẾU NHI THÁNH THỂ — Web Portal
+   Chủ đề: "Spiritual Premium"
+   Bảng màu: Navy Marian + Gold Vatican + Ivory + Deep Red
+════════════════════════════════════════════════════════════════════ */
+
 @theme {
-  --color-catholic-red: #800000;
-  --color-catholic-gold: #DAA520;
-  
-  --font-sans: "Outfit", "sans-serif";
+  /* ── Màu sắc chính ── */
+  --color-navy:        #1a3a6b;   /* Xanh Marian (chính) */
+  --color-navy-light:  #2a5298;   /* Xanh Navy sáng hơn */
+  --color-navy-dark:   #0f2347;   /* Xanh Navy tối */
+  --color-gold:        #c9a96e;   /* Vàng Vatican */
+  --color-gold-light:  #e8c98a;   /* Vàng sáng */
+  --color-gold-dark:   #a07840;   /* Vàng tối */
+  --color-ivory:       #faf8f3;   /* Nền sáng Ivory */
+  --color-ivory-dark:  #f0ece0;   /* Ivory đậm hơn */
+  --color-catholic-red: #8b1a1a;  /* Đỏ Công Giáo */
+  --color-catholic-red-light: #b02a2a;
+  --color-catholic-gold: #c9a96e; /* Vàng Vatican */
+
+  /* ── Typography ── */
+  --font-sans:  "Outfit", "sans-serif";
   --font-serif: "Merriweather", "serif";
-  
-  --animate-marquee: marquee 25s linear infinite;
-  --animate-sweep: sweep 0.8s ease-in-out;
-  --animate-fade-in: fade-in 0.8s ease-out forwards;
-  --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+
+  /* ── Animations ── */
+  --animate-marquee:      marquee 25s linear infinite;
+  --animate-sweep:        sweep 0.8s ease-in-out;
+  --animate-fade-in:      fade-in 0.8s ease-out forwards;
+  --animate-slide-up:     slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+  --animate-float:        float 6s ease-in-out infinite;
+  --animate-shimmer:      shimmer 2.5s linear infinite;
+  --animate-pulse-gold:   pulse-gold 2s ease-in-out infinite;
+  --animate-glow:         glow 3s ease-in-out infinite;
+  --animate-scroll-progress: scroll-progress linear both;
 
   @keyframes marquee {
-    0% { transform: translateX(0%); }
+    0%   { transform: translateX(0%); }
     100% { transform: translateX(-100%); }
   }
   @keyframes sweep {
-    0% { transform: translateX(-100%); }
+    0%   { transform: translateX(-100%); }
     100% { transform: translateX(100%); }
   }
   @keyframes fade-in {
-    0% { opacity: 0; transform: translateY(10px); }
+    0%   { opacity: 0; transform: translateY(10px); }
     100% { opacity: 1; transform: translateY(0); }
   }
   @keyframes slide-up {
-    0% { opacity: 0; transform: translateY(30px); }
+    0%   { opacity: 0; transform: translateY(30px); }
     100% { opacity: 1; transform: translateY(0); }
   }
-}
-
-@layer base {
-  body {
-    @apply font-sans antialiased text-slate-900 bg-slate-50;
+  /* Hiệu ứng nổi lên xuống nhẹ nhàng (dùng cho bokeh/particles) */
+  @keyframes float {
+    0%, 100% { transform: translateY(0) scale(1); }
+    50%       { transform: translateY(-20px) scale(1.05); }
+  }
+  /* Ánh sáng chạy qua - shimmer effect */
+  @keyframes shimmer {
+    0%   { background-position: -200% center; }
+    100% { background-position: 200% center; }
+  }
+  /* Nhịp đập vàng */
+  @keyframes pulse-gold {
+    0%, 100% { box-shadow: 0 0 0 0 rgba(201, 169, 110, 0.4); }
+    50%       { box-shadow: 0 0 0 12px rgba(201, 169, 110, 0); }
+  }
+  /* Ánh hào quang */
+  @keyframes glow {
+    0%, 100% { opacity: 0.6; }
+    50%       { opacity: 1; }
+  }
+  /* Progress bar cuộn trang */
+  @keyframes scroll-progress {
+    from { transform: scaleX(0); }
+    to   { transform: scaleX(1); }
   }
 }
 
+/* ════════════════════════════════════════════════════════════════════
+   BASE STYLES
+════════════════════════════════════════════════════════════════════ */
+@layer base {
+  html {
+    scroll-behavior: smooth;
+  }
+
+  body {
+    @apply font-sans antialiased text-slate-900 bg-ivory;
+    background-color: #faf8f3;
+  }
+
+  /* Dark mode body */
+  .dark body {
+    @apply bg-[#0d1117] text-stone-100;
+  }
+
+  h1, h2, h3 {
+    @apply font-serif;
+  }
+
+  /* Scrollbar đẹp */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  ::-webkit-scrollbar-track {
+    background: #f0ece0;
+  }
+  ::-webkit-scrollbar-thumb {
+    background: #c9a96e;
+    border-radius: 3px;
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: #a07840;
+  }
+  .dark ::-webkit-scrollbar-track {
+    background: #1a1b1e;
+  }
+  .dark ::-webkit-scrollbar-thumb {
+    background: #2a5298;
+  }
+}
+
+/* ════════════════════════════════════════════════════════════════════
+   COMPONENT CLASSES
+════════════════════════════════════════════════════════════════════ */
 @layer components {
-  /* Hiệu ứng nổi bật chấm active trên menu */
+
+  /* ── Navigation ── */
   .nav-link-refined {
-    @apply relative flex items-center px-4 py-2 text-sm font-semibold tracking-wide uppercase transition-all duration-300;
+    @apply relative flex items-center px-3 py-2 text-sm font-semibold tracking-wide transition-all duration-300;
   }
   .nav-link-refined:hover,
   .nav-link-refined.active {
-    @apply text-amber-500;
+    @apply text-gold;
+    color: #c9a96e;
   }
+  /* Thanh underline chạy */
   .nav-dot-floating {
-    @apply absolute left-0 bottom-[-4px] h-[4px] w-0 rounded-full bg-amber-500 transition-all duration-300;
+    @apply absolute left-0 bottom-[-4px] h-[3px] w-0 rounded-full transition-all duration-300;
+    background: linear-gradient(90deg, #c9a96e, #e8c98a);
   }
   .nav-link-refined:hover .nav-dot-floating,
   .nav-link-refined.active .nav-dot-floating {
     @apply w-full;
   }
 
-  /* Thẻ card phong cách mới */
-  .catholic-card {
-    @apply bg-white rounded-xl border border-slate-100 shadow-sm transition-all duration-500;
+  /* ── Glassmorphism Card ── */
+  .glass-card {
+    @apply relative rounded-2xl border overflow-hidden;
+    background: rgba(255, 255, 255, 0.65);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-color: rgba(255, 255, 255, 0.5);
+    box-shadow:
+      0 8px 32px rgba(26, 58, 107, 0.08),
+      0 1px 0 rgba(255, 255, 255, 0.6) inset;
   }
-  .catholic-card:hover {
-    @apply -translate-y-2 border-amber-200 shadow-xl shadow-amber-500/10;
+  .dark .glass-card {
+    background: rgba(26, 27, 30, 0.7);
+    border-color: rgba(255, 255, 255, 0.06);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+  }
+  .glass-card:hover {
+    @apply -translate-y-1;
+    box-shadow:
+      0 16px 48px rgba(26, 58, 107, 0.14),
+      0 1px 0 rgba(255, 255, 255, 0.6) inset;
+    transition: all 0.4s cubic-bezier(0.16, 1, 0.3, 1);
   }
 
-  /* Không cuộn ngang mượt */
+  /* ── Sacred Card (card trang trọng) ── */
+  .sacred-card {
+    @apply relative rounded-3xl border transition-all duration-500 overflow-hidden;
+    background: #faf8f3;
+    border-color: rgba(201, 169, 110, 0.2);
+    box-shadow:
+      0 4px 24px rgba(26, 58, 107, 0.06),
+      0 0 0 1px rgba(201, 169, 110, 0.1);
+  }
+  .dark .sacred-card {
+    background: #1a1b1e;
+    border-color: rgba(201, 169, 110, 0.12);
+    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+  }
+  .sacred-card:hover {
+    border-color: rgba(201, 169, 110, 0.5);
+    box-shadow:
+      0 12px 40px rgba(26, 58, 107, 0.12),
+      0 0 0 1px rgba(201, 169, 110, 0.3);
+    transform: translateY(-4px);
+  }
+
+  /* ── Catholic Card (giữ lại từ design cũ, nâng cấp) ── */
+  .catholic-card {
+    @apply bg-white rounded-xl border border-stone-100 shadow-sm transition-all duration-500;
+  }
+  .catholic-card:hover {
+    @apply -translate-y-2;
+    border-color: rgba(201, 169, 110, 0.3);
+    box-shadow: 0 20px 40px rgba(26, 58, 107, 0.1);
+  }
+
+  /* ── Premium Button ── */
+  .premium-btn {
+    @apply relative inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-white text-sm tracking-wide overflow-hidden transition-all duration-300;
+    background: linear-gradient(135deg, #1a3a6b, #2a5298);
+    box-shadow: 0 4px 15px rgba(26, 58, 107, 0.3);
+  }
+  .premium-btn::before {
+    content: '';
+    @apply absolute inset-0 opacity-0 transition-opacity duration-300;
+    background: linear-gradient(135deg, #2a5298, #1a3a6b);
+  }
+  .premium-btn:hover::before {
+    @apply opacity-100;
+  }
+  .premium-btn:hover {
+    @apply -translate-y-0.5;
+    box-shadow: 0 8px 25px rgba(26, 58, 107, 0.4);
+  }
+
+  /* ── Gold Button ── */
+  .gold-btn {
+    @apply relative inline-flex items-center gap-2 px-6 py-3 rounded-xl font-bold text-navy text-sm tracking-wide overflow-hidden transition-all duration-300;
+    background: linear-gradient(135deg, #c9a96e, #e8c98a);
+    box-shadow: 0 4px 15px rgba(201, 169, 110, 0.4);
+    color: #1a3a6b;
+  }
+  .gold-btn:hover {
+    @apply -translate-y-0.5;
+    box-shadow: 0 8px 25px rgba(201, 169, 110, 0.5);
+  }
+
+  /* ── Shimmer Text ── */
+  .shimmer-text {
+    background: linear-gradient(
+      90deg,
+      #c9a96e 0%,
+      #faf8f3 30%,
+      #e8c98a 50%,
+      #faf8f3 70%,
+      #c9a96e 100%
+    );
+    background-size: 200% auto;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    animation: shimmer 3s linear infinite;
+  }
+
+  /* ── Cross Pattern (họa tiết thánh giá mờ) ── */
+  .cross-pattern {
+    background-image:
+      linear-gradient(rgba(201, 169, 110, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(201, 169, 110, 0.04) 1px, transparent 1px);
+    background-size: 40px 40px;
+  }
+
+  /* ── Sacred Divider ── */
+  .sacred-divider {
+    @apply flex items-center gap-4;
+  }
+  .sacred-divider::before,
+  .sacred-divider::after {
+    content: '';
+    @apply flex-1 h-px;
+    background: linear-gradient(90deg, transparent, rgba(201, 169, 110, 0.5), transparent);
+  }
+
+  /* ── Liturgical Color Dot ── */
+  .liturgy-dot {
+    @apply w-3 h-3 rounded-full shadow-sm;
+    animation: pulse-gold 2s ease-in-out infinite;
+  }
+
+  /* ── Section Heading ── */
+  .section-heading {
+    @apply text-2xl md:text-3xl font-black tracking-tight text-navy;
+    color: #1a3a6b;
+  }
+  .dark .section-heading {
+    color: #e8c98a;
+  }
+
+  /* ── Gold Accent Line ── */
+  .gold-accent-line {
+    @apply h-1 w-16 rounded-full;
+    background: linear-gradient(90deg, #c9a96e, #e8c98a);
+  }
+
+  /* ── Scroll Progress ── */
+  .scroll-progress-bar {
+    @apply fixed top-0 left-0 right-0 z-[100] h-[3px] origin-left;
+    background: linear-gradient(90deg, #1a3a6b, #c9a96e, #8b1a1a);
+    animation: scroll-progress linear both;
+    animation-timeline: scroll();
+  }
+
+  /* ── No scrollbar ── */
   .no-scrollbar::-webkit-scrollbar {
     display: none;
   }
@@ -69,4 +307,43 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+
+  /* ── Bokeh pseudo-particle (dùng bằng CSS) ── */
+  .bokeh-bg {
+    @apply absolute inset-0 overflow-hidden pointer-events-none;
+  }
+  .bokeh-bg::before,
+  .bokeh-bg::after {
+    content: '';
+    @apply absolute rounded-full;
+    background: radial-gradient(circle, rgba(201, 169, 110, 0.15) 0%, transparent 70%);
+    animation: float 8s ease-in-out infinite;
+  }
+  .bokeh-bg::before {
+    width: 300px; height: 300px;
+    top: 10%; left: 5%;
+    animation-delay: 0s;
+  }
+  .bokeh-bg::after {
+    width: 200px; height: 200px;
+    top: 40%; right: 8%;
+    animation-delay: 3s;
+  }
+
+  /* ── Gradient Overlay ── */
+  .navy-gradient-overlay {
+    background: linear-gradient(
+      135deg,
+      rgba(26, 58, 107, 0.95) 0%,
+      rgba(42, 82, 152, 0.85) 50%,
+      rgba(139, 26, 26, 0.7) 100%
+    );
+  }
+
+  /* ── TNTT Branch Colors ── */
+  .tntt-au      { background-color: #ec4899; } /* Ấu: Hồng */
+  .tntt-thieu   { background-color: #22c55e; } /* Thiếu: Xanh lá */
+  .tntt-nghia   { background-color: #3b82f6; } /* Nghĩa: Xanh dương */
+  .tntt-hiep    { background-color: #eab308; } /* Hiệp: Vàng */
+  .tntt-huynh   { background-color: #92400e; } /* Huynh Trưởng: Nâu */
 }

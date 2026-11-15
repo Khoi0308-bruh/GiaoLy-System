@@ -1,69 +1,60 @@
 namespace GiaoLy.Domain.Entities;
 
 /// <summary>
-/// Entity điểm số của đoàn sinh trong một lớp học.
-///
-/// QUAN TRỌNG — Lý do đổi từ Computed Properties (=>) sang property thường:
-///   Entity Framework Core bỏ qua hoàn toàn các thuộc tính chỉ có getter (=>).
-///   Chúng KHÔNG được tạo thành cột trong Database.
-///   Hệ quả: Câu truy vấn db.Grades.Where(g => g.IsQualified) sẽ CRASH vì
-///   SQL Server không có cột "IsQualified" để lọc.
-///
-/// Giải pháp: Dùng hàm Calculate() — Tính bằng C# code, lưu kết quả vào DB.
-///   Hoạt động độc lập với loại Database (SQL Server, PostgreSQL, MySQL).
-///   Dễ dàng chuyển đổi DB engine sau này mà không cần sửa Migration.
+/// Entity Điểm số của một ghi danh (Mục 6.6 & schema-v3.sql).
+/// Điểm của 1 ghi danh mang tính độc lập theo từng niên khóa và lớp học.
 /// </summary>
 public class Grade
 {
-    public Guid Id { get; set; }
-    public Guid StudentId { get; set; }
-    public Student? Student { get; set; }
-    public Guid ClassRoomId { get; set; }
-    public ClassRoom? ClassRoom { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
 
-    // ─── Các cột điểm thành phần ────────────────────────────────────────────
-    public double Oral { get; set; }        // Điểm Miệng (Hệ số 1)
-    public double SmallTest { get; set; }   // Điểm 15 phút (Hệ số 1)
-    public double BigTest { get; set; }     // Điểm 1 Tiết (Hệ số 2)
-    public double FinalExam { get; set; }   // Điểm Thi Học Kỳ (Hệ số 3)
+    public Guid EnrollmentId { get; set; }
+    public Enrollment? Enrollment { get; set; }
 
-    // ─── Chuyên cần ─────────────────────────────────────────────────────────
-    public int Absences { get; set; }               // Số buổi vắng
-    public int TotalSessions { get; set; } = 30;    // Mặc định 30 buổi/năm
+    // Điểm thành phần từ 0 đến 10, null là chưa nhập (khác 0)
+    public decimal? Oral { get; set; }
+    public decimal? SmallTest { get; set; }
+    public decimal? BigTest { get; set; }
+    public decimal? FinalExam { get; set; }
 
-    // ─── Thuộc tính tính toán — LƯU VÀO DB để có thể QUERY được ────────────
-    // Cần { get; set; } để EF Core tạo cột trong Database.
-    // Giá trị được cập nhật mỗi khi gọi Calculate().
-    public double GPA { get; set; }
-    public double AttendanceRate { get; set; }
-    public bool IsQualified { get; set; }
+    // Chuyên cần
+    public int? TotalSessions { get; set; }
+    public int? Absences { get; set; }
+
+    // Thuộc tính tính toán được lưu DB để query và lọc
+    public decimal? ComputedGpa { get; set; }
+    public string? ComputedStatus { get; set; } // Incomplete, Qualified, NotQualified
+    public DateTime? ComputedAt { get; set; }
+    public string? Remarks { get; set; }
+
+    public Guid? UpdatedBy { get; set; }
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    public byte[] RowVersion { get; set; } = Array.Empty<byte>();
+
+    // Backward compatibility helper properties for legacy controllers
+    public Guid StudentId => Enrollment?.StudentId ?? Guid.Empty;
+    public Guid ClassRoomId => Enrollment?.ClassRoomId ?? Guid.Empty;
+    public double GPA => (double)(ComputedGpa ?? 0m);
+    public bool IsQualified => ComputedStatus == "Qualified";
+    public double AttendanceRate => (TotalSessions ?? 0) > 0
+        ? Math.Round((double)(TotalSessions!.Value - (Absences ?? 0)) / TotalSessions.Value, 4)
+        : 1.0;
 
     /// <summary>
-    /// Tính toán và cập nhật GPA, AttendanceRate, IsQualified.
-    /// GỌI HÀM NÀY trước mỗi lần SaveChanges() khi có thay đổi điểm.
-    ///
-    /// Công thức GPA (theo trọng số):
-    ///   GPA = (Miệng + 15p + (1Tiết × 2) + (HK × 3)) / 7
-    ///
-    /// Điều kiện lên lớp (IsQualified = true):
-    ///   - GPA >= 5.0
-    ///   - Tỷ lệ chuyên cần >= 80% (không vắng quá 20%)
+    /// Tính toán và gán giá trị GPA và Trạng thái theo quy tắc miền thuần.
     /// </summary>
     public void Calculate()
     {
-        // Công thức GPA theo trọng số, làm tròn 1 chữ số thập phân
-        GPA = Math.Round(
-            (Oral + SmallTest + (BigTest * 2) + (FinalExam * 3)) / 7.0,
-            1,
-            MidpointRounding.AwayFromZero
-        );
-
-        // Tỷ lệ chuyên cần = (Tổng - Vắng) / Tổng, làm tròn 4 chữ số
-        AttendanceRate = TotalSessions > 0
-            ? Math.Round((double)(TotalSessions - Absences) / TotalSessions, 4)
-            : 1.0;
-
-        // Học sinh đủ điều kiện lên lớp khi đạt cả 2 tiêu chí
-        IsQualified = GPA >= 5.0 && AttendanceRate >= 0.8;
+        ComputedGpa = Rules.GradeRules.CalculateGpa(Oral, SmallTest, BigTest, FinalExam);
+        var attendance = Rules.GradeRules.CalculateAttendanceRate(TotalSessions, Absences);
+        var (status, _) = Rules.GradeRules.DetermineStatus(
+            ComputedGpa,
+            attendance,
+            FinalExam.HasValue,
+            requireFinalExam: true,
+            requireAttendance: true);
+        ComputedStatus = status;
+        ComputedAt = DateTime.UtcNow;
     }
 }

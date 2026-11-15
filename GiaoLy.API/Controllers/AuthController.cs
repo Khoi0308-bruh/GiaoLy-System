@@ -1,82 +1,114 @@
-using GiaoLy.API.Helpers;
-using GiaoLy.Domain.Data;
-using GiaoLy.Domain.Entities;
+using GiaoLy.API.Common;
+using GiaoLy.Application.Identity.Contracts;
+using GiaoLy.Application.Identity.Dtos;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.IdentityModel.Tokens.Jwt;
-using System.Security.Claims;
-using System.Text;
-using Microsoft.IdentityModel.Tokens;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GiaoLy.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/auth")]
+[Route("api/auth")]
 public class AuthController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly IConfiguration _config;
+    private readonly IAuthService _authService;
 
-    public AuthController(AppDbContext context, IConfiguration config)
+    public AuthController(IAuthService authService)
     {
-        _context = context;
-        _config = config;
+        _authService = authService;
     }
 
     [HttpPost("login")]
-    public async Task<IActionResult> Login([FromBody] LoginRequest request)
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimiterExtensions.PolicyLogin)]
+    public async Task<IActionResult> Login([FromBody] LoginRequest request, CancellationToken ct)
     {
-        var user = await _context.Users
-            .Include(u => u.RoleEntity)
-                .ThenInclude(r => r!.RolePermissions)
-                    .ThenInclude(rp => rp.Permission)
-            .FirstOrDefaultAsync(u => u.Username == request.Username);
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = Request.Headers.UserAgent.ToString();
 
-
-        if (user == null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
-            return Unauthorized(new { message = "Tài khoản hoặc mật khẩu không đúng!" });
-
-        var token = GenerateJwt(user);
-        var permissions = user.RoleEntity?.RolePermissions.Select(rp => rp.Permission.Code).ToList() ?? new List<string>();
-        
-        return Ok(new
+        var result = await _authService.LoginAsync(request, ip, userAgent, ct);
+        if (result.IsSuccess && result.Value != null)
         {
-            token,
-            userId = user.Id.ToString(), // Cần thiết cho ABAC check phía Frontend
-            username = user.Username,
-            role = user.RoleEntity?.Code ?? user.Role,
-            permissions,
-            fullName = user.FullName,
-            branch = user.Branch
-        });
-    }
-
-    private string GenerateJwt(User user)
-    {
-        var securityKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_config["Jwt:Key"]!));
-        var credentials = new SigningCredentials(securityKey, SecurityAlgorithms.HmacSha256);
-
-        var permissions = user.RoleEntity?.RolePermissions.Select(rp => rp.Permission.Code).ToList() ?? new List<string>();
-        var roleCode = user.RoleEntity?.Code ?? user.Role;
-
-        var claims = new List<Claim> {
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()), // Giai đoạn 3A — Cần cho ABAC Policy
-            new Claim(ClaimTypes.Name, user.Username),
-            new Claim(ClaimTypes.Role, roleCode),
-            new Claim("Branch", user.Branch?.ToString() ?? "0")
-        };
-
-        foreach (var p in permissions)
-        {
-            claims.Add(new Claim("Permission", p));
+            SetRefreshTokenCookie(result.Value.RefreshToken, result.Value.ExpiresAt);
         }
 
-        var token = new JwtSecurityToken(_config["Jwt:Issuer"], _config["Jwt:Audience"],
-          claims, expires: DateTimeHelper.GetVnNow().AddDays(7), signingCredentials: credentials);
-
-        return new JwtSecurityTokenHandler().WriteToken(token);
+        return result.ToActionResult();
     }
 
-}
+    [HttpPost("refresh")]
+    [AllowAnonymous]
+    [EnableRateLimiting(RateLimiterExtensions.PolicyLogin)]
+    public async Task<IActionResult> Refresh([FromBody] RefreshRequest? request, CancellationToken ct)
+    {
+        // Get refresh token from cookie or body
+        var rawToken = Request.Cookies["refreshToken"] ?? request?.RefreshToken;
+        if (string.IsNullOrWhiteSpace(rawToken))
+        {
+            return Unauthorized(new ProblemDetails
+            {
+                Status = StatusCodes.Status401Unauthorized,
+                Title = "Unauthorized",
+                Detail = "Refresh token không được tìm thấy trong cookie hoặc yêu cầu."
+            });
+        }
 
-public class LoginRequest { public string Username { get; set; } = ""; public string Password { get; set; } = ""; }
+        var ip = HttpContext.Connection.RemoteIpAddress?.ToString();
+        var userAgent = Request.Headers.UserAgent.ToString();
+
+        var result = await _authService.RefreshTokenAsync(rawToken, ip, userAgent, ct);
+        if (result.IsSuccess && result.Value != null)
+        {
+            SetRefreshTokenCookie(result.Value.RefreshToken, result.Value.ExpiresAt);
+        }
+
+        return result.ToActionResult();
+    }
+
+    [HttpPost("logout")]
+    [Authorize]
+    public async Task<IActionResult> Logout(CancellationToken ct)
+    {
+        var rawToken = Request.Cookies["refreshToken"];
+        var result = await _authService.LogoutAsync(rawToken, ct);
+
+        Response.Cookies.Delete("refreshToken");
+        return result.ToActionResult();
+    }
+
+    [HttpGet("me")]
+    [Authorize]
+    public async Task<IActionResult> GetMe(CancellationToken ct)
+    {
+        var result = await _authService.GetCurrentUserProfileAsync(ct);
+        return result.ToActionResult();
+    }
+
+    [HttpPost("change-password")]
+    [Authorize]
+    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request, CancellationToken ct)
+    {
+        var result = await _authService.ChangePasswordAsync(request, ct);
+        if (result.IsSuccess)
+        {
+            Response.Cookies.Delete("refreshToken");
+        }
+
+        return result.ToActionResult();
+    }
+
+    private void SetRefreshTokenCookie(string token, DateTime expiresAt)
+    {
+        var cookieOptions = new CookieOptions
+        {
+            HttpOnly = true,
+            Secure = Request.IsHttps,
+            SameSite = SameSiteMode.Strict,
+            Expires = expiresAt
+        };
+
+        Response.Cookies.Append("refreshToken", token, cookieOptions);
+    }
+
+    public record RefreshRequest(string? RefreshToken);
+}

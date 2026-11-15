@@ -12,9 +12,13 @@ test.describe('Admin Workspace - Core Automated Tests', () => {
     const passwordInput = page.getByPlaceholder(/password/i).or(page.locator('input[type="password"]'));
     const loginBtn = page.getByRole('button', { name: /đăng nhập/i }).or(page.locator('button[type="submit"]'));
 
-    if (await emailInput.count() > 0) {
-      await emailInput.fill('nguyentrinhanhkhoi0308@gmail.com');
-      await passwordInput.fill('AnhEmMotor1@');
+    // Không hard-code thông tin đăng nhập: đặt E2E_USERNAME / E2E_PASSWORD trong môi trường chạy test.
+    const username = process.env.E2E_USERNAME;
+    const password = process.env.E2E_PASSWORD;
+
+    if (username && password && await emailInput.count() > 0) {
+      await emailInput.fill(username);
+      await passwordInput.fill(password);
       await loginBtn.click();
     }
     

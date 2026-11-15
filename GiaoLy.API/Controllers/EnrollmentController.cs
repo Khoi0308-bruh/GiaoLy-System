@@ -195,7 +195,7 @@ public class EnrollmentController : ControllerBase
             { "Hiệp 3", "Hiệp 4" }
         };
 
-        if (map.TryGetValue(name, out string nextClass))
+        if (map.TryGetValue(name, out string? nextClass) && nextClass != null)
         {
             return nextClass;
         }

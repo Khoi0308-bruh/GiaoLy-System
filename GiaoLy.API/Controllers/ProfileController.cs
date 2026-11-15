@@ -1,175 +1,127 @@
-using GiaoLy.Domain.Data;
+using GiaoLy.API.Common;
+using GiaoLy.Application.Common.Errors;
+using GiaoLy.Application.Identity.Contracts;
+using GiaoLy.Application.Identity.Dtos;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using System.Security.Claims;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
-using System.IO;
+using Microsoft.AspNetCore.RateLimiting;
 
 namespace GiaoLy.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
 [Authorize]
+[Route("api/v1/me")]
+[Route("api/me")]
 public class ProfileController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IAuthService _authService;
+    private readonly IConfiguration _config;
     private readonly IWebHostEnvironment _env;
 
-    public ProfileController(AppDbContext context, IWebHostEnvironment env)
+    private static readonly HashSet<string> AllowedExtensions = new(StringComparer.OrdinalIgnoreCase)
     {
-        _context = context;
+        ".jpg", ".jpeg", ".png", ".webp"
+    };
+
+    public ProfileController(IAuthService authService, IConfiguration config, IWebHostEnvironment env)
+    {
+        _authService = authService;
+        _config = config;
         _env = env;
     }
 
-    [HttpGet("me")]
-    public async Task<IActionResult> GetMyProfile()
+    [HttpPut("profile")]
+    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request, CancellationToken ct)
     {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdClaim, out var userId))
-            return Unauthorized("Không tìm thấy thông tin người dùng trong token.");
-
-        var user = await _context.Users
-            .Select(u => new 
-            {
-                u.Id,
-                u.Username,
-                u.ChristianName,
-                u.FullName,
-                u.Role,
-                u.Branch,
-                u.Email,
-                u.PhoneNumber,
-                u.DateOfBirth,
-                u.Address,
-                u.Bio,
-                u.AvatarPath,
-                u.CreatedAt
-            })
-            .FirstOrDefaultAsync(u => u.Id == userId);
-
-        if (user == null)
-            return NotFound("Người dùng không tồn tại.");
-
-        return Ok(user);
-    }
-
-    [HttpPut("update")]
-    public async Task<IActionResult> UpdateProfile([FromBody] UpdateProfileRequest request)
-    {
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdClaim, out var userId))
-            return Unauthorized("Không tìm thấy thông tin người dùng trong token.");
-
-        var user = await _context.Users.FindAsync(userId);
-        if (user == null)
-            return NotFound("Người dùng không tồn tại.");
-
-        if (string.IsNullOrWhiteSpace(request.FullName))
-            return BadRequest(new { errors = new { FullName = new[] { "Họ tên không được để trống." } } });
-
-        user.ChristianName = request.ChristianName?.Trim() ?? string.Empty;
-        user.FullName = request.FullName.Trim();
-        user.Email = request.Email?.Trim() ?? string.Empty;
-        user.PhoneNumber = request.PhoneNumber?.Trim() ?? string.Empty;
-        user.DateOfBirth = request.DateOfBirth;
-        user.Address = request.Address?.Trim() ?? string.Empty;
-        user.Bio = request.Bio?.Trim() ?? string.Empty;
-
-        await _context.SaveChangesAsync();
-
-        return Ok(new { message = "Cập nhật hồ sơ thành công.", user = new {
-            user.Id, user.Username, user.ChristianName, user.FullName,
-            user.Role, user.Branch, user.Email, user.PhoneNumber,
-            user.DateOfBirth, user.Address, user.Bio, user.AvatarPath, user.CreatedAt
-        } });
+        var result = await _authService.UpdateProfileAsync(request, ct);
+        return result.ToActionResult();
     }
 
     [HttpPost("avatar")]
-    public async Task<IActionResult> UploadAvatar(IFormFile avatar)
+    [EnableRateLimiting(RateLimiterExtensions.PolicyUpload)]
+    public async Task<IActionResult> UploadAvatar(IFormFile file, CancellationToken ct)
     {
-        if (avatar == null || avatar.Length == 0)
-            return BadRequest("Vui lòng chọn ảnh hợp lệ.");
-
-        var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".gif" };
-        var ext = Path.GetExtension(avatar.FileName).ToLowerInvariant();
-        if (!allowedExtensions.Contains(ext))
-            return BadRequest("Chỉ hỗ trợ tệp định dạng JPG, PNG, GIF.");
-
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdClaim, out var userId))
-            return Unauthorized("Không tìm thấy thông tin người dùng trong token.");
-
-        var user = await _context.Users.FindAsync(userId);
-        if (user == null)
-            return NotFound("Người dùng không tồn tại.");
-
-        var uploadsFolder = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), "uploads", "avatars");
-        if (!Directory.Exists(uploadsFolder))
-            Directory.CreateDirectory(uploadsFolder);
-
-        var uniqueFileName = $"{userId}_{DateTime.UtcNow.Ticks}{ext}";
-        var filePath = Path.Combine(uploadsFolder, uniqueFileName);
-
-        using (var stream = new FileStream(filePath, FileMode.Create))
+        if (file == null || file.Length == 0)
         {
-            await avatar.CopyToAsync(stream);
-        }
-
-        if (!string.IsNullOrEmpty(user.AvatarPath))
-        {
-            var oldFilePath = Path.Combine(_env.WebRootPath ?? Path.Combine(Directory.GetCurrentDirectory(), "wwwroot"), user.AvatarPath.TrimStart('/'));
-            if (System.IO.File.Exists(oldFilePath))
+            return BadRequest(new ProblemDetails
             {
-                System.IO.File.Delete(oldFilePath);
-            }
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad Request",
+                Detail = "Vui lòng chọn tệp ảnh hợp lệ."
+            });
         }
 
-        user.AvatarPath = $"/uploads/avatars/{uniqueFileName}";
-        await _context.SaveChangesAsync();
+        // Max 2 MB
+        if (file.Length > 2 * 1024 * 1024)
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad Request",
+                Detail = "Dung lượng ảnh đại diện tối đa là 2 MB."
+            });
+        }
 
-        return Ok(new { message = "Cập nhật ảnh đại diện thành công.", avatarPath = user.AvatarPath });
+        var ext = Path.GetExtension(file.FileName);
+        if (string.IsNullOrWhiteSpace(ext) || !AllowedExtensions.Contains(ext))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad Request",
+                Detail = "Chỉ chấp nhận định dạng ảnh JPG, PNG hoặc WEBP."
+            });
+        }
+
+        // Validate magic bytes
+        using var stream = file.OpenReadStream();
+        var header = new byte[8];
+        var bytesRead = await stream.ReadAsync(header, 0, header.Length, ct);
+        stream.Position = 0;
+
+        if (!IsValidImageHeader(header, ext))
+        {
+            return BadRequest(new ProblemDetails
+            {
+                Status = StatusCodes.Status400BadRequest,
+                Title = "Bad Request",
+                Detail = "Nội dung tệp không phải là ảnh hợp lệ."
+            });
+        }
+
+        var storageRoot = _config["Storage:Root"] ?? Path.Combine(_env.ContentRootPath, "uploads");
+        var avatarsDir = Path.Combine(storageRoot, "avatars");
+        if (!Directory.Exists(avatarsDir))
+        {
+            Directory.CreateDirectory(avatarsDir);
+        }
+
+        var fileName = $"{Guid.NewGuid():N}{ext.ToLowerInvariant()}";
+        var fullPath = Path.Combine(avatarsDir, fileName);
+
+        using (var destStream = new FileStream(fullPath, FileMode.Create))
+        {
+            await file.CopyToAsync(destStream, ct);
+        }
+
+        var relativePath = $"/uploads/avatars/{fileName}";
+        var result = await _authService.UpdateAvatarAsync(relativePath, ct);
+        return result.ToActionResult();
     }
 
-    [HttpPatch("change-password")]
-    public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordRequest request)
+    private static bool IsValidImageHeader(byte[] header, string ext)
     {
-        if (string.IsNullOrWhiteSpace(request.OldPassword) || string.IsNullOrWhiteSpace(request.NewPassword))
-            return BadRequest("Vui lòng nhập đầy đủ mật khẩu cũ và mới.");
+        if (header.Length < 4) return false;
 
-        var userIdClaim = User.FindFirstValue(ClaimTypes.NameIdentifier);
-        if (!Guid.TryParse(userIdClaim, out var userId))
-            return Unauthorized("Không tìm thấy thông tin người dùng trong token.");
+        // JPEG: FF D8 FF
+        if (header[0] == 0xFF && header[1] == 0xD8 && header[2] == 0xFF) return true;
 
-        var user = await _context.Users.FindAsync(userId);
-        if (user == null)
-            return NotFound("Người dùng không tồn tại.");
+        // PNG: 89 50 4E 47
+        if (header[0] == 0x89 && header[1] == 0x50 && header[2] == 0x4E && header[3] == 0x47) return true;
 
-        if (!BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PasswordHash))
-            return BadRequest("Mật khẩu hiện tại không chính xác.");
+        // WEBP: RIFF ... WEBP (52 49 46 46)
+        if (header[0] == 0x52 && header[1] == 0x49 && header[2] == 0x46 && header[3] == 0x46) return true;
 
-        user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.NewPassword);
-        
-        await _context.SaveChangesAsync();
-
-        return Ok(new { message = "Đổi mật khẩu thành công." });
+        return false;
     }
-}
-
-public class ChangePasswordRequest
-{
-    public string OldPassword { get; set; } = string.Empty;
-    public string NewPassword { get; set; } = string.Empty;
-}
-
-public class UpdateProfileRequest
-{
-    public string ChristianName { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public string PhoneNumber { get; set; } = string.Empty;
-    public DateTime? DateOfBirth { get; set; }
-    public string Address { get; set; } = string.Empty;
-    public string Bio { get; set; } = string.Empty;
 }

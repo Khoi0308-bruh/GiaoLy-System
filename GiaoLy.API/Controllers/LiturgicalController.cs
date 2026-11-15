@@ -1,104 +1,87 @@
-using GiaoLy.API.Services;
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+using GiaoLy.API.Authorization;
+using GiaoLy.API.Common;
+using GiaoLy.Application.Liturgical.Contracts;
+using GiaoLy.Application.Liturgical.Dtos;
+using GiaoLy.Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GiaoLy.API.Helpers;
 
 namespace GiaoLy.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
 public class LiturgicalController : ControllerBase
 {
-    private readonly LiturgicalService _liturgical;
+    private readonly ILiturgicalService _liturgicalService;
 
-    public LiturgicalController(LiturgicalService liturgical)
+    public LiturgicalController(ILiturgicalService liturgicalService)
     {
-        _liturgical = liturgical;
+        _liturgicalService = liturgicalService;
     }
 
-    /// <summary>GET lịch phụng vụ hôm nay (public, ai cũng xem được)</summary>
-    [HttpGet("today")]
-    public async Task<IActionResult> GetToday()
+    [HttpGet("api/v1/public/liturgical/today")]
+    [HttpGet("api/Liturgical/today")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetToday(CancellationToken ct)
     {
-        return Ok(await _liturgical.GetTodayAsync());
+        var result = await _liturgicalService.GetTodayAsync(ct);
+        return result.ToActionResult();
     }
 
-    /// <summary>GET lịch phụng vụ theo ngày cụ thể</summary>
-    [HttpGet("{dateStr}")]
-    public async Task<IActionResult> GetByDate(string dateStr)
+    [HttpGet("api/v1/public/liturgical/date/{date}")]
+    [HttpGet("api/Liturgical/{date}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetByDate(string date, CancellationToken ct)
     {
-        if (!DateTime.TryParse(dateStr, out var date))
-            return BadRequest("Định dạng ngày không hợp lệ (dùng yyyy-MM-dd).");
-        return Ok(await _liturgical.GetDayAsync(date));
-    }
-
-    /// <summary>GET Lịch Phụng Vụ nguyên tháng (Tính bằng thuật toán Computus)</summary>
-    [HttpGet("month/{year}/{month}")]
-    public async Task<IActionResult> GetMonthCalendar(int year, int month)
-    {
-        if (year < 2000 || year > 2100 || month < 1 || month > 12)
-            return BadRequest("Năm hoặc tháng không hợp lệ.");
-            
-        var calendar = await _liturgical.GetMonthAsync(year, month);
-        return Ok(calendar);
-    }
-
-    [HttpPost("override")]
-    [RequirePermission("liturgical.update")] // Admin và Thư ký
-    public async Task<IActionResult> OverrideLiturgicalDay([FromBody] OverrideLiturgicalRequest request, [FromServices] GiaoLy.Domain.Data.AppDbContext context)
-    {
-        var existing = await context.LiturgicalEvents.FirstOrDefaultAsync(e => e.Date.Date == request.Date.Date);
-        if (existing != null)
+        if (!DateOnly.TryParse(date, out var parsedDate))
         {
-            existing.Title = request.Title;
-            existing.Color = request.Color;
-            existing.Level = request.Level;
-            existing.IsOverride = true;
-            existing.WordOfGodOverride = request.WordOfGodOverride;
-            existing.WordOfGodReference = request.WordOfGodReference;
+            return BadRequest(new { message = "Định dạng ngày không hợp lệ. Vui lòng dùng yyyy-MM-dd" });
         }
-        else
-        {
-            context.LiturgicalEvents.Add(new GiaoLy.Domain.Entities.LiturgicalEvent
-            {
-                Id = Guid.NewGuid(),
-                Date = request.Date.Date,
-                Title = request.Title,
-                Color = request.Color,
-                Level = request.Level,
-                IsOverride = true,
-                WordOfGodOverride = request.WordOfGodOverride,
-                WordOfGodReference = request.WordOfGodReference
-            });
-        }
-        await context.SaveChangesAsync();
-        return Ok(new { message = "Lưu tùy chỉnh thành công" });
+
+        var result = await _liturgicalService.GetByDateAsync(parsedDate, ct);
+        return result.ToActionResult();
     }
 
-    [HttpDelete("override/{dateStr}")]
-    [RequirePermission("liturgical.update")]
-    public async Task<IActionResult> DeleteOverride(string dateStr, [FromServices] GiaoLy.Domain.Data.AppDbContext context)
+    [HttpGet("api/v1/public/liturgical/month/{year:int}/{month:int}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetMonth(int year, int month, CancellationToken ct)
     {
-        if (!DateTime.TryParse(dateStr, out var date))
-            return BadRequest("Định dạng ngày không hợp lệ.");
-
-        var existing = await context.LiturgicalEvents.FirstOrDefaultAsync(e => e.Date.Date == date.Date && e.IsOverride);
-        if (existing != null)
+        if (month < 1 || month > 12)
         {
-            context.LiturgicalEvents.Remove(existing);
-            await context.SaveChangesAsync();
+            return BadRequest(new { message = "Tháng phải từ 1 đến 12" });
         }
-        return Ok(new { message = "Xóa tùy chỉnh thành công" });
-    }
-}
 
-public class OverrideLiturgicalRequest
-{
-    public DateTime Date { get; set; }
-    public string Title { get; set; } = string.Empty;
-    public string Color { get; set; } = "Green";
-    public string Level { get; set; } = "Thường";
-    public string? WordOfGodOverride { get; set; }
-    public string? WordOfGodReference { get; set; }
+        var result = await _liturgicalService.GetMonthAsync(year, month, ct);
+        return result.ToActionResult();
+    }
+
+    [HttpGet("api/v1/liturgical")]
+    [RequirePermission(Permissions.Liturgical.View)]
+    public async Task<IActionResult> GetAll(
+        [FromQuery] int? year,
+        [FromQuery] int? month,
+        CancellationToken ct)
+    {
+        var result = await _liturgicalService.GetAllAsync(year, month, ct);
+        return result.ToActionResult();
+    }
+
+    [HttpPut("api/v1/liturgical/{date}")]
+    [RequirePermission(Permissions.Liturgical.Update)]
+    public async Task<IActionResult> OverrideDay(
+        string date,
+        [FromBody] OverrideLiturgicalDayRequest request,
+        CancellationToken ct)
+    {
+        if (!DateOnly.TryParse(date, out var parsedDate))
+        {
+            return BadRequest(new { message = "Định dạng ngày không hợp lệ. Vui lòng dùng yyyy-MM-dd" });
+        }
+
+        var result = await _liturgicalService.OverrideDayAsync(parsedDate, request, ct);
+        return result.ToActionResult();
+    }
 }

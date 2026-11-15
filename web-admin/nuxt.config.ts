@@ -1,5 +1,7 @@
 // https://nuxt.com/docs/api/configuration/nuxt-config
 export default defineNuxtConfig({
+  extends: ['../layer'],
+  ssr: false,
 
   modules: [
     '@nuxt/ui',
@@ -12,11 +14,17 @@ export default defineNuxtConfig({
     enabled: true
   },
 
+  // @pinia/nuxt chỉ quét <srcDir>/stores của app hiện tại, không quét store trong layer,
+  // nên phải khai báo tường minh để useSessionStore() auto-import hoạt động.
+  pinia: {
+    storesDirs: ['stores', '../layer/app/stores']
+  },
+
   css: ['~/assets/css/main.css'],
 
   runtimeConfig: {
     public: {
-      apiBase: process.env.NUXT_PUBLIC_API_BASE || 'http://localhost:5000' // Có giá trị mặc định tránh lỗi relative URL
+      apiBase: (globalThis as unknown as { process?: { env?: Record<string, string> } }).process?.env?.NUXT_PUBLIC_API_BASE || 'http://localhost:5000' // Có giá trị mặc định tránh lỗi relative URL
     }
   },
 

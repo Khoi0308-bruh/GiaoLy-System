@@ -12,9 +12,11 @@ interface BannerItem {
   isActive?: boolean
 }
 
+const config = useRuntimeConfig()
+
 // Gọi API lấy danh sách banner đang hoạt động
 const { data: apiBanners } = await useFetch<BannerItem[]>('/api/banners/active', {
-  baseURL: 'https://localhost:7198'
+  baseURL: config.public.apiBase
 })
 
 // Dữ liệu mẫu phong phú khi API chưa có hoặc đang tải
@@ -53,93 +55,108 @@ const handleSearch = () => {
   if (!searchQuery.value.trim()) return
   navigateTo(`/verify?q=${encodeURIComponent(searchQuery.value.trim())}`)
 }
+
+// Thống kê nhanh (quick stats)
+const quickStats = [
+  { label: 'Đoàn Sinh', value: '120+', icon: 'i-heroicons-users' },
+  { label: 'Huynh Trưởng', value: '24', icon: 'i-heroicons-academic-cap' },
+  { label: 'Lớp Học', value: '8', icon: 'i-heroicons-building-library' },
+  { label: 'Năm Hoạt Động', value: '15+', icon: 'i-heroicons-star' },
+]
 </script>
 
 <template>
-  <div class="relative w-full mb-16 -mt-4">
-    <!-- ═══════════════════════════════════════════════════════
-         MAIN HERO BANNER (Edge-to-Edge Cinematic)
-    ════════════════════════════════════════════════════════════ -->
-    <div class="relative w-full overflow-hidden bg-slate-900 shadow-xl">
-      <!-- UCarousel từ Nuxt UI -->
+  <div class="relative w-full mb-20 -mt-0">
+
+    <!-- ══════════════════════════════════════════════════════════════
+         HERO BANNER — Cinematic Edge-to-Edge
+    ══════════════════════════════════════════════════════════════════ -->
+    <div class="relative w-full overflow-hidden shadow-2xl" style="box-shadow: 0 25px 60px rgba(26,58,107,0.25);">
+
+      <!-- Bokeh particles giả (CSS only) -->
+      <div class="bokeh-bg z-10" />
+
+      <!-- UCarousel Nuxt UI -->
       <UCarousel
         :items="bannerList"
         :ui="{
-          root: 'relative overflow-hidden w-full h-[500px] sm:h-[600px] md:h-[650px] lg:h-[700px]',
+          root: 'relative overflow-hidden w-full h-[520px] sm:h-[620px] md:h-[680px] lg:h-[740px]',
           container: 'h-full w-full',
           item: 'w-full basis-full h-full relative select-none'
         }"
         indicators
         arrows
-        :autoplay="{ delay: 5000 }"
+        :autoplay="{ delay: 5500 }"
         loop
       >
         <template #default="{ item }">
           <div class="relative w-full h-full group overflow-hidden">
-            <!-- Background Image với hiệu ứng Zoom mềm mại -->
+
+            <!-- Ảnh nền với hiệu ứng zoom -->
             <img
               :src="item.imageUrl"
               :alt="item.title"
-              class="w-full h-full object-cover object-center transform transition-transform duration-1000 ease-out group-hover:scale-105"
+              class="w-full h-full object-cover object-center transform transition-transform duration-[1200ms] ease-out group-hover:scale-105"
               draggable="false"
             >
 
-            <!-- Multi-layered Gradient Overlays (Tăng độ tương phản text) -->
-            <div class="absolute inset-0 bg-gradient-to-t from-black/95 via-black/40 to-black/20" />
-            <div class="absolute inset-0 bg-gradient-to-r from-black/70 via-black/20 to-transparent" />
+            <!-- Các lớp gradient overlay tạo chiều sâu -->
+            <div class="absolute inset-0 bg-gradient-to-t from-[#0d1117]/95 via-[#0d1117]/30 to-transparent" />
+            <div class="absolute inset-0 bg-gradient-to-r from-[#0d1117]/80 via-[#0d1117]/20 to-transparent" />
+            <!-- Viền vàng tinh tế ở bottom -->
+            <div class="absolute bottom-0 left-0 right-0 h-[3px]"
+              style="background: linear-gradient(90deg, transparent, #c9a96e, transparent);"
+            />
 
-            <!-- Nội dung Slide (Typography hiện đại) -->
-            <div class="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14 pb-20 sm:pb-20 z-10 max-w-3xl">
-              <!-- Tag / Eyebrow Pill -->
-              <div
-                v-if="item.tag"
-                class="mb-3"
-              >
-                <UBadge
-                  :color="(item.tagColor as any) || 'primary'"
-                  variant="solid"
-                  size="md"
-                  class="font-bold tracking-wider uppercase px-3 py-1 rounded-full shadow-lg backdrop-blur-md"
+            <!-- Nội dung Slide — Typography "Spiritual Premium" -->
+            <div class="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14 pb-24 sm:pb-28 z-10 max-w-4xl">
+
+              <!-- Tag / Eyebrow Label -->
+              <div v-if="item.tag" class="mb-4">
+                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black tracking-[0.2em] uppercase backdrop-blur-md border"
+                  style="
+                    background: rgba(201,169,110,0.15);
+                    border-color: rgba(201,169,110,0.4);
+                    color: #e8c98a;
+                  "
                 >
                   {{ item.tag }}
-                </UBadge>
+                </span>
               </div>
 
-              <!-- Tiêu đề lớn -->
-              <h1 class="text-2xl sm:text-4xl md:text-5xl font-black text-white leading-tight font-serif tracking-tight drop-shadow-lg mb-3">
+              <!-- Tiêu đề serif lớn -->
+              <h1 class="font-serif font-black text-white leading-[1.1] tracking-tight drop-shadow-2xl mb-4"
+                style="font-size: clamp(1.75rem, 5vw, 3.5rem);"
+              >
                 {{ item.title }}
               </h1>
 
-              <!-- Mô tả / Phụ đề -->
+              <!-- Phụ đề -->
               <p
                 v-if="item.subtitle"
-                class="text-sm sm:text-base md:text-lg text-stone-200 line-clamp-2 sm:line-clamp-3 mb-6 font-normal drop-shadow"
+                class="text-stone-300/90 line-clamp-2 sm:line-clamp-3 mb-8 leading-relaxed"
+                style="font-size: clamp(0.875rem, 1.5vw, 1.1rem); max-width: 600px;"
               >
                 {{ item.subtitle }}
               </p>
 
-              <!-- Nút CTA hành động -->
-              <div class="flex items-center gap-3">
-                <UButton
+              <!-- Nút CTA -->
+              <div class="flex items-center gap-3 flex-wrap">
+                <NuxtLink
                   v-if="item.link"
                   :to="item.link"
-                  color="primary"
-                  size="lg"
-                  class="rounded-xl px-6 font-bold shadow-lg shadow-amber-500/25 hover:shadow-amber-500/40 hover:-translate-y-0.5 transition-all"
-                  trailing-icon="i-heroicons-arrow-right-20-solid"
+                  class="gold-btn"
                 >
                   {{ item.ctaText || 'Xem Chi Tiết' }}
-                </UButton>
+                  <UIcon name="i-heroicons-arrow-right-20-solid" class="w-4 h-4" />
+                </NuxtLink>
 
-                <UButton
+                <NuxtLink
                   to="/leadership"
-                  color="neutral"
-                  variant="outline"
-                  size="lg"
-                  class="rounded-xl px-5 font-semibold text-white border-white/40 hover:bg-white/20 backdrop-blur-sm"
+                  class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm text-white border border-white/30 backdrop-blur-sm hover:bg-white/15 transition-all duration-300"
                 >
                   Về Ban Điều Hành
-                </UButton>
+                </NuxtLink>
               </div>
             </div>
           </div>
@@ -147,18 +164,26 @@ const handleSearch = () => {
       </UCarousel>
     </div>
 
-    <!-- ═══════════════════════════════════════════════════════
-         FLOATING SEARCH BAR (Glassmorphism nép chân banner)
-    ════════════════════════════════════════════════════════════ -->
+    <!-- ══════════════════════════════════════════════════════════════
+         FLOATING SEARCH BAR — Glassmorphism nép chân banner
+    ══════════════════════════════════════════════════════════════════ -->
     <div class="absolute -bottom-7 left-1/2 -translate-x-1/2 w-[92%] max-w-2xl z-30">
       <form
-        class="bg-white/60 dark:bg-black/40 backdrop-blur-2xl p-2 rounded-2xl shadow-[0_15px_35px_rgba(0,0,0,0.18)] border border-white/40 dark:border-stone-700/50 flex items-center gap-2 transition-all focus-within:ring-2 focus-within:ring-amber-500 focus-within:bg-white/90 dark:focus-within:bg-[#242526]/90 focus-within:shadow-[0_15px_40px_rgba(245,158,11,0.25)] group"
+        class="relative p-2 rounded-2xl flex items-center gap-2 transition-all duration-500 focus-within:shadow-[0_15px_50px_rgba(201,169,110,0.3)]"
+        style="
+          background: rgba(255,255,255,0.8);
+          backdrop-filter: blur(24px);
+          -webkit-backdrop-filter: blur(24px);
+          box-shadow: 0 15px 40px rgba(26,58,107,0.18);
+          border: 1px solid rgba(201,169,110,0.25);
+        "
         @submit.prevent="handleSearch"
       >
-        <div class="flex-1 flex items-center pl-2">
+        <div class="flex-1 flex items-center pl-2 gap-2">
           <UIcon
             name="i-heroicons-magnifying-glass-20-solid"
-            class="w-6 h-6 text-stone-500 dark:text-stone-400 group-focus-within:text-amber-500 shrink-0 mr-2 transition-colors"
+            class="w-5 h-5 shrink-0 transition-colors duration-300"
+            style="color: #c9a96e;"
           />
           <input
             v-model="searchQuery"
@@ -167,16 +192,35 @@ const handleSearch = () => {
             class="w-full bg-transparent border-none text-stone-800 dark:text-stone-100 placeholder-stone-400 text-sm sm:text-base focus:outline-none"
           >
         </div>
-
-        <UButton
+        <button
           type="submit"
-          color="primary"
-          size="md"
-          class="rounded-xl px-5 sm:px-7 font-bold shadow-md hover:shadow-lg transition-transform active:scale-95 shrink-0"
+          class="premium-btn shrink-0 text-sm px-5 sm:px-7 py-2.5"
         >
           Tìm Kiếm
-        </UButton>
+        </button>
       </form>
     </div>
+
+    <!-- ══════════════════════════════════════════════════════════════
+         QUICK STATS BAR — Thống kê nhanh dưới hero
+    ══════════════════════════════════════════════════════════════════ -->
+    <div class="mt-20 px-4 sm:px-6">
+      <div class="max-w-3xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div
+          v-for="stat in quickStats"
+          :key="stat.label"
+          class="sacred-card p-5 text-center group cursor-default"
+        >
+          <div class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+            style="background: linear-gradient(135deg, rgba(26,58,107,0.08), rgba(201,169,110,0.08));"
+          >
+            <UIcon :name="stat.icon" class="w-5 h-5" style="color: #c9a96e;" />
+          </div>
+          <div class="font-black text-2xl font-serif" style="color: #1a3a6b;">{{ stat.value }}</div>
+          <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 mt-0.5 tracking-wide uppercase">{{ stat.label }}</div>
+        </div>
+      </div>
+    </div>
+
   </div>
 </template>

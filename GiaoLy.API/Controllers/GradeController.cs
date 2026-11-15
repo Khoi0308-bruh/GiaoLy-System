@@ -32,12 +32,13 @@ public class GradeController : ControllerBase
         // Lấy danh sách các học sinh đã xếp vào lớp này
         var enrollments = await _context.Enrollments.AsNoTracking()
             .Include(e => e.Student)
+            .Include(e => e.Grade)
             .Where(e => e.ClassRoomId == classRoomId && e.Status == "Active")
             .ToListAsync();
 
-        var existingGrades = await _context.Grades.AsNoTracking()
-            .Where(g => g.ClassRoomId == classRoomId)
-            .ToDictionaryAsync(g => g.StudentId);
+        var existingGrades = enrollments
+            .Where(e => e.Grade != null)
+            .ToDictionary(e => e.StudentId, e => e.Grade!);
 
         var result = new List<GradeDto>();
 
@@ -89,37 +90,43 @@ public class GradeController : ControllerBase
 
             if (req.Id != Guid.Empty)
             {
-                // [Vá Lỗ Hổng IDOR]: Kiểm tra chéo ClassRoomId từ URL, cấm người dùng cập nhật điểm của lớp khác
-                grade = await _context.Grades.FirstOrDefaultAsync(g => g.Id == req.Id && g.ClassRoomId == classRoomId);
+                // [Vá Lỗ Hổng IDOR]: Kiểm tra chéo ClassRoomId từ URL qua Enrollment
+                grade = await _context.Grades
+                    .Include(g => g.Enrollment)
+                    .FirstOrDefaultAsync(g => g.Id == req.Id && g.Enrollment!.ClassRoomId == classRoomId);
             }
             else
             {
-                // [Vá Lỗ Hổng IDOR]: Bắt buộc sử dụng classRoomId từ URL (đã được phân quyền) thay vì lấy từ body request do client gửi lên.
-                grade = await _context.Grades
-                    .FirstOrDefaultAsync(g => g.StudentId == req.StudentId && g.ClassRoomId == classRoomId);
-            }
-
-            if (grade == null)
-            {
-                grade = new Grade
+                var enroll = await _context.Enrollments
+                    .FirstOrDefaultAsync(e => e.StudentId == req.StudentId && e.ClassRoomId == classRoomId && e.Status == "Active");
+                if (enroll != null)
                 {
-                    Id = Guid.NewGuid(),
-                    StudentId = req.StudentId,
-                    ClassRoomId = classRoomId // An toàn tuyệt đối
-                };
-                _context.Grades.Add(grade);
+                    grade = await _context.Grades.FirstOrDefaultAsync(g => g.EnrollmentId == enroll.Id);
+                    if (grade == null)
+                    {
+                        grade = new Grade
+                        {
+                            Id = Guid.NewGuid(),
+                            EnrollmentId = enroll.Id
+                        };
+                        _context.Grades.Add(grade);
+                    }
+                }
             }
 
-            grade.Oral = req.Oral;
-            grade.SmallTest = req.SmallTest;
-            grade.BigTest = req.BigTest;
-            grade.FinalExam = req.FinalExam;
-            grade.Absences = req.Absences;
-            grade.TotalSessions = req.TotalSessions > 0 ? req.TotalSessions : 30;
+            if (grade != null)
+            {
+                grade.Oral = (decimal)req.Oral;
+                grade.SmallTest = (decimal)req.SmallTest;
+                grade.BigTest = (decimal)req.BigTest;
+                grade.FinalExam = (decimal)req.FinalExam;
+                grade.Absences = req.Absences;
+                grade.TotalSessions = req.TotalSessions > 0 ? req.TotalSessions : 30;
 
-            // Giai đoạn 4A — Tính toán GPA/IsQualified trước khi lưu vào DB.
-            // Bắt buộc gọi trước SaveChanges để cột GPA và IsQualified được cập nhật đúng.
-            grade.Calculate();
+                // Giai đoạn 4A — Tính toán GPA/IsQualified trước khi lưu vào DB.
+                // Bắt buộc gọi trước SaveChanges để cột GPA và IsQualified được cập nhật đúng.
+                grade.Calculate();
+            }
         }
 
         await _context.SaveChangesAsync();
@@ -139,12 +146,13 @@ public class GradeController : ControllerBase
 
         var enrollments = await _context.Enrollments.AsNoTracking()
             .Include(e => e.Student)
+            .Include(e => e.Grade)
             .Where(e => e.ClassRoomId == classRoomId && e.Status == "Active")
             .ToListAsync();
 
-        var grades = await _context.Grades.AsNoTracking()
-            .Where(g => g.ClassRoomId == classRoomId)
-            .ToDictionaryAsync(g => g.StudentId);
+        var grades = enrollments
+            .Where(e => e.Grade != null)
+            .ToDictionary(e => e.StudentId, e => e.Grade!);
 
         using var workbook = new ClosedXML.Excel.XLWorkbook();
         var worksheet = workbook.Worksheets.Add("BangDiem");
@@ -179,12 +187,12 @@ public class GradeController : ControllerBase
 
             if (grades.TryGetValue(enroll.StudentId, out var g))
             {
-                oral = g.Oral;
-                small = g.SmallTest;
-                big = g.BigTest;
-                final = g.FinalExam;
-                abs = g.Absences;
-                total = g.TotalSessions;
+                oral = (double)(g.Oral ?? 0m);
+                small = (double)(g.SmallTest ?? 0m);
+                big = (double)(g.BigTest ?? 0m);
+                final = (double)(g.FinalExam ?? 0m);
+                abs = g.Absences ?? 0;
+                total = g.TotalSessions ?? 30;
                 gpa = g.GPA;
                 result = g.IsQualified ? "Lên lớp" : "Ở lại";
             }
@@ -228,12 +236,13 @@ public class GradeController : ControllerBase
 
         var enrollments = await _context.Enrollments.AsNoTracking()
             .Include(e => e.Student)
+            .Include(e => e.Grade)
             .Where(e => e.ClassRoomId == classRoomId && e.Status == "Active")
             .ToListAsync();
 
-        var grades = await _context.Grades.AsNoTracking()
-            .Where(g => g.ClassRoomId == classRoomId)
-            .ToDictionaryAsync(g => g.StudentId);
+        var grades = enrollments
+            .Where(e => e.Grade != null)
+            .ToDictionary(e => e.StudentId, e => e.Grade!);
 
         var document = QuestPDF.Fluent.Document.Create(container =>
         {
@@ -300,11 +309,11 @@ public class GradeController : ControllerBase
 
                             if (grades.TryGetValue(enroll.StudentId, out var g))
                             {
-                                oral = g.Oral;
-                                small = g.SmallTest;
-                                big = g.BigTest;
-                                final = g.FinalExam;
-                                abs = g.Absences;
+                                oral = (double)(g.Oral ?? 0m);
+                                small = (double)(g.SmallTest ?? 0m);
+                                big = (double)(g.BigTest ?? 0m);
+                                final = (double)(g.FinalExam ?? 0m);
+                                abs = g.Absences ?? 0;
                                 gpa = g.GPA;
                                 result = g.IsQualified ? "Lên lớp" : "Ở lại";
                             }
@@ -349,12 +358,12 @@ public class GradeController : ControllerBase
             StudentFullName = s.FullName,
             StudentHolyName = s.HolyName,
             ClassRoomId = g.ClassRoomId,
-            Oral = g.Oral,
-            SmallTest = g.SmallTest,
-            BigTest = g.BigTest,
-            FinalExam = g.FinalExam,
-            Absences = g.Absences,
-            TotalSessions = g.TotalSessions,
+            Oral = (double)(g.Oral ?? 0m),
+            SmallTest = (double)(g.SmallTest ?? 0m),
+            BigTest = (double)(g.BigTest ?? 0m),
+            FinalExam = (double)(g.FinalExam ?? 0m),
+            Absences = g.Absences ?? 0,
+            TotalSessions = g.TotalSessions ?? 30,
             GPA = g.GPA,
             AttendanceRate = g.AttendanceRate,
             IsQualified = g.IsQualified

@@ -1,0 +1,102 @@
+@import "tailwindcss";
+@import "@nuxt/ui";
+
+@theme static {
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: 'Cormorant Garamond', Georgia, serif;
+
+  --color-marian-50: #eef3fb;
+  --color-marian-100: #d9e4f5;
+  --color-marian-200: #b6c9ea;
+  --color-marian-300: #8aa6da;
+  --color-marian-400: #5a7fc4;
+  --color-marian-500: #2c4f96;
+  --color-marian-600: #1d3a73;
+  --color-marian-700: #182f5e;
+  --color-marian-800: #13264e;
+  --color-marian-900: #0e1c3b;
+  --color-marian-950: #08122a;
+
+  --color-vatican-50: #fbf6e6;
+  --color-vatican-100: #f4e8bf;
+  --color-vatican-200: #ead58f;
+  --color-vatican-300: #dcbd5c;
+  --color-vatican-400: #c7a03d;
+  --color-vatican-500: #a8812a;
+  --color-vatican-600: #876520;
+  --color-vatican-700: #664c1a;
+  --color-vatican-800: #4b3814;
+  --color-vatican-900: #33260e;
+  --color-vatican-950: #1c1407;
+
+  --color-ivory: #f6f2e9;
+  --color-parchment: #fffefa;
+}
+
+:root {
+  --lit: #2f6b4f;
+  --lit-text: #ffffff;
+  --gold-text: var(--color-vatican-700);
+  --ui-secondary: var(--color-vatican-600);
+}
+
+.dark {
+  --gold-text: var(--color-vatican-300);
+  --ui-secondary: var(--color-vatican-400);
+}
+
+[data-liturgical='green'] { --lit: #2f6b4f; --lit-text: #ffffff; }
+[data-liturgical='violet'] { --lit: #5b3a7a; --lit-text: #ffffff; }
+[data-liturgical='white'] { --lit: #f1e6c2; --lit-text: #3a2d0a; }
+[data-liturgical='red'] { --lit: #9b2335; --lit-text: #ffffff; }
+[data-liturgical='rose'] { --lit: #a24f65; --lit-text: #ffffff; }
+[data-liturgical='black'] { --lit: #2b2b2b; --lit-text: #ffffff; }
+
+body {
+  background: var(--color-ivory);
+  font-family: var(--font-sans);
+}
+
+.dark body {
+  background: #0f1524;
+}
+
+h1, h2, h3, .font-display {
+  font-family: var(--font-serif);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.gold-rule {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  color: var(--color-vatican-500);
+}
+
+.gold-rule::before,
+.gold-rule::after {
+  content: '';
+  height: 1px;
+  flex: 1;
+  background: linear-gradient(90deg, transparent, currentColor);
+}
+
+.gold-rule::after {
+  transform: scaleX(-1);
+}
+
+.arch-frame {
+  border: 2px solid var(--color-vatican-500);
+  border-radius: 999px 999px 0.625rem 0.625rem;
+  background: var(--color-vatican-50);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+}
+
+@media print {
+  .no-print { display: none !important; }
+  body { background: #ffffff; }
+}

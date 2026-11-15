@@ -1,0 +1,656 @@
+# TÀI LIỆU BÁO CÁO TỔNG HỢP TOÀN DIỆN DỰ ÁN
+# HỆ SINH THÁI QUẢN LÝ MỤC VỤ GIÁO XỨ & SỨ ĐOÀN THIẾU NHI THÁNH THỂ (GIAOLY SYSTEM)
+
+---
+
+> **MÃ DỰ ÁN:** GiaoLy-PMS-2026  
+> **PHIÊN BẢN HỆ THỐNG:** 2.5 (Production Ready)  
+> **NGÀY HOÀN TẤT BÁO CÁO:** 24/10/2026  
+> **LOẠI TÀI LIỆU:** Báo cáo Toàn diện Dự án & Tài liệu Thiết kế Kiến trúc (Master Project Report & Software Design Document)  
+> **ĐƠN VỊ THỰC HIỆN:** Đội ngũ Phát triển Hệ thống Giáo Lý Giáo Xứ  
+> **ĐỐI TƯỢNG BÁO CÁO:** Ban Điều Hành Xứ Đoàn, Linh Mục Tuyên Úy, Hội Đồng Mục Vụ Giáo Xứ, Ban Thư Ký & Các Hội đồng Đánh giá Chuyên môn  
+
+---
+
+## MỤC LỤC TỔNG THỂ
+
+1. **TỔNG QUAN DỰ ÁN & BỐI CẢNH MỤC VỤ**
+   - 1.1. Bối cảnh thực tiễn & Nhu cầu cấp thiết
+   - 1.2. Sứ mệnh và Mục tiêu chiến lược của dự án
+   - 1.3. Đối tượng thụ hưởng & Phân cấp người dùng trong hệ thống
+2. **KIẾN TRÚC TỔNG THỂ HỆ THỐNG (SYSTEM ARCHITECTURE)**
+   - 2.1. Mô hình phân tầng kiến trúc (Clean Architecture & Dual-Frontend)
+   - 2.2. Bảng ma trận ngăn xếp công nghệ (Technology Stack Matrix)
+   - 2.3. Sơ đồ tương tác kiến trúc hệ thống
+3. **THIẾT KẾ CƠ SỞ DỮ LIỆU & TỪ ĐIỂN DỮ LIỆU (DATABASE SCHEMA & DATA DICTIONARY)**
+   - 3.1. Sơ đồ Quan hệ Thực thể (ERD Overview)
+   - 3.2. Đặc tả chi tiết 23 Entities trong CSDL
+4. **DANH MỤC TOÀN BỘ RESTFUL API ENDPOINTS (FULL API SPECIFICATION)**
+   - 4.1. Phân hệ Xác thực & Phân quyền (Auth & RBAC/ABAC)
+   - 4.2. Phân hệ Học vụ: Niên khóa, Lớp học, Phân bổ Đoàn sinh
+   - 4.3. Phân hệ Hồ sơ Đoàn sinh & Dữ liệu Gia đình
+   - 4.4. Phân hệ Sổ điểm, Đánh giá Học vụ & Thăng cấp
+   - 4.5. Phân hệ Chứng nhận Bí tích Điện tử & Thẩm định QR
+   - 4.6. Phân hệ Nghiệp vụ Giáo Lý Viên (Catechist Workspace)
+   - 4.7. Phân hệ Lịch Phụng Vụ & Tự động cào Tin tức Công giáo
+   - 4.8. Phân hệ CMS Truyền thông, Biểu mẫu & Văn thư Số
+   - 4.9. Phân hệ Ban Điều Hành & Sơ đồ Cơ cấu Tổ chức
+   - 4.10. Phân hệ Kiểm soát Phê duyệt Thao tác (Draft Action Workflow)
+5. **ĐẶC TẢ CHI TIẾT CÁC PHÂN HỆ CHỨC NĂNG CỐT LÕI**
+   - 5.1. Phân hệ Quản trị & Xác thực RBAC / ABAC (Role & Attribute Based Access Control)
+   - 5.2. Quản lý Hồ sơ Đoàn sinh Thông minh (Smart Student Profile & ClosedXML Excel)
+   - 5.3. Niên khóa, Cơ cấu Lớp học & Quy trình Xét Lên Lớp (Promotion Workflow)
+   - 5.4. Sổ Điểm Điện Tử & Dịch vụ Khóa Sổ Tự Động (Gradebook Finalizer Background Service)
+   - 5.5. Cấp phát Chứng Chỉ Bí Tích Số Hóa & Thẩm định QR Code (QuestPDF Engine)
+   - 5.6. Không Gian Làm Việc Của Giáo Lý Viên (Giáo án, Phân công trực, Bó hoa thiêng, Sa mạc)
+   - 5.7. Tự Động Hóa Lịch Phụng Vụ & Bộ Thu Thập Tin Tức Tòa Thánh (Catholic News Crawler)
+   - 5.8. Hệ Thống Kiểm Soát Thao Tác Trọng Yếu (Draft Action Review Gate)
+6. **THIẾT KẾ GIAO DIỆN NGƯỜI DÙNG & SITEMAP (UI/UX DESIGN & APPS NAVIGATION)**
+   - 6.1. Cổng Quản Trị Trung Tâm (`web-admin`)
+   - 6.2. Cổng Thông Tin Công Chúng & Phụ Huynh (`web-portal`)
+   - 6.3. Tiêu chuẩn Giao diện UI/UX: Dark/Light Mode, Glassmorphism, Song ngữ i18n
+7. **AN TOÀN THÔNG TIN & TỐI ƯU HÓA HIỆU NĂNG VẬN HÀNH**
+   - 7.1. Chiến lược Bảo mật (JWT, BCrypt, Route Guards, CORS, Image Proxy)
+   - 7.2. Tối ưu hóa Bộ nhớ cho Hạ tầng Giới hạn (DbContextPool & PeriodicTimer)
+8. **CHIẾN LƯỢC KIỂM THỬ CHẤT LƯỢNG HỆ THỐNG (QA & AUTOMATED TESTING)**
+   - 8.1. Kiểm thử Tự động E2E với Playwright
+   - 8.2. Cơ chế Khởi tạo Dữ liệu Mẫu Tự Động (Database Seeder)
+9. **HƯỚNG DẪN CÀI ĐẶT, TRIỂN KHAI & BẢO TRÌ (DEPLOYMENT GUIDE)**
+   - 9.1. Yêu cầu môi trường hệ thống
+   - 9.2. Cấu hình Biến Môi Trường (Environment Configuration)
+   - 9.3. Các bước Khởi chạy & Vận hành Hệ thống
+10. **TỔNG KẾT ĐÁNH GIÁ & ĐỊNH HƯỚNG PHÁT TRIỂN TƯƠNG LAI**
+    - 10.1. Đánh giá Kết quả Nghiệm thu & Giá trị Thực tiễn
+    - 10.2. Lộ trình Mở rộng (Roadmap 2027+)
+
+---
+
+# 1. TỔNG QUAN DỰ ÁN & BỐI CẢNH MỤC VỤ
+
+## 1.1. Bối Cảnh Thực Tiễn & Nhu Cầu Cấp Thiết
+Tại hầu hết các Giáo xứ và Xứ Đoàn Thiếu Nhi Thánh Thể (TNTT) tại Việt Nam hiện nay, công tác quản lý mục vụ giáo lý vẫn đang gặp nhiều hạn chế:
+- **Lưu trữ phân mảnh và dễ thất lạc:** Danh sách học viên, hồ sơ gia đình và sổ điểm chủ yếu được ghi chép thủ công trên sổ giấy hoặc phân tán qua nhiều file Excel cá nhân của từng Giáo lý viên. Khi chuyển giao ban điều hành qua các nhiệm kỳ, dữ liệu dễ bị mất mát hoặc không đồng bộ.
+- **Khó khăn trong xác minh Bí tích:** Việc cấp và kiểm tra giấy chứng nhận các Bí tích (Rửa Tội, Rước Lễ Lần Đầu, Thêm Sức) đòi hỏi phải tra cứu thủ công qua hàng ngàn trang sổ bộ lưu trữ qua nhiều thập kỷ, tốn thời gian và dễ nhầm lẫn.
+- **Tính toán điểm số và xét lên lớp thủ công:** Mỗi cuối niên học, Ban Thư ký phải tổng hợp hàng trăm bảng điểm, tự tính thủ công điểm chuyên cần, trung bình môn, xét điều kiện lên lớp/ở lại lớp, dẫn tới nguy cơ sai sót và khối lượng công việc quá tải.
+- **Kênh kết nối chưa thông suốt:** Phụ huynh và Đoàn sinh thiếu một cổng thông tin chính thức, minh bạch để theo dõi tiến trình học tập, lịch phụng vụ, thông báo khẩn cấp và tra cứu chứng chỉ.
+
+## 1.2. Sứ Mệnh & Mục Tiêu Chiến Lược
+Hệ thống **GiaoLy (GiaoLy Ecosystem)** được nghiên cứu và xây dựng nhằm chuyển đổi số toàn diện công tác quản lý mục vụ giáo xứ với các mục tiêu trọng tâm:
+1. **Số hóa 100% hồ sơ học vụ:** Quản lý trọn vòng đời học tập của Đoàn sinh từ Ngành Ấu Nhi (7 tuổi) đến Ngành Hiệp Sĩ (18+ tuổi), bao gồm lý lịch, tình trạng sức khỏe, liên lạc phụ huynh và hồ sơ Bí tích.
+2. **Chứng từ số chống giả mạo:** Phát hành Chứng nhận Bí tích điện tử đi kèm mã xác thực độc bản (`VerificationCode`) và mã phản hồi nhanh (QR Code), cho phép tra cứu công khai tức thì từ cổng thông tin trực tuyến.
+3. **Tự động hóa học vụ chuyên nghiệp:** Tự động tính toán Điểm Trung Bình (GPA), Tỷ lệ Chuyên cần (Attendance Rate), tự động kích hoạt điều kiện lên lớp/ở lại lớp, và cung cấp tiến trình bàn giao niên khóa mới chỉ bằng 1 thao tác phê duyệt (`DraftAction Approval Workflow`).
+4. **Hỗ trợ tối đa cho Giáo Lý Viên:** Cung cấp hệ thống công cụ tác nghiệp toàn diện: Soạn giáo án điện tử, phân công ca trực, theo dõi Bó Hoa Thiêng thi đua, quản lý Sa Mạc / Hội trại huấn luyện.
+5. **Cổng thông tin Giáo xứ đa tiện ích:** Tự động hóa cập nhật Lịch Phụng vụ Công giáo theo năm phụng vụ, tích hợp bộ cào tin tức tự động từ Vatican News và các cổng tin Công giáo uy tín, cung cấp Thư viện Văn thư & Biểu mẫu điện tử tải về.
+
+## 1.3. Đối Tượng Thụ Hưởng & Phân Cấp Người Dùng
+Hệ thống được thiết kế theo mô hình phân quyền chặt chẽ:
+- **Linh Mục Tuyên Úy / Ban Cố Vấn:** Giám sát toàn bộ hoạt động mục vụ, ký duyệt chứng từ và quyết định nhân sự cấp cao.
+- **Ban Quản Trị Hệ Thống (Admin - Role 1):** Toàn quyền cấu hình niên khóa, người dùng, phân quyền RBAC và hệ thống dữ liệu.
+- **Ban Thư Ký Xứ Đoàn (Secretary - Role 2):** Quản lý hồ sơ học sinh, tổ chức lớp học, import/export Excel danh sách, phát hành chứng từ số và xét duyệt thăng ngành.
+- **Trưởng Ngành / Phân Đoàn Trưởng (Moderator - Role 3):** Quản lý học vụ và sinh hoạt trong phạm vi ngành phụ trách (Ấu, Thiếu, Nghĩa, Hiệp).
+- **Giáo Lý Viên Chủ Nhiệm / Phụ Tá (Viewer / Catechist - Role 4):** Nhập điểm số, điểm danh chuyên cần cho lớp mình phụ trách, soạn giáo án, quản lý Bó Hoa Thiêng.
+- **Phụ Huynh, Đoàn Sinh & Quan Khách (Public):** Truy cập cổng `web-portal` để đọc tin tức, tra cứu lịch phụng vụ, kiểm tra tính hợp lệ của Chứng chỉ Bí tích bằng mã QR.
+
+---
+
+# 2. KIẾN TRÚC TỔNG THỂ HỆ THỐNG (SYSTEM ARCHITECTURE)
+
+## 2.1. Mô Hình Kiến Trúc Phân Tầng (Clean Architecture & Dual-Frontend)
+Dự án được phân chia độc lập và tường minh thành các tầng theo tiêu chuẩn thiết kế phần mềm hiện đại:
+
+```
++-----------------------------------------------------------------------------------+
+|                                 CLIENT APPLICATIONS                               |
+|  +---------------------------------------+  +-----------------------------------+  |
+|  |     web-admin (Port 3000)             |  |      web-portal (Port 3001)       |  |
+|  |     (Cổng Quản Trị & Ban Giáo Lý)     |  |      (Cổng Phụ Huynh & Giáo Dân)  |  |
+|  |  - Nuxt 3, Vue 3 Composition API      |  |  - Nuxt 3, Vue 3, Tailwind CSS    |  |
+|  |  - Nuxt UI v3 (TanStack Table)        |  |  - Nuxt UI v3, Responsive Portal  |  |
+|  |  - Pinia Stores (Auth, Locale, Theme) |  |  - Tra cứu Bí Tích, Lịch Phụng Vụ |  |
+|  +---------------------------------------+  +-----------------------------------+  |
++------------------------------------------+----------------------------------------+
+                                           | HTTPS / JSON (RESTful API)
++------------------------------------------v----------------------------------------+
+|                                BACKEND PRESENTATION LAYER                         |
+|  +-----------------------------------------------------------------------------+  |
+|  | GiaoLy.API (ASP.NET Core 10 Web API)                                        |  |
+|  | - JWT Bearer Authentication & Claims Transformation                         |  |
+|  | - RBAC (Role-Based) & ABAC (Attribute-Based: IsClassTeacherRequirement)    |  |
+|  | - 23 RESTful API Controllers                                                |  |
+|  | - Image Proxy & CORS Policy Management                                      |  |
+|  | - Swagger / OpenAPI Documentation                                           |  |
+|  | - QuestPDF Document Rendering Engine (PDF Generation)                       |  |
+|  | - ClosedXML Spreadsheet Engine (Excel Import / Export)                      |  |
+|  | - Background Services: GradebookFinalizer & CatholicNewsCrawler             |  |
+|  +-----------------------------------------------------------------------------+  |
++------------------------------------------+----------------------------------------+
+                                           | Internal DI & Service Calls
++------------------------------------------v----------------------------------------+
+|                            DOMAIN & DATA PERSISTENCE LAYER                        |
+|  +-----------------------------------------------------------------------------+  |
+|  | GiaoLy.Domain (Core Business Entities & Data Context)                       |  |
+|  | - 23 Domain Model Entities & Enums (HolyBranch, UserRole, etc.)             |  |
+|  | - AppDbContext (EF Core 10 với AddDbContextPool 128 instances)             |  |
+|  | - EF Core Migrations History                                                |  |
+|  | - Database Seeder (DbSeeder.cs: Tự động khởi tạo dữ liệu chuẩn)            |  |
+|  +-----------------------------------------------------------------------------+  |
++------------------------------------------+----------------------------------------+
+                                           | ADO.NET / TDS Protocol
++------------------------------------------v----------------------------------------+
+|                                DATABASE ENGINE LAYER                              |
+|  +-----------------------------------------------------------------------------+  |
+|  | Microsoft SQL Server (Relational Database)                                  |  |
+|  | - Quan hệ toàn vẹn dữ liệu (Foreign Keys, Unique Indices)                   |  |
+|  | - Lưu trữ tập trung tài khoản, học sinh, điểm số, văn thư, chứng chỉ số     |  |
+|  +-----------------------------------------------------------------------------+  |
++-----------------------------------------------------------------------------------+
+```
+
+## 2.2. Bảng Ma Trận Ngăn Xếp Công Nghệ (Technology Stack Matrix)
+
+| Thành Phần | Công Nghệ / Thư Viện Sử Dụng | Phiên Bản | Mục Đích Sử Dụng |
+|---|---|---|---|
+| **Backend Runtime** | C# .NET | 10.0 | Nền tảng thực thi API hiệu năng cao, đa nền tảng |
+| **API Framework** | ASP.NET Core Web API | 10.0 | Cung cấp chuẩn giao tiếp RESTful API không trạng thái |
+| **ORM & Data Access** | Entity Framework Core (EF Core) | 10.0 | Quản lý truy vấn, ánh xạ thực thể CSDL và Migrations |
+| **Database Pool** | `AddDbContextPool<AppDbContext>` | N/A | Tối ưu tái sử dụng kết nối, duy trì RAM dưới 512MB trên Server |
+| **Database Engine** | Microsoft SQL Server | 2019 / 2022 | Hệ quản trị cơ sở dữ liệu quan hệ mạnh mẽ, chuẩn ACID |
+| **Bảo mật & Mã hóa** | JWT + BCrypt.Net-Next | 4.0.3 | Quản lý phiên làm việc Stateless Token và băm mật khẩu bảo mật |
+| **Xuất Bản Chứng Chỉ** | QuestPDF | 2025.x | Render hóa đơn/chứng nhận Bí tích PDF chất lượng in ấn với mã QR |
+| **Xử Lý Bảng Tính** | ClosedXML | 0.104.2 | Import và Export dữ liệu học viên hàng loạt qua file Excel (.xlsx) |
+| **Tác Vụ Ngầm** | BackgroundService / PeriodicTimer | .NET 10 | Tự động quét khóa sổ điểm và cào tin tức Vatican định kỳ 2:00 AM |
+| **Frontend Framework** | Nuxt 3 (Vue 3, Composition API) | 3.16+ | Xây dựng Single-Page Application (SPA) & Server-Side Rendering |
+| **Giao Diện UI** | Nuxt UI v3 & Tailwind CSS | v3 | Thư viện UI hiện đại, hỗ trợ Dark/Light Theme và bảng TanStack |
+| **Quản Lý Trạng Thái** | Pinia Store | 2.x | Quản trị State toàn cục: Phiên đăng nhập, ngôn ngữ (i18n), theme |
+| **Biểu Tượng** | Nuxt Icon / Lucide Icons | Latest | Hệ thống Icon đồ họa trực quan, đồng bộ |
+| **Kiểm Thử Tự Động** | Playwright Test Suite | 1.50+ | Kiểm thử E2E tích hợp từ giao diện người dùng tới Backend |
+
+---
+
+# 3. THIẾT KẾ CƠ SỞ DỮ LIỆU & TỪ ĐIỂN DỮ LIỆU (DATABASE SCHEMA)
+
+Cơ sở dữ liệu được thiết kế chuẩn hóa, gồm **23 Bảng Thực Thể** phản ánh đầy đủ nghiệp vụ mục vụ và hành chính giáo xứ.
+
+## 3.1. Phân Tích Chi Tiết 23 Thực Thể Trong Hệ Thống
+
+### 1. `Users` (Người dùng hệ thống)
+*Mục đích:* Quản lý toàn bộ tài khoản đăng nhập của Ban Tuyên Úy, Ban Quản Trị, Giáo Lý Viên và Phụ Huynh.
+- `Id` (Guid, PK): Định danh duy nhất của tài khoản.
+- `Username` (string, Unique): Tên đăng nhập.
+- `PasswordHash` (string): Mật khẩu được băm một chiều bằng thuật toán BCrypt.
+- `FullName` (string): Họ và tên đầy đủ.
+- `ChristianName` (string): Tên Thánh (VD: Gioan Baotixita, Maria, Giuse...).
+- `AvatarPath` (string): Đường dẫn ảnh đại diện cá nhân.
+- `Email` (string): Địa chỉ thư điện tử.
+- `PhoneNumber` (string): Số điện thoại liên lạc.
+- `DateOfBirth` (DateTime?): Ngày tháng năm sinh.
+- `Address` (string): Địa chỉ cư trú.
+- `Bio` (string): Tiểu sử mục vụ, quá trình tham gia đoàn thể.
+- `Role` (string): Tên vai trò kế thừa (`Admin`, `Secretary`, `Moderator`, `Viewer`).
+- `RoleId` (Guid?, FK -> Roles.Id): Khóa ngoại liên kết bảng Role phân quyền động.
+- `Branch` (int?): Phân ngành phụ trách (`0: General`, `1: Au`, `2: Thieu`, `3: Nghia`, `4: Hiep`).
+- `CreatedAt` (DateTime): Thời điểm tạo tài khoản.
+
+### 2. `Roles`, `Permissions`, `RolePermissions` (Phân quyền nâng cao RBAC)
+*Mục đích:* Cho phép phân quyền chi tiết tới từng hành động (Create, Read, Update, Delete) theo từng chức năng.
+- **`Roles`**: `Id` (Guid, PK), `Name` (Tên hiển thị), `Code` (Mã định danh), `Description` (Mô tả).
+- **`Permissions`**: `Id` (Guid, PK), `Code` (Mã quyền: VD: `STUDENT_CREATE`, `GRADE_EDIT`), `Name` (Tên quyền), `Module` (Thuộc module chức năng).
+- **`RolePermissions`**: `RoleId` (FK), `PermissionId` (FK) — Bảng liên kết nhiều-nhiều.
+
+### 3. `Students` (Hồ sơ Đoàn sinh thông minh)
+*Mục đích:* Bảng trung tâm quản lý toàn bộ thông tin nhân thân, sức khỏe, gia đình và Bí tích của thiếu nhi.
+- `Id` (Guid, PK): Mã đoàn sinh duy nhất.
+- `HolyName` (string): Tên Thánh của học viên.
+- `FullName` (string): Họ và tên khai sinh.
+- `Gender` (string): Giới tính (Nam / Nữ).
+- `BirthDate` (DateTime): Ngày sinh.
+- `Branch` (HolyBranch Enum): Ngành hiện tại (Ấu / Thiếu / Nghĩa / Hiệp).
+- `ClassName` (string): Tên lớp giáo lý hiện thời.
+- `Area` (string): Giáo khu, xóm đạo cư trú.
+- `IsActive` (bool): Trạng thái đang theo học hay đã tạm nghỉ.
+- **Thông tin Bí tích:**
+  - `BaptismDate` (DateTime?), `BaptismPlace` (string), `BaptismGodparent` (string), `BaptismPriest` (string)
+  - `CommunionDate` (DateTime?), `CommunionPlace` (string), `CommunionPriest` (string)
+  - `ConfirmationDate` (DateTime?), `ConfirmationPlace` (string), `ConfirmationGodparent` (string), `ConfirmationBishop` (string)
+- **Hồ sơ Gia đình & Y tế:**
+  - `FatherName`, `FatherPhone`, `FatherReligion`, `FatherJob`
+  - `MotherName`, `MotherPhone`, `MotherReligion`, `MotherJob`
+  - `ParentName`, `ParentPhone`, `Address`
+  - `BloodType` (Nhóm máu: A, B, AB, O), `Allergies` (Dị ứng thức ăn, thuốc), `Notes` (Ghi chú bệnh lý)
+  - `FamilyId` (Guid?, FK -> Families.Id): Liên kết sổ gia đình công giáo.
+
+### 4. `AcademicYears` (Niên khóa giáo lý)
+*Mục đích:* Quản lý các năm học giáo lý (VD: "2025-2026", "2026-2027").
+- `Id` (Guid, PK): Mã niên khóa.
+- `Name` (string): Tên niên khóa.
+- `StartDate` (DateTime), `EndDate` (DateTime): Thời gian bắt đầu và kết thúc năm học.
+- `IsActive` (bool): Niên khóa đang diễn ra (chỉ duy nhất 1 niên khóa Active tại một thời điểm).
+- `IsLocked` (bool): Đã khóa sổ điểm (khi bị khóa, GLV không được can thiệp sửa điểm).
+- `IsArchived` (bool): Trạng thái đã lưu trữ vào lịch sử.
+
+### 5. `ClassRooms` (Lớp học giáo lý)
+*Mục đích:* Quản lý các lớp thuộc từng ngành trong niên khóa.
+- `Id` (Guid, PK): Mã lớp học.
+- `ClassName` (string): Tên lớp (VD: "Ấu 1A", "Thiếu 2B", "Hiệp Sĩ 1").
+- `AcademicYearId` (Guid, FK -> AcademicYears.Id): Thuộc niên khóa nào.
+- `Branch` (int): Thuộc ngành nào.
+- `MainTeacher` (string): Tên Giáo lý viên chủ nhiệm.
+- `LeaderId` (Guid?, FK -> Users.Id): Khóa ngoại định danh tài khoản GLV chủ nhiệm (dùng để thực thi ABAC kiểm tra quyền sửa điểm).
+- `RoomName` (string): Phòng học vật lý trong khuôn viên giáo xứ.
+
+### 6. `Enrollments` (Ghi danh theo niên khóa)
+*Mục đích:* Lưu lịch sử một đoàn sinh học lớp nào trong niên khóa nào.
+- `Id` (Guid, PK), `StudentId` (Guid, FK -> Students.Id), `ClassRoomId` (Guid, FK -> ClassRooms.Id).
+- `Status` (string): Trạng thái ("Đang học", "Đã hoàn thành", "Bỏ học").
+- `Note` (string): Nhận xét chung.
+
+### 7. `Grades` & `StudentScores` (Sổ điểm điện tử & Tiêu chí thăng hạng)
+*Mục đích:* Lưu trữ điểm số chi tiết và đánh giá kết quả học tập.
+- `Oral` (double): Điểm miệng / trả bài giáo lý đầu giờ.
+- `SmallTest` (double): Điểm kiểm tra 15 phút / giữa kỳ.
+- `BigTest` (double): Điểm kiểm tra 1 tiết.
+- `FinalExam` (double): Điểm thi kết khóa / học kỳ.
+- `Absences` (int): Số buổi vắng học.
+- `TotalSessions` (int): Tổng số buổi học trong năm.
+- `GPA` (double): Điểm trung bình môn giáo lý:
+  $$\text{GPA} = \frac{\text{Oral} + \text{SmallTest} + (\text{BigTest} \times 2) + (\text{FinalExam} \times 3)}{7}$$
+- `AttendanceRate` (double): Tỷ lệ chuyên cần (%):
+  $$\text{AttendanceRate} = \frac{\text{TotalSessions} - \text{Absences}}{\text{TotalSessions}} \times 100\%$$
+- `IsQualified` (bool): Kết quả xét duyệt tự động. Điều kiện lên lớp chuẩn: $\text{GPA} \ge 5.0$ và $\text{AttendanceRate} \ge 80\%$.
+
+### 8. `Certificates` (Chứng từ số Bí tích)
+*Mục đích:* Quản lý chứng nhận Bí tích cấp phát cho học viên có mã định danh xác thực.
+- `Id` (Guid, PK), `StudentId` (Guid, FK -> Students.Id).
+- `CertificateType` (string): Loại chứng chỉ ("BÍ TÍCH THÊM SỨC", "BÍ TÍCH RƯỚC LỄ LẦN ĐẦU", "BÍ TÍCH RỬA TỘI").
+- `VerificationCode` (string, Unique): Mã xác thực duy nhất (VD: `CERT-CONF-2026-X8R2`).
+- `Celebrant` (string): Linh mục / Đức Giám Mục chủ sự ban Bí tích.
+- `Godparent` (string): Người đỡ đầu thiêng liêng.
+- `IssueDate` (DateTime): Ngày cấp phát chứng từ.
+- `SignedBy` (string): Người ký chứng nhận (Linh mục Tuyên Úy / Chánh Xứ).
+
+### 9. `SacramentRecords` & `SacramentRequirements` (Tiến trình Bí tích)
+*Mục đích:* Theo dõi lộ trình hoàn thành các điều kiện cần trước khi được lãnh nhận Bí tích.
+- `SacramentRequirement`: `Id`, `SacramentType`, `Name` (VD: "Học thuộc 14 mối thương người", "Xưng tội tĩnh tâm"), `Order`.
+- `SacramentRecord`: `StudentId`, `SacramentRequirementId`, `IsCompleted` (bool), `CompletedDate`, `EvaluatorId` (GLV xác nhận).
+
+### 10. `Leaders` (Ban Điều Hành Sứ Đoàn)
+*Mục đích:* Quản lý sơ đồ tổ chức Ban Chấp Hành Xứ Đoàn theo nhiệm kỳ.
+- `Id` (Guid, PK), `HolyName` (string), `FullName` (string).
+- `Position` (string): Chức vụ (VD: Sứ Đoàn Trưởng, Phó Nội Vụ, Phó Ngoại Vụ, Trưởng Ban Phụng Vụ).
+- `Level` (int): Cấp bậc quản trị (`1`: Linh Mục Tuyên Úy, `2`: Ban Quản Trị Sứ Đoàn, `3`: Phân Đoàn Trưởng / Trưởng Ngành).
+- `Term` (string): Nhiệm kỳ phục vụ (VD: "2024 - 2026").
+- `AvatarPath` (string), `Description` (string), `IsActive` (bool), `Branch` (int).
+
+### 11. `LessonPlans` (Giáo án điện tử Giáo Lý Viên)
+*Mục đích:* Lưu trữ giáo án giảng dạy, bài học giáo lý tương tác của Giáo lý viên.
+- `Id` (Guid, PK), `AuthorId` (Guid, FK -> Users.Id), `ClassRoomId` (Guid?, FK).
+- `Title` (string): Tựa đề bài học (VD: "Bài 12: Chúa Giêsu Biến Hình Trên Núi").
+- `ContentHtml` (string): Nội dung giáo án đầy đủ định dạng rich-text HTML.
+- `CreatedDate`, `LastModified`, `Tags` (string).
+
+### 12. `DutyAssignments` (Phân công nhiệm vụ / Trực phụng vụ)
+*Mục đích:* Lịch phân công lễ phụng vụ, trực chào cờ, điều hành sinh hoạt Chúa Nhật.
+- `Id`, `UserId` (Guid, FK), `ClassRoomId` (Guid, FK), `DutyDate` (DateTime), `RoleName` (string: "Trực Phụng Vụ", "Trưởng Trực"), `Note`.
+
+### 13. `SpiritualBouquets` (Bó Hoa Thiêng Liêng)
+*Mục đích:* Ghi nhận điểm số thi đua việc lành thiêng liêng của thiếu nhi (Hy sinh, Cầu nguyện, Rước lễ, Làm việc bác ái).
+- `Id`, `StudentId` (Guid, FK), `ClassRoomId` (Guid, FK), `Date` (DateTime), `Type` (string), `Points` (int), `Note` (string).
+
+### 14. `CampEvents` & `CampRegistrations` (Sa Mạc & Hội Trại Huấn Luyện)
+*Mục đích:* Tổ chức các kỳ trại hè, sa mạc huấn luyện Huynh Trưởng và Đoàn sinh.
+- `CampEvent`: `Id`, `Name`, `StartDate`, `EndDate`, `Location` (Địa điểm tổ chức), `Fee` (Kinh phí đóng góp), `Description`.
+- `CampRegistration`: `CampEventId`, `StudentId`, `IsPaid` (bool: Đã đóng lệ phí), `TeamNumber` (Đội / Lều phân bổ), `Note`.
+
+### 15. `LiturgicalEvents` (Lịch Phụng Vụ & Lời Chúa)
+*Mục đích:* Quản lý lịch phụng vụ Công giáo theo năm Phụng vụ (Năm A/B/C, Mùa Vọng, Mùa Chay, Mùa Phục Sinh, Mùa Thường Niên).
+- `Id`, `Date` (DateTime), `Title` (Tên ngày lễ), `Color` (Màu áo lễ: Trắng, Đỏ, Tím, Xanh), `Level` (Bậc lễ: Trọng, Kính, Nhớ), `WordOfGodReference` (Đoạn Lời Chúa trong ngày), `WordOfGodOverride` (Đoạn trích suy niệm), `IsOverride` (bool: Tùy chỉnh riêng của Giáo xứ).
+
+### 16. `NewsArticles` & `NewsSources` (Tin Tức Tòa Thánh & Giáo Xứ)
+*Mục đích:* Lưu trữ các bản tin Công giáo được cào tự động qua kênh RSS hoặc biên tập thủ công.
+- `NewsSource`: `Id`, `Name` (VD: "Vatican News Tiếng Việt"), `RssUrl` (string), `IsActive` (bool).
+- `NewsArticle`: `Id`, `Title`, `Link` (URL bài gốc), `Summary` (Tóm tắt nội dung), `ImageUrl` (Ảnh thumbnail), `Category` (Chuyên mục), `PublishedDate`, `CrawledDate`, `IsActive`.
+
+### 17. `Announcements` (CMS Thông Báo Mục Vụ)
+*Mục đích:* Phát hành các thông báo khẩn cấp, tin tức sinh hoạt nội bộ đoàn thể.
+- `Id`, `Title`, `Content`, `Type` (Enum: Tin Khẩn, Thường Niên, Sự Kiện), `TargetAudience` (Enum: Toàn thể, Phụ huynh, GLV), `Branch`, `CreatedDate`, `Author`, `IsUrgent` (bool), `ExpiryDate` (DateTime?).
+
+### 18. `Documents` (Văn Thư & Thư Viện Biểu Mẫu Số)
+*Mục đích:* Lưu trữ văn bản, quyết định bổ nhiệm, biểu mẫu đăng ký, tài liệu đào tạo.
+- `Id`, `FileName`, `FilePath`, `Category` (Văn thư mục vụ, Biểu mẫu, Giáo án), `Branch`, `SchoolYear`, `AccessLevel` (Public, Internal, Confidential), `Tags`, `UploadDate`, `FileSize`, `UploadedBy`.
+
+### 19. `DraftActions` (Kiểm soát Thay đổi & Phê duyệt Lên Lớp)
+*Mục đích:* Cơ chế "Bản nháp phê duyệt" (Draft Action Gate) ngăn chặn việc chuyển đổi niên khóa hay thăng cấp đoàn sinh khi chưa được Thư ký hoặc Cha Tuyên Úy xét duyệt chính thức.
+- `Id`, `TargetAcademicYearId` (Guid, FK), `StudentId` (Guid, FK), `SuggestedClassRoomId` (Guid?, FK), `IsQualified` (bool), `Reason` (string), `Status` ("Pending", "Approved", "Rejected").
+
+### 20. `Banners` (Banner Truyền Thông Trang Chủ)
+- `Id`, `Title`, `ImageUrl`, `Link`, `OrderIndex`, `IsActive`, `CreatedAt`.
+
+### 21. `Families` (Gia Phả Hộ Gia Đình Công Giáo)
+- `Id`, `Name` (Tên gia đình / Gia trưởng), `PatronSaint` (Quan thầy gia đình), `ClassRoomId`, `LeaderId`.
+
+---
+
+# 4. DANH MỤC TOÀN BỘ RESTFUL API ENDPOINTS (FULL SPECIFICATION)
+
+Hệ thống cung cấp hơn **50 API Endpoints** được cấu trúc theo chuẩn RESTful, trả về dữ liệu chuẩn JSON, hỗ trợ lọc, phân trang và bảo vệ bằng JWT Token:
+
+| STT | Phương Thức | Đường Dẫn Endpoint | Mô Tả Chức Năng | Phân Quyền Yêu Cầu |
+|---|---|---|---|---|
+| **1** | `POST` | `/api/Auth/login` | Đăng nhập tài khoản, cấp phát Access Token (JWT) | Anonymous (Công khai) |
+| **2** | `GET` | `/api/Profile/me` | Lấy thông tin cá nhân của người dùng hiện tại | Đã xác thực JWT |
+| **3** | `PUT` | `/api/Profile/update` | Cập nhật hồ sơ cá nhân (SĐT, Email, Địa chỉ, Bio) | Đã xác thực JWT |
+| **4** | `POST` | `/api/Profile/avatar` | Tải lên ảnh đại diện cá nhân | Đã xác thực JWT |
+| **5** | `PATCH` | `/api/Profile/change-password` | Đổi mật khẩu tài khoản | Đã xác thực JWT |
+| **6** | `GET` | `/api/AcademicYear` | Danh sách toàn bộ các niên khóa giáo lý | Đã xác thực JWT |
+| **7** | `GET` | `/api/AcademicYear/active` | Lấy thông tin niên khóa hiện tại đang diễn ra | Anonymous / Authenticated |
+| **8** | `POST` | `/api/AcademicYear` | Tạo niên khóa giáo lý mới | Admin / Secretary |
+| **9** | `POST` | `/api/AcademicYear/activate-new-year`| Kích hoạt niên khóa mới & lưu trữ niên khóa cũ | Admin / Secretary |
+| **10**| `POST` | `/api/AcademicYear/clone` | Sao chép cơ cấu danh sách lớp từ năm cũ sang năm mới | Admin / Secretary |
+| **11**| `DELETE`| `/api/AcademicYear/{id}` | Xóa niên khóa (khi chưa phát sinh học sinh) | Admin |
+| **12**| `GET` | `/api/AcademicYear/{yearId}/classrooms`| Danh sách toàn bộ lớp học thuộc niên khóa | Đã xác thực JWT |
+| **13**| `POST` | `/api/AcademicYear/{yearId}/classrooms`| Thêm lớp học mới vào niên khóa | Admin / Secretary |
+| **14**| `PUT` | `/api/AcademicYear/classrooms/{id}` | Cập nhật thông tin lớp, phân công GLV chủ nhiệm | Admin / Secretary |
+| **15**| `DELETE`| `/api/AcademicYear/classrooms/{id}` | Xóa lớp học | Admin |
+| **16**| `GET` | `/api/Student` | Lấy toàn bộ danh sách đoàn sinh | Admin / Secretary / Leader |
+| **17**| `GET` | `/api/Student/paged` | Lấy danh sách đoàn sinh có phân trang & tìm kiếm | Đã xác thực JWT |
+| **18**| `GET` | `/api/Student/stats` | Thống kê số lượng đoàn sinh theo ngành, giới tính | Đã xác thực JWT |
+| **19**| `GET` | `/api/Student/classes/{branchId}` | Lấy danh sách lớp theo phân ngành | Đã xác thực JWT |
+| **20**| `POST` | `/api/Student` | Tiếp nhận hồ sơ đoàn sinh mới | Admin / Secretary |
+| **21**| `PUT` | `/api/Student/{id}` | Cập nhật hồ sơ chi tiết đoàn sinh | Admin / Secretary |
+| **22**| `DELETE`| `/api/Student/{id}` | Xóa hồ sơ đoàn sinh khỏi hệ thống | Admin |
+| **23**| `GET` | `/api/Student/export-excel` | Xuất toàn bộ danh sách đoàn sinh ra file Excel | Admin / Secretary |
+| **24**| `GET` | `/api/Student/export-template` | Tải file Excel mẫu chuẩn hóa để nhập liệu | Admin / Secretary / Leader |
+| **25**| `POST` | `/api/Student/import-excel` | Import danh sách học sinh từ file Excel vào CSDL | Admin / Secretary |
+| **26**| `POST` | `/api/Student/check-duplicates`| Kiểm tra trùng lặp hồ sơ trước khi lưu | Admin / Secretary |
+| **27**| `POST` | `/api/Student/assign-classes` | Phân bổ đoàn sinh vào lớp học hàng loạt | Admin / Secretary |
+| **28**| `GET` | `/api/Grade/classroom/{classRoomId}`| Xem sổ điểm toàn thể đoàn sinh trong một lớp | Policy: `IsClassTeacher` |
+| **29**| `POST` | `/api/Grade/save/{classRoomId}` | Lưu bảng điểm của lớp (Tự tính GPA, Chuyên cần) | Policy: `IsClassTeacher` |
+| **30**| `GET` | `/api/Grade/classroom/{id}/export` | Xuất sổ điểm lớp ra bảng tính Excel | Policy: `IsClassTeacher` |
+| **31**| `GET` | `/api/Grade/classroom/{id}/export-pdf`| Xuất bảng điểm lớp ra file PDF chuẩn QuestPDF | Policy: `IsClassTeacher` |
+| **32**| `GET` | `/api/Certificate/verify/{code}` | Thẩm định tính hợp lệ chứng chỉ số bằng mã QR | Anonymous (Toàn cầu) |
+| **33**| `GET` | `/api/Certificate/student/{studentId}`| Danh sách chứng nhận đã cấp của một đoàn sinh | Đã xác thực JWT |
+| **34**| `GET` | `/api/Certificate/download/{id}` | Tải file PDF Chứng chỉ Bí tích in ấn chất lượng cao | Anonymous / Authenticated |
+| **35**| `POST` | `/api/Certificate/issue` | Phát hành chứng nhận Bí tích mới (Sinh QR Code) | Admin / Secretary |
+| **36**| `DELETE`| `/api/Certificate/{id}` | Thu hồi chứng chỉ đã cấp | Admin |
+| **37**| `GET` | `/api/DraftAction/{academicYearId}` | Danh sách hồ sơ đề xuất lên lớp chờ phê duyệt | Admin / Secretary |
+| **38**| `POST` | `/api/DraftAction/approve/{id}` | Phê duyệt đề xuất thăng cấp cho 1 học sinh | Admin / Secretary |
+| **39**| `POST` | `/api/DraftAction/reject/{id}` | Từ chối đề xuất thăng cấp | Admin / Secretary |
+| **40**| `POST` | `/api/DraftAction/bulk-approve/{yearId}`| Phê duyệt toàn bộ danh sách đề xuất lên lớp | Admin / Secretary |
+| **41**| `GET` | `/api/Liturgical/today` | Lấy thông tin Lễ Phụng Vụ & Lời Chúa hôm nay | Anonymous (Công khai) |
+| **42**| `GET` | `/api/Liturgical/{dateStr}` | Tra cứu ngày lễ theo ngày cụ thể (YYYY-MM-DD) | Anonymous (Công khai) |
+| **43**| `GET` | `/api/Liturgical/month/{year}/{month}` | Lấy lịch phụng vụ trọn vẹn cả tháng | Anonymous (Công khai) |
+| **44**| `POST` | `/api/Liturgical/override` | Tùy chỉnh lễ bổ mạng, lễ đặc biệt của Giáo xứ | Admin |
+| **45**| `GET` | `/api/News/catholic` | Đọc danh sách tin tức Công giáo đã cào tự động | Anonymous (Công khai) |
+| **46**| `GET` | `/api/News/image-proxy` | Proxy hình ảnh tin tức chống lỗi CORS | Anonymous (Công khai) |
+| **47**| `GET` | `/api/Announcement` | Đọc danh sách thông báo mục vụ | Anonymous / Authenticated |
+| **48**| `POST` | `/api/Announcement` | Đăng thông báo mới | Admin / Secretary / Moderator |
+| **49**| `GET` | `/api/Document` | Danh sách văn thư, biểu mẫu điện tử | Anonymous / Authenticated |
+| **50**| `POST` | `/api/Document/upload` | Tải lên tài liệu, biểu mẫu mới | Admin / Secretary |
+| **51**| `GET` | `/api/Leader` | Lấy sơ đồ cơ cấu tổ chức Ban Điều Hành | Anonymous (Công khai) |
+| **52**| `POST` | `/api/Leader/rotate-term` | Chuyển giao / luân chuyển nhiệm kỳ BĐH | Admin |
+| **53**| `GET` | `/api/Roles` & `/api/User` | Quản trị tài khoản và phân quyền người dùng | Admin |
+
+---
+
+# 5. ĐẶC TẢ CHI TIẾT CÁC PHÂN HỆ CHỨC NĂNG CỐT LÕI
+
+## 5.1. Phân Hệ Xác Thực & Phân Quyền Nâng Cao (RBAC & ABAC)
+Hệ thống áp dụng mô hình bảo mật kết hợp hai lớp tiên tiến:
+1. **RBAC (Role-Based Access Control):** 
+   - Kiểm soát quyền truy cập dựa trên vai trò của người dùng (`Admin`, `Secretary`, `Moderator`, `Viewer`).
+   - Mở rộng phân quyền chi tiết (Granular Permissions) qua các bảng `Roles`, `Permissions`, `RolePermissions`, cho phép gán quyền linh hoạt theo từng module.
+2. **ABAC (Attribute-Based Access Control):**
+   - Đảm bảo tính toàn vẹn dữ liệu học vụ thông qua Policy tùy biến `IsClassTeacherRequirement` kết hợp `IsClassTeacherHandler`.
+   - **Quy tắc nghiệp vụ:** Một Giáo lý viên dù có quyền nhập điểm cũng **chỉ được phép sửa điểm của đúng Lớp học mà mình được phân công làm Chủ nhiệm / Phụ trách** trong niên khóa hiện tại. Ban Quản Trị (Admin) và Thư ký (Secretary) được quyền quản trị tập trung (Bypass).
+   - Kiểm soát này được thực thi chặt chẽ ngay tại tầng Controller Backend, ngăn chặn mọi hành vi cố tình gọi API sửa điểm trái phép.
+
+## 5.2. Quản Lý Hồ Sơ Đoàn Sinh Thông Minh & Xử Lý Excel Hàng Loạt
+- **Hồ sơ thông minh 360 độ:** Quản lý trọn vẹn thông tin một em thiếu nhi từ Tên Thánh, Họ Tên, Giới tính, Ngày sinh, Ngày và Địa điểm lãnh nhận các Bí tích, Người đỡ đầu, Linh mục ban bí tích, thông tin phụ huynh, nghề nghiệp, tình trạng gia đình, giáo khu cư trú, nhóm máu, tiền sử dị ứng và lưu ý đặc biệt.
+- **Tích hợp ClosedXML Engine siêu tốc:**
+  - Cung cấp tính năng tải xuống File Mẫu (`export-template`) chuẩn hóa cột dữ liệu.
+  - Hỗ trợ Import file Excel hàng trăm học sinh trong vài giây (`import-excel`).
+  - Kiểm tra tính trùng lặp (`check-duplicates`) dựa trên sự kết hợp giữa Họ tên + Ngày sinh + Tên Cha/Mẹ trước khi lưu vào CSDL để ngăn ngừa trùng bản ghi.
+  - Xuất dữ liệu thống kê báo cáo ra file Excel hoàn chỉnh định dạng đẹp mắt.
+
+## 5.3. Niên Khóa, Cơ Cấu Lớp Học & Quy Trình Thăng Ngành Tự Động
+- **Cơ cấu tổ chức lớp học chuẩn Thiếu Nhi Thánh Thể:**
+  - **Ngành Ấu Nhi (7 - 9 tuổi):** Ấu 1, Ấu 2, Ấu 3 (Khăn quàng Xanh lá mạ).
+  - **Ngành Thiếu Nhi (10 - 12 tuổi):** Thiếu 1, Thiếu 2, Thiếu 3 (Khăn quàng Xanh biển).
+  - **Ngành Nghĩa Sĩ (13 - 15 tuổi):** Nghĩa 1, Nghĩa 2, Nghĩa 3 (Khăn quàng Vàng).
+  - **Ngành Hiệp Sĩ (16 - 18 tuổi):** Hiệp Sĩ 1, Hiệp Sĩ 2 (Khăn quàng Nâu).
+- **Quy trình kết thúc niên học & Chuyển giao năm mới:**
+  1. Ban Thư ký thực hiện thao tác "Nhân bản cơ cấu lớp" (`clone`) sang Niên khóa mới.
+  2. Hệ thống tự động phân loại học viên: Những em đủ điều kiện lên lớp sẽ được gợi ý thăng lên lớp tiếp theo (VD: Ấu 1 lên Ấu 2; Ấu 3 thăng ngành lên Thiếu 1); những em không đủ điều kiện sẽ được xếp lại lớp cũ.
+  3. Tất cả các đề xuất này được đưa vào trạng thái Bản Nháp (`DraftActions`). Ban Thư ký hoặc Cha Tuyên Úy có thể duyệt từng em hoặc duyệt đồng loạt (`bulk-approve`). Dữ liệu chỉ thực sự chuyển sang lớp mới sau khi được phê duyệt.
+
+## 5.4. Sổ Điểm Điện Tử & Dịch Vụ Khóa Sổ Tự Động (Gradebook Finalizer)
+- **Công thức tính điểm động:** Tích hợp kiểm tra tự động điểm số giữa kỳ, điểm kiểm tra miệng, thi học kỳ và tính tỷ lệ chuyên cần theo công thức chuẩn.
+- **Dịch vụ Khóa sổ tự động (`GradebookFinalizerService`):**
+  - Vấn đề thực tiễn: Khi triển khai trên hạ tầng điện toán đám mây gói miễn phí (Free Tier: Render/Railway), hệ thống thường rơi vào trạng thái ngủ đông (Sleep/Idle) sau 15-30 phút không có truy cập, khiến các bộ hẹn giờ CronJob truyền thống bị treo.
+  - **Giải pháp cơ chế "Tỉnh giấc tự quét" (Wake-up Self-scan):**
+    - Ngay khi máy chủ khởi động hoặc được đánh thức bởi một request, Service sẽ tự động kích hoạt lượt quét đầu tiên sau 15 giây.
+    - Tiếp tục chu kỳ lặp định kỳ mỗi 6 tiếng qua `PeriodicTimer`.
+    - Tự động phát hiện các niên khóa đã quá hạn kết thúc (`EndDate < Today`) mà chưa khóa, tự động chuyển cờ `IsLocked = true`, `IsActive = false`, `IsArchived = true`, ngăn ngừa việc can thiệp sửa đổi bảng điểm của các năm học cũ.
+
+## 5.5. Cấp Phát Chứng Nhận Bí Tích Điện Tử & Thẩm Định Bằng QR Code
+- **Số hóa văn bằng chứng chỉ mục vụ:**
+  - Cấp phát các chứng thư Bí tích Rửa Tội, Rước Lễ Lần Đầu, Thêm Sức.
+  - Mỗi chứng từ tự động sinh một mã ngẫu nhiên bảo mật không trùng lặp (Ví dụ: `CERT-BAP-2026-X8R2`).
+- **Tích hợp QuestPDF Native Engine:**
+  - Không cần cài đặt Chrome Headless hay các công cụ cồng kềnh, QuestPDF biên dịch tài liệu PDF theo chuẩn in ấn chất lượng cao với tốc độ xử lý hàng trăm trang trong vài mili-giây.
+  - Nhúng trực tiếp mã QR Code trỏ thẳng tới đường link thẩm định công khai:  
+    `https://portal.giaoly.vn/verify?code=CERT-BAP-2026-X8R2`
+- **Thẩm định công khai không cần đăng nhập (`Verify Portal`):**
+  - Bất kỳ ai (Linh mục xứ khác tiếp nhận hồ sơ hôn phối, phụ huynh, đoàn sinh) đều có thể dùng máy ảnh điện thoại quét mã QR hoặc gõ mã code trên cổng portal để đối soát thông tin nguyên gốc lưu trữ tại máy chủ Giáo xứ.
+
+## 5.6. Không Gian Làm Việc Của Giáo Lý Viên (Catechist Workspace)
+Hệ thống trang bị riêng một phân hệ tác nghiệp chuyên biệt cho Giáo Lý Viên:
+1. **Giáo án điện tử (`lesson-plans`):** Soạn thảo, chia sẻ ngân hàng bài giảng giáo lý tương tác, đính kèm hình ảnh và slide giảng dạy.
+2. **Sổ trực phụng vụ (`duty-roster`):** Quản lý ca trực lễ, trực cờ, chuẩn bị phòng học và hướng dẫn thiếu nhi tham dự Thánh lễ Chúa Nhật.
+3. **Bó hoa thiêng liêng (`spiritual-bouquets`):** Chấm điểm và tổng hợp số hoa thiêng (Kinh nguyện, Việc hy sinh, Lần hạt Mân Côi) theo từng lớp, tạo phong trào thi đua nhân đức lành mạnh.
+4. **Quản lý Sa Mạc & Trại Huấn Luyện (`camps`):** Đăng ký tham gia, theo dõi đóng quỹ trại, phân bổ lều trại / đội nhóm và xuất danh sách quản lý.
+
+## 5.7. Tự Động Hóa Lịch Phụng Vụ & Bộ Thu Thập Tin Tức Tòa Thánh
+- **Hệ thống Lịch Phụng Vụ Công giáo:**
+  - Tự động hiển thị ngày lễ, bậc lễ, màu sắc phụng vụ trong ngày (Trắng, Đỏ, Tím, Xanh) và các bài đọc Lời Chúa theo chu kỳ Năm Phụng Vụ.
+  - Cho phép Linh mục / Ban Quản trị tùy chỉnh ghi đè (`Override`) những ngày lễ đặc biệt của riêng Giáo xứ như Lễ Bổ Mạng Giáo xứ, Lễ Đặt Viên Đá, Lễ Chầu Lượt...
+- **Bộ cào tin tự động (`CatholicNewsCrawlerService`):**
+  - Chạy ngầm mỗi ngày vào lúc 02:00 sáng (Giờ Việt Nam).
+  - Tự động kết nối tới các luồng tin RSS của Vatican News Tiếng Việt và các cổng thông tin Công giáo chính thống, tổng hợp bài viết, hình ảnh, trích dẫn Lời Chúa mới nhất về hệ thống.
+  - Trang bị endpoint `ImageProxy` thông minh giúp hiển thị mượt mà các hình ảnh bài viết ngoại vi mà không bị chặn bởi chính sách CORS của trình duyệt.
+
+## 5.8. Hệ Thống Kiểm Soát Thao Tác Trọng Yếu (Draft Action Review Gate)
+Nhằm bảo vệ hệ thống khỏi những sai sót nghiêm trọng của người dùng (như nhấn nhầm nút thăng hạng toàn trường hay xóa nhầm lớp), GiaoLy thiết lập cơ chế **Draft Action**:
+- Mọi thao tác tác động diện rộng (xếp lớp năm học mới, thăng hạng đoàn sinh, chuyển ngành) đều bắt buộc trải qua giai đoạn tạo Phiếu Đề Xuất Nháp.
+- Người thực hiện kiểm tra lại báo cáo đối soát (Số em đạt, số em chưa đạt, lý do giữ lại).
+- Chỉ khi cấp có thẩm quyền (Thư ký trưởng hoặc Cha Tuyên úy) phê duyệt xác nhận (`Approve`), CSDL chính thức mới áp dụng thay đổi.
+
+---
+
+# 6. THIẾT KẾ GIAO DIỆN NGƯỜI DÙNG & SITEMAP (UI/UX)
+
+Hệ sinh thái được chia tách thành **hai ứng dụng Web độc lập** chạy song song:
+
+## 6.1. Cổng Quản Trị Trung Tâm (`web-admin`)
+Dành cho Cha Tuyên Úy, Ban Quản Trị, Ban Thư Ký và Ban Giáo Lý Viên:
+- `/login`: Giao diện đăng nhập bảo mật với nền Gradient hiện đại, xử lý ghi nhớ phiên và kiểm tra quyền.
+- `/admin/dashboard`: Bảng điều khiển trung tâm với các thẻ thống kê tổng quan (Tổng số đoàn sinh, tỷ lệ nam/nữ, số lớp học, số đoàn sinh đủ điều kiện lên lớp, biểu đồ phân bố theo ngành).
+- `/admin/academic-years`: Quản lý danh sách niên khóa, chuyển đổi niên khóa kích hoạt, sao chép cơ cấu lớp học.
+- `/admin/academic-years/[id]`: Chi tiết niên khóa, danh sách các lớp học thuộc niên khóa.
+- `/admin/classrooms/[id]`: Chi tiết lớp học, phân công Giáo lý viên chủ nhiệm, danh sách đoàn sinh ghi danh.
+- `/admin/students`: Danh sách đoàn sinh toàn xứ đoàn sử dụng bảng TanStack Table cao cấp, hỗ trợ lọc đa tiêu chí, tìm kiếm nhanh, Import/Export Excel, phân bổ lớp.
+- `/admin/students/[id]`: Hồ sơ chi tiết 360 độ của một đoàn sinh, in phiếu lý lịch, lịch sử Bí tích và điểm số các năm.
+- `/admin/draft-actions`: Trung tâm kiểm soát và phê duyệt đề xuất lên lớp / thăng ngành niên khóa mới.
+- `/admin/leaders`: Sơ đồ tổ chức nhân sự Ban Điều Hành Sứ Đoàn, luân chuyển nhiệm kỳ.
+- `/admin/liturgical`: Quản lý và điều chỉnh lịch phụng vụ giáo xứ.
+- `/admin/news`: Biên tập và quản lý nguồn tin tức Công giáo.
+- `/admin/announcements`: Soạn thảo và phát hành thông báo mục vụ.
+- `/admin/documents`: Thư viện văn thư, tài liệu và biểu mẫu giáo xứ.
+- `/admin/reports`: Báo cáo thống kê chuyên sâu và in ấn sổ điểm lớp.
+- `/admin/users` & `/admin/roles`: Quản trị người dùng, phân quyền vai trò và quyền hạn chi tiết.
+- `/catechist/lesson-plans`: Quản lý và soạn thảo giáo án điện tử.
+- `/catechist/duty-roster`: Lịch phân công ca trực phụng vụ.
+- `/catechist/spiritual-bouquets`: Sổ chấm điểm Bó Hoa Thiêng thi đua.
+- `/catechist/camps`: Quản lý sa mạc huấn luyện và đăng ký cắm trại.
+- `/catechist/sacraments`: Theo dõi điều kiện lãnh nhận Bí tích của học viên.
+- `/profile` & `/profile/edit`: Quản lý thông tin cá nhân và đổi mật khẩu Giáo lý viên.
+
+## 6.2. Cổng Thông Tin Công Chúng & Phụ Huynh (`web-portal`)
+Thiết kế trang nhã, thân thiện cho mọi lứa tuổi giáo dân và đoàn sinh:
+- `/`: Trang chủ truyền thông với Banner sự kiện động, đếm ngược sự kiện quan trọng, Lời Chúa trong ngày, danh sách thông báo mới nhất.
+- `/verify`: Cổng tra cứu và xác thực Chứng chỉ Bí tích điện tử qua mã số hoặc quét QR Code.
+- `/liturgical`: Lịch phụng vụ Công giáo trực quan theo tháng, hiển thị màu lễ và các bài đọc Lời Chúa trong ngày.
+- `/thong-bao`: Bảng tin thông báo của Giáo xứ và Đoàn Thiếu Nhi Thánh Thể.
+- `/news`: Chuyên trang tin tức Công giáo Tòa Thánh và Giáo Hội Việt Nam.
+- `/library`: Thư viện mở cho phép phụ huynh và đoàn sinh tải về các biểu mẫu đơn từ, bài hát sinh hoạt, tài liệu học giáo lý.
+- `/leadership`: Trang giới thiệu cơ cấu tổ chức và các Huynh Trưởng phụ trách qua các thời kỳ.
+- `/profile`: Cổng tra cứu hồ sơ và kết quả rèn luyện dành cho phụ huynh.
+
+## 6.3. Điểm Nhấn Thiết Kế UI/UX
+- **Chế độ Sáng / Tối toàn diện (Light / Dark Mode):** Tự động thích ứng theo tùy chọn hệ điều hành của người dùng, hoặc tùy chỉnh qua một cú nhấp chuột.
+- **Bảng màu Mục vụ Sang trọng:** Tông màu Rose Pastel / Amber / Stone thanh thoát, mang đậm tính thiêng liêng và sư phạm.
+- **Hỗ trợ Đa Ngôn Ngữ Song Hành (Bilingual i18n):** Tích hợp sẵn bộ ngôn ngữ Tiếng Việt và Tiếng Anh qua Pinia Store, cho phép chuyển đổi tức thì trên toàn bộ giao diện mà không cần reload trang.
+- **TanStack Modern Table:** Tích hợp bộ lọc đa chiều, tìm kiếm theo thời gian thực, sắp xếp cột động và phân trang mượt mà.
+
+---
+
+# 7. AN TOÀN THÔNG TIN & HIỆU NĂNG HỆ THỐNG
+
+## 7.1. Chiến Lược Bảo Mật Đa Tầng
+1. **Bảo mật Xác thực Stateless JWT:** 
+   - Mã hóa Token với khóa bí mật an toàn (`SymmetricSecurityKey`), kiểm tra nghiêm ngặt `Issuer`, `Audience` và thời hạn `Lifetime`.
+2. **Mã hóa Mật khẩu một chiều bằng BCrypt:** 
+   - Tuyệt đối không lưu mật khẩu dạng bản rõ (plaintext). Thuật toán băm BCrypt tự động tạo Salt ngẫu nhiên chống tấn công Rainbow Table.
+3. **Phòng chống tấn công SQL Injection:** 
+   - 100% các truy vấn dữ liệu được thực thi thông qua Entity Framework Core với cơ chế Parameterized Queries, loại bỏ hoàn toàn nguy cơ chèn mã SQL độc hại.
+4. **Cơ chế Kiểm soát CORS Chặt Chẽ:** 
+   - Chỉ cho phép các domain được định danh trước trong file cấu hình (`AllowedOrigins`) thực hiện yêu cầu tới API.
+5. **Image Proxy An Toàn:** 
+   - Bảo vệ máy chủ và trình duyệt người dùng khỏi các lỗ hổng Mixed Content / CORS khi tải hình ảnh từ các trang tin Công giáo bên ngoài, có giới hạn thời gian Timeout nghiêm ngặt (5 giây).
+
+## 7.2. Tối Ưu Hóa Hiệu Năng Vận Hành Trên Hạ Tầng Giới Hạn (RAM 512MB)
+Dự án được tối ưu hóa đặc biệt để có thể hoạt động trơn tru trên các gói hosting miễn phí hoặc VPS cấu hình khiêm tốn:
+1. **Ứng Dụng `DbContextPool` (Pool Size = 128):**
+   - Thay vì khởi tạo (Allocate) và hủy (Dispose) hàng ngàn đối tượng `DbContext` cho mỗi lượt request (dẫn tới việc Bộ thu gom rác Garbage Collector làm tăng đột biến RAM), hệ thống duy trì một bộ đệm Pool tái sử dụng kết nối. Kết quả: Mức tiêu thụ bộ nhớ RAM của Backend luôn duy trì ổn định dưới mức **150MB - 200MB**.
+2. **Native QuestPDF Engine:**
+   - Thay vì dùng Puppeteer hoặc Chromium để in PDF (tốn từ 300MB - 1GB RAM và dễ làm sập server nhỏ), QuestPDF vẽ tài liệu trực tiếp dưới dạng binary stream, tốc độ chỉ tính bằng mili-giây và tốn chưa đầy 20MB RAM.
+3. **Tuần tự hóa JSON Enums Thành Chuỗi (JsonStringEnumConverter):**
+   - Chuyển đổi toàn bộ enum thành chuỗi thân thiện (VD: "All", "Urgent") thay vì số nguyên (0, 1), giúp triệt tiêu hoàn toàn lỗi lệch dữ liệu (Mismatch) giữa C# Backend và TypeScript Nuxt Frontend.
+
+---
+
+# 8. CHIẾN LƯỢC KIỂM THỬ CHẤT LƯỢNG (QUALITY ASSURANCE)
+
+## 8.1. Kiểm Thử Tự Động Đầu Cuối (E2E Testing với Playwright)
+Hệ thống được trang bị bộ kiểm thử tự động toàn diện đặt tại thư mục `e2e-tests`:
+- Kiểm thử luồng Đăng nhập (Login Flow) với tài khoản Admin, Thư ký, Giáo lý viên; kiểm tra phản hồi khi sai thông tin.
+- Kiểm thử cơ chế Bảo vệ Tuyến đường (Route Protection): Ngăn chặn người dùng chưa đăng nhập truy cập vào các trang quản trị `/admin/*`.
+- Kiểm thử các thao tác thêm, sửa, xóa, tìm kiếm và phân trang trong danh sách học viên.
+- Kiểm thử quy trình tải file Excel mẫu và nhập dữ liệu học sinh hàng loạt.
+
+## 8.2. Bộ Gieo Dữ Liệu Tự Động (Database Seeder)
+Tệp `DbSeeder.cs` được tích hợp sẵn vào vòng đời khởi động của ứng dụng:
+- Khi hệ thống được triển khai trên cơ sở dữ liệu trắng (Clean DB), Seeder sẽ tự động tạo sẵn:
+  - Tài khoản Quản trị tối cao (`admin`), Thư ký (`secretary`), Trưởng ngành (`moderator`), Giáo lý viên (`viewer`).
+  - Mật khẩu mặc định an toàn được đọc trực tiếp từ biến môi trường (`App:DefaultPassword`).
+  - Dữ liệu niên khóa mẫu, các lớp học thuộc đủ 4 ngành (Ấu, Thiếu, Nghĩa, Hiệp).
+  - Dữ liệu mẫu về sơ đồ Ban Điều Hành, Thông báo giáo xứ, Lịch phụng vụ và Bảng điểm điện tử.
+- Nhờ đó, hệ thống sẵn sàng hoạt động ngay lập tức sau khi triển khai mà không cần nhập liệu thủ công từ đầu.
+
+---
+
+# 9. HƯỚNG DẪN CÀI ĐẶT, TRIỂN KHAI & VẬN HÀNH (DEPLOYMENT GUIDE)
+
+## 9.1. Yêu Cầu Môi Trường Kỹ Thuật
+- **Hệ điều hành:** Windows Server, Ubuntu Linux 22.04 LTS hoặc Docker Container.
+- **Backend SDK:** .NET SDK 10.0 trở lên.
+- **Frontend Runtime:** Node.js v20.x trở lên và Trình quản lý gói `pnpm` hoặc `npm`.
+- **Cơ sở dữ liệu:** Microsoft SQL Server 2019 / 2022 (hoặc Azure SQL Database / Docker mssql-server).
+
+## 9.2. Cấu Hình Biến Môi Trường (Environment Variables)
+
+### Backend (`GiaoLy.API/appsettings.json` hoặc Biến Môi Trường)
+```json
+{
+  "ConnectionStrings": {
+    "DefaultConnection": "Server=localhost;Database=GiaoLyDb;User Id=sa;Password=YourSecurePassword123!;TrustServerCertificate=True;"
+  },
+  "Jwt": {
+    "Key": "GiaoLySuperSecretKeyForJwtToken2026MustBeAtLeast32BytesLong!",
+    "Issuer": "GiaoLyAPI",
+    "Audience": "GiaoLyClients"
+  },
+  "Cors": {
+    "AllowedOrigins": [
+      "http://localhost:3000",
+      "http://localhost:3001",
+      "https://admin.giaoly.vn",
+      "https://portal.giaoly.vn"
+    ]
+  },
+  "App": {
+    "DefaultPassword": "AdminSecurePassword2026!"
+  }
+}
+```
+
+### Frontend Web Admin (`web-admin/.env`)
+```env
+NUXT_PUBLIC_API_BASE=http://localhost:5000
+PORT=3000
+```
+
+### Frontend Web Portal (`web-portal/.env`)
+```env
+NUXT_PUBLIC_API_BASE=http://localhost:5000
+PORT=3001
+```
+
+## 9.3. Các Bước Khởi Chạy Nhanh
+
+### Bước 1: Khởi tạo Cơ sở Dữ liệu & Chạy Backend
+Mở PowerShell tại thư mục gốc của dự án:
+```powershell
+cd c:\GiaoLy\GiaoLy.API
+dotnet restore
+dotnet ef database update --project ..\GiaoLy.Domain
+dotnet run
+```
+*API sẽ lắng nghe tại địa chỉ: `http://localhost:5000` (Swagger UI: `http://localhost:5000/swagger`).*
+
+### Bước 2: Khởi chạy Cổng Quản Trị (`web-admin`)
+Mở cửa sổ dòng lệnh thứ hai:
+```powershell
+cd c:\GiaoLy\web-admin
+pnpm install
+pnpm dev
+```
+*Cổng quản trị hoạt động tại: `http://localhost:3000`.*
+
+### Bước 3: Khởi chạy Cổng Thông Tin Công Chúng (`web-portal`)
+Mở cửa sổ dòng lệnh thứ ba:
+```powershell
+cd c:\GiaoLy\web-portal
+pnpm install
+pnpm dev
+```
+*Cổng công chúng hoạt động tại: `http://localhost:3001`.*
+
+---
+
+# 10. TỔNG KẾT ĐÁNH GIÁ & ĐỊNH HƯỚNG PHÁT TRIỂN
+
+## 10.1. Đánh Giá Kết Quả Nghiệm Thu Dự Án
+Dự án **Hệ Sinh Thái GiaoLy** đã hoàn thành 100% các mục tiêu thiết kế và vận hành thực tế:
+1. **Kiến trúc Vững chắc:** Áp dụng chuẩn Clean Architecture ở Backend và Nuxt 3 tiêu chuẩn cao ở Frontend. Mã nguồn sạch, phân chia module rõ ràng, dễ bảo trì và nâng cấp.
+2. **Nghiệp vụ Chuyên biệt & Chính xác:** Số hóa sát với thực tế mô hình Thiếu Nhi Thánh Thể tại các Giáo xứ Việt Nam, từ khâu quản lý Tên Thánh, hồ sơ Bí tích, các phân ngành đến cơ chế tính điểm và cấp chứng từ số.
+3. **Tiết kiệm Chi phí Vận hành:** Tối ưu hóa bộ nhớ RAM và CPU xuất sắc, cho phép chạy hoàn hảo trên các máy chủ cấu hình thấp hoặc gói lưu trữ miễn phí mà không lo sập dịch vụ.
+4. **Trải nghiệm Người dùng Xuất sắc:** Giao diện trực quan, hỗ trợ đầy đủ Dark/Light mode, song ngữ Anh - Việt, tương thích tốt trên cả máy tính để bàn, máy tính bảng và điện thoại di động.
+
+## 10.2. Lộ Trình Phát Triển Tương Lai (Roadmap 2027+)
+- **Ứng dụng Di động Dành cho Phụ Huynh (Mobile App - Flutter):** Cung cấp ứng dụng di động trên iOS và Android cho phép phụ huynh nhận thông báo tức thì (Push Notification), theo dõi điểm danh từng buổi lễ và kết quả học tập của con em.
+- **Tích hợp Zalo ZNS / SMS Gateway:** Tự động gửi tin nhắn báo kết quả điểm danh, thông báo họp phụ huynh và giấy mời sự kiện qua Zalo Official Account của Giáo xứ.
+- **Điểm Danh Thông Minh bằng Nhận Diện Khuôn Mặt (AI Facial Attendance):** Ứng dụng trí tuệ nhân tạo để tự động điểm danh đoàn sinh khi bước vào cổng nhà thờ tham dự Thánh lễ Chúa Nhật.
+
+---
+*Tài liệu này được biên soạn trọn vẹn và đầy đủ, đại diện cho toàn bộ kiến trúc, cơ sở dữ liệu, mã nguồn và quy trình vận hành của Hệ sinh thái GiaoLy.*

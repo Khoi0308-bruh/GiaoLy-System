@@ -115,12 +115,13 @@ public class AcademicYearController : ControllerBase
         // 2. Tạo danh sách DraftAction cho học sinh
         var oldClassIds = oldClasses.Select(c => c.Id).ToList();
         var enrollments = await _context.Enrollments.AsNoTracking()
+            .Include(e => e.Grade)
             .Where(e => oldClassIds.Contains(e.ClassRoomId) && e.Status == "Active")
             .ToListAsync();
 
-        var grades = await _context.Grades.AsNoTracking()
-            .Where(g => oldClassIds.Contains(g.ClassRoomId))
-            .ToDictionaryAsync(g => g.StudentId);
+        var grades = enrollments
+            .Where(e => e.Grade != null)
+            .ToDictionary(e => e.StudentId, e => e.Grade!);
 
         var draftActions = new List<DraftAction>();
 

@@ -11,55 +11,71 @@ const quickLinks = [
 </script>
 
 <template>
-  <footer class="relative mt-20 border-t border-stone-200 dark:border-stone-800 bg-white dark:bg-[#18191a] overflow-hidden">
-    <!-- Dải màu 5 Ngành TNTT -->
-    <div class="flex h-1.5 w-full">
-      <div class="flex-1 bg-tntt-pink-500" />
-      <div class="flex-1 bg-tntt-green-500" />
-      <div class="flex-1 bg-tntt-blue-600" />
-      <div class="flex-1 bg-tntt-gold-500" />
-      <div class="flex-1 bg-tntt-brown-600" />
+  <footer class="relative mt-24 border-t overflow-hidden bg-white dark:bg-[#0a0d13]" style="border-color: rgba(201,169,110,0.25);">
+    <!-- Dải màu 5 Ngành TNTT tinh tế với hiệu ứng gradient -->
+    <div class="flex h-2 w-full shadow-sm">
+      <div class="flex-1 bg-pink-500" title="Ngành Ấu Nhi" />
+      <div class="flex-1 bg-blue-500" title="Ngành Thiếu Nhi" />
+      <div class="flex-1 bg-emerald-500" title="Ngành Nghĩa Sĩ" />
+      <div class="flex-1 bg-red-600" title="Ngành Hiệp Sĩ" />
+      <div class="flex-1 bg-amber-700" title="Huynh Trưởng" />
     </div>
 
     <!-- Họa tiết Watermark chìm ở góc -->
     <UIcon
       name="i-heroicons-globe-asia-australia"
-      class="absolute -bottom-20 -right-20 w-96 h-96 text-stone-100/50 dark:text-stone-800/30 z-0 select-none pointer-events-none"
+      class="absolute -bottom-24 -right-24 w-[420px] h-[420px] opacity-[0.03] dark:opacity-[0.02] z-0 select-none pointer-events-none"
+      style="color: #1a3a6b;"
     />
 
-    <div class="relative z-10 w-full max-w-[1200px] mx-auto px-6 py-16">
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-16">
-        <!-- Cột 1: Nhận diện & Sứ Mạng (Chiếm 5 cột) -->
+    <div class="relative z-10 w-full max-w-[1240px] mx-auto px-6 py-16 sm:py-20">
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-12 gap-10 lg:gap-14">
+        <!-- Cột 1: Nhận diện & Sứ Mạng (5 cột) -->
         <div class="lg:col-span-5 flex flex-col gap-6">
           <div class="flex items-center gap-4">
-            <div class="w-16 h-16 rounded-full bg-blue-700 flex flex-col items-center justify-center shadow-lg shrink-0 border-2 border-white dark:border-stone-800">
+            <div
+              class="w-16 h-16 rounded-2xl flex flex-col items-center justify-center shadow-xl shrink-0 border-2"
+              style="
+                background: linear-gradient(135deg, #1a3a6b, #2a5298);
+                border-color: #c9a96e;
+              "
+            >
               <span class="text-white font-black text-2xl leading-none">✝</span>
-              <span class="text-white font-bold text-[10px] tracking-widest mt-0.5">TNTT</span>
+              <span class="text-white font-extrabold text-[9px] tracking-widest mt-0.5" style="color: #e8c98a;">TNTT</span>
             </div>
             <div>
-              <h2 class="text-2xl font-black text-stone-800 dark:text-white leading-tight font-serif uppercase">
-                Thiếu Nhi<br>Thánh Thể
+              <span class="text-[11px] font-black uppercase tracking-[0.25em]" style="color: #a07840;">
+                Phong Trào Giới Trẻ
+              </span>
+              <h2 class="text-2xl font-black font-serif leading-tight uppercase" style="color: #1a3a6b;">
+                Thiếu Nhi Thánh Thể
               </h2>
             </div>
           </div>
 
-          <div class="pl-2 border-l-4 border-amber-500">
-            <p class="text-lg font-serif italic text-stone-600 dark:text-stone-300">
+          <div
+            class="pl-4 py-1 border-l-4 rounded-r-xl"
+            style="
+              border-color: #c9a96e;
+              background: linear-gradient(90deg, rgba(201,169,110,0.08), transparent);
+            "
+          >
+            <p class="text-base font-serif italic text-stone-700 dark:text-stone-300 font-semibold">
               "Cầu Nguyện • Rước Lễ • Hy Sinh • Làm Tông Đồ"
             </p>
           </div>
 
           <p class="text-sm text-stone-500 dark:text-stone-400 leading-relaxed max-w-sm">
-            Website chính thức của Xứ Đoàn. Nơi cập nhật tin tức, lịch phụng vụ và các tài liệu giáo lý cho đoàn sinh và huynh trưởng.
+            Cổng thông tin chính thức của Xứ Đoàn. Kết nối phụ huynh, đoàn sinh và ban huynh trưởng trong sứ vụ tông đồ và bồi dưỡng đức tin.
           </p>
         </div>
 
-        <!-- Cột 2: Quick Links (Chiếm 3 cột) -->
+        <!-- Cột 2: Liên Kết Nhanh (3 cột) -->
         <div class="lg:col-span-3">
-          <h3 class="text-sm font-black text-stone-800 dark:text-stone-200 uppercase tracking-widest mb-6">
+          <h3 class="text-xs font-black uppercase tracking-[0.2em] mb-6" style="color: #1a3a6b;">
             Liên Kết Nhanh
           </h3>
-          <ul class="flex flex-col gap-3">
+          <ul class="flex flex-col gap-3.5">
             <li
               v-for="link in quickLinks"
               :key="link.to"
@@ -67,66 +83,78 @@ const quickLinks = [
               <NuxtLink
                 :to="link.to"
                 :target="link.external ? '_blank' : undefined"
-                class="text-stone-500 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-500 font-medium transition-colors flex items-center gap-2 group"
+                class="text-sm text-stone-600 dark:text-stone-400 hover:text-navy font-medium transition-all duration-200 flex items-center gap-2 group"
               >
                 <UIcon
                   name="i-heroicons-chevron-right"
-                  class="w-4 h-4 text-stone-300 dark:text-stone-700 group-hover:text-amber-500 transition-colors"
+                  class="w-4 h-4 text-stone-300 group-hover:translate-x-1 transition-all duration-200"
+                  style="color: #c9a96e;"
                 />
-                {{ link.label }}
+                <span>{{ link.label }}</span>
               </NuxtLink>
             </li>
           </ul>
         </div>
 
-        <!-- Cột 3: Liên hệ (Chiếm 4 cột) -->
+        <!-- Cột 3: Liên hệ (4 cột) -->
         <div class="lg:col-span-4">
-          <h3 class="text-sm font-black text-stone-800 dark:text-stone-200 uppercase tracking-widest mb-6">
-            Liên Hệ
+          <h3 class="text-xs font-black uppercase tracking-[0.2em] mb-6" style="color: #1a3a6b;">
+            Văn Phòng Xứ Đoàn
           </h3>
-          <ul class="flex flex-col gap-4">
+          <ul class="flex flex-col gap-4 text-sm text-stone-600 dark:text-stone-400">
             <li class="flex items-start gap-3">
-              <div class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
+              <div
+                class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
+                style="background: rgba(26,58,107,0.05); border-color: rgba(201,169,110,0.25);"
+              >
                 <UIcon
                   name="i-heroicons-map-pin"
-                  class="w-4 h-4 text-stone-600 dark:text-stone-400"
+                  class="w-4 h-4"
+                  style="color: #1a3a6b;"
                 />
               </div>
-              <p class="text-sm text-stone-600 dark:text-stone-400 mt-1.5 leading-relaxed">
-                Nhà Thờ Giáo Xứ<br>Đường ABC, Phường XYZ, Thành Phố
+              <p class="mt-1 leading-relaxed">
+                Nhà Mục Vụ Giáo Xứ — Phòng Sinh Hoạt TNTT<br>
+                <span class="text-xs text-stone-400">Giờ sinh hoạt: Chiều Chúa Nhật hàng tuần</span>
               </p>
             </li>
             <li class="flex items-center gap-3">
-              <div class="w-8 h-8 rounded-full bg-stone-100 dark:bg-stone-800 flex items-center justify-center shrink-0">
+              <div
+                class="w-9 h-9 rounded-xl flex items-center justify-center shrink-0 border"
+                style="background: rgba(26,58,107,0.05); border-color: rgba(201,169,110,0.25);"
+              >
                 <UIcon
                   name="i-heroicons-envelope"
-                  class="w-4 h-4 text-stone-600 dark:text-stone-400"
+                  class="w-4 h-4"
+                  style="color: #1a3a6b;"
                 />
               </div>
               <a
                 href="mailto:contact@xudoan.org"
-                class="text-sm text-stone-600 dark:text-stone-400 hover:text-amber-600 dark:hover:text-amber-500 transition-colors"
+                class="hover:underline transition-colors"
+                style="color: #1a3a6b;"
               >
                 contact@xudoan.org
               </a>
             </li>
           </ul>
 
-          <div class="mt-6 pt-6 border-t border-stone-100 dark:border-stone-800">
-            <div class="flex gap-4">
+          <div class="mt-6 pt-6 border-t flex items-center gap-3" style="border-color: rgba(201,169,110,0.2);">
+            <span class="text-xs text-stone-400">Mạng xã hội:</span>
+            <div class="flex gap-2">
               <UButton
                 color="neutral"
-                variant="ghost"
+                variant="soft"
                 icon="i-simple-icons-facebook"
-                size="sm"
-                class="rounded-full"
+                size="xs"
+                class="rounded-lg hover:scale-105 transition-transform"
               />
               <UButton
                 color="neutral"
-                variant="ghost"
+                variant="soft"
                 icon="i-simple-icons-youtube"
-                size="sm"
-                class="rounded-full"
+                size="xs"
+                class="rounded-lg hover:scale-105 transition-transform"
               />
             </div>
           </div>
@@ -134,21 +162,21 @@ const quickLinks = [
       </div>
     </div>
 
-    <!-- Bottom Copyright -->
-    <div class="relative z-10 w-full border-t border-stone-100 dark:border-stone-800/60 bg-stone-50 dark:bg-stone-900/50">
-      <div class="w-full max-w-[1200px] mx-auto px-6 py-4 flex flex-col md:flex-row items-center justify-between gap-4">
-        <p class="text-xs font-medium text-stone-400 dark:text-stone-500">
-          &copy; {{ currentYear }} Web Portal Xứ Đoàn. All rights reserved.
+    <!-- Bản quyền cuối trang -->
+    <div
+      class="relative z-10 w-full border-t py-5"
+      style="
+        background: rgba(26,58,107,0.03);
+        border-color: rgba(201,169,110,0.18);
+      "
+    >
+      <div class="w-full max-w-[1240px] mx-auto px-6 flex flex-col sm:flex-row items-center justify-between gap-3 text-xs text-stone-400">
+        <p>
+          &copy; {{ currentYear }} Hệ Thống Giáo Lý & Thiếu Nhi Thánh Thể. Mọi quyền được bảo lưu.
         </p>
-        <div class="flex gap-4 text-xs font-medium text-stone-400 dark:text-stone-500">
-          <NuxtLink
-            to="#"
-            class="hover:text-amber-600 dark:hover:text-amber-500 transition-colors"
-          >Bảo mật</NuxtLink>
-          <NuxtLink
-            to="#"
-            class="hover:text-amber-600 dark:hover:text-amber-500 transition-colors"
-          >Điều khoản</NuxtLink>
+        <div class="flex gap-5">
+          <NuxtLink to="#" class="hover:underline" style="color: #a07840;">Quy Chế Sinh Hoạt</NuxtLink>
+          <NuxtLink to="#" class="hover:underline" style="color: #a07840;">Bảo Vệ Thiếu Nhi</NuxtLink>
         </div>
       </div>
     </div>

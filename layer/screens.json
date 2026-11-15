@@ -1,0 +1,927 @@
+[
+ {
+  "route": "/dang-nhap",
+  "area": "admin",
+  "title": "Đăng nhập",
+  "perm": "PUBLIC",
+  "endpoints": [
+   "POST /auth/login",
+   "POST /auth/refresh"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/doi-mat-khau-lan-dau",
+  "area": "admin",
+  "title": "Đổi mật khẩu lần đầu",
+  "perm": "AUTHED",
+  "endpoints": [
+   "POST /auth/change-password"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/admin/tai-khoan",
+  "area": "admin",
+  "title": "Hồ sơ cá nhân",
+  "perm": "AUTHED",
+  "endpoints": [
+   "GET /auth/me",
+   "PUT /me/profile",
+   "POST /me/avatar",
+   "POST /auth/change-password",
+   "POST /auth/logout"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/admin",
+  "area": "admin",
+  "title": "Tổng quan",
+  "perm": "AUTHED",
+  "endpoints": [
+   "GET /academic-years/active",
+   "GET /reports/dashboard",
+   "GET /announcements",
+   "GET /public/liturgical/today"
+  ],
+  "actions": [
+   {
+    "label": "Thẻ số liệu tổng quan",
+    "permission": "reports.view"
+   },
+   {
+    "label": "Khung thông báo",
+    "permission": "announcements.view"
+   },
+   {
+    "label": "Dải niên khóa hiện hành",
+    "permission": "academic.view"
+   }
+  ]
+ },
+ {
+  "route": "/admin/doan-sinh",
+  "area": "admin",
+  "title": "Danh sách đoàn sinh",
+  "perm": "students.view",
+  "endpoints": [
+   "GET /students",
+   "GET /students/stats",
+   "GET /students/export",
+   "GET /students/unassigned",
+   "GET /branches",
+   "GET /class-levels",
+   "GET /classrooms/{id}/roster"
+  ],
+  "actions": [
+   {
+    "label": "Thêm đoàn sinh",
+    "permission": "students.create"
+   },
+   {
+    "label": "Xuất Excel",
+    "permission": "students.export"
+   },
+   {
+    "label": "Nhập Excel",
+    "permission": "students.import"
+   },
+   {
+    "label": "Xem SĐT phụ huynh",
+    "permission": "students.view-contact"
+   },
+   {
+    "label": "Xem nhóm máu, dị ứng",
+    "permission": "students.view-health"
+   },
+   {
+    "label": "Xếp lớp cho em chưa có lớp",
+    "permission": "enrollments.manage"
+   }
+  ]
+ },
+ {
+  "route": "/admin/doan-sinh/them",
+  "area": "admin",
+  "title": "Thêm đoàn sinh",
+  "perm": "students.create",
+  "endpoints": [
+   "POST /students",
+   "POST /students/duplicates/check",
+   "GET /academic-years/{yearId}/classrooms"
+  ],
+  "actions": [
+   {
+    "label": "Chọn lớp để xếp ngay",
+    "permission": "academic.view"
+   }
+  ]
+ },
+ {
+  "route": "/admin/doan-sinh/nhap-excel",
+  "area": "admin",
+  "title": "Nhập đoàn sinh từ Excel",
+  "perm": "students.import",
+  "endpoints": [
+   "GET /imports/students/template",
+   "POST /imports/students",
+   "GET /imports/{id}",
+   "POST /imports/{id}/apply",
+   "POST /imports/{id}/cancel"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/admin/doan-sinh/{id}",
+  "area": "admin",
+  "title": "Hồ sơ đoàn sinh",
+  "perm": "students.view",
+  "endpoints": [
+   "GET /students/{id}",
+   "PATCH /students/{id}",
+   "POST /students/{id}/status",
+   "DELETE /students/{id}",
+   "POST /students/{id}/restore",
+   "POST /students/{id}/photo",
+   "GET /students/{id}/guardians",
+   "PUT /students/{id}/guardians",
+   "GET /students/{id}/notes",
+   "POST /students/{id}/notes",
+   "DELETE /student-notes/{noteId}",
+   "GET /students/{id}/history",
+   "GET /students/{id}/enrollments",
+   "GET /students/{id}/sacraments",
+   "PUT /students/{id}/sacraments/{type}",
+   "DELETE /students/{id}/sacraments/{type}",
+   "GET /students/{id}/requirement-progress",
+   "PUT /students/{id}/requirement-progress/{requirementId}",
+   "GET /students/{id}/certificates",
+   "POST /students/{id}/certificates",
+   "POST /certificates/{id}/revoke",
+   "GET /certificates/{id}/pdf",
+   "GET /guardian-links",
+   "POST /guardian-links",
+   "DELETE /guardian-links/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Tab Bí tích",
+    "permission": "sacraments.view"
+   },
+   {
+    "label": "Tab Chứng chỉ",
+    "permission": "certificates.view"
+   },
+   {
+    "label": "Tab Lịch sử ghi danh",
+    "permission": "enrollments.view"
+   },
+   {
+    "label": "Sửa hồ sơ",
+    "permission": "students.update"
+   },
+   {
+    "label": "Đổi trạng thái",
+    "permission": "students.change-status"
+   },
+   {
+    "label": "Xóa",
+    "permission": "students.delete"
+   },
+   {
+    "label": "Khôi phục",
+    "permission": "students.restore"
+   },
+   {
+    "label": "Viết ghi chú",
+    "permission": "students.notes.write"
+   },
+   {
+    "label": "Cập nhật bí tích",
+    "permission": "sacraments.update"
+   },
+   {
+    "label": "Cấp chứng chỉ",
+    "permission": "certificates.issue"
+   },
+   {
+    "label": "Thu hồi chứng chỉ",
+    "permission": "certificates.revoke"
+   },
+   {
+    "label": "Liên kết tài khoản phụ huynh",
+    "permission": "guardians.link"
+   },
+   {
+    "label": "Xem liên hệ phụ huynh",
+    "permission": "students.view-contact"
+   },
+   {
+    "label": "Xem thông tin sức khỏe",
+    "permission": "students.view-health"
+   }
+  ]
+ },
+ {
+  "route": "/admin/doan-sinh/yeu-cau-bi-tich",
+  "area": "admin",
+  "title": "Yêu cầu chuẩn bị bí tích",
+  "perm": "sacraments.view",
+  "endpoints": [
+   "GET /sacrament-requirements",
+   "POST /sacrament-requirements",
+   "PUT /sacrament-requirements/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Thêm, sửa yêu cầu",
+    "permission": "sacraments.manage-requirements"
+   }
+  ]
+ },
+ {
+  "route": "/admin/gia-dinh",
+  "area": "admin",
+  "title": "Gia đình thiếu nhi",
+  "perm": "students.view",
+  "endpoints": [
+   "GET /families",
+   "POST /families",
+   "PUT /families/{id}",
+   "DELETE /families/{id}",
+   "PUT /families/{id}/members"
+  ],
+  "actions": [
+   {
+    "label": "Quản lý gia đình",
+    "permission": "families.manage"
+   }
+  ]
+ },
+ {
+  "route": "/admin/nien-khoa",
+  "area": "admin",
+  "title": "Niên khóa",
+  "perm": "academic.view",
+  "endpoints": [
+   "GET /academic-years",
+   "GET /academic-years/{id}",
+   "POST /academic-years",
+   "PUT /academic-years/{id}",
+   "DELETE /academic-years/{id}",
+   "POST /academic-years/{id}/activate",
+   "POST /academic-years/{id}/close",
+   "POST /academic-years/{id}/archive",
+   "POST /academic-years/{id}/reopen",
+   "POST /academic-years/{id}/clone-structure"
+  ],
+  "actions": [
+   {
+    "label": "Tạo niên khóa",
+    "permission": "academic.create"
+   },
+   {
+    "label": "Sửa niên khóa",
+    "permission": "academic.update"
+   },
+   {
+    "label": "Xóa niên khóa",
+    "permission": "academic.delete"
+   },
+   {
+    "label": "Kích hoạt, chốt, lưu trữ, mở lại",
+    "permission": "academic.lifecycle"
+   }
+  ]
+ },
+ {
+  "route": "/admin/lop",
+  "area": "admin",
+  "title": "Danh sách lớp",
+  "perm": "academic.view",
+  "endpoints": [
+   "GET /academic-years/{yearId}/classrooms",
+   "POST /academic-years/{yearId}/classrooms"
+  ],
+  "actions": [
+   {
+    "label": "Tạo lớp",
+    "permission": "academic.create"
+   }
+  ]
+ },
+ {
+  "route": "/admin/lop/{id}",
+  "area": "admin",
+  "title": "Chi tiết lớp",
+  "perm": "academic.view",
+  "endpoints": [
+   "GET /classrooms/{id}",
+   "PUT /classrooms/{id}",
+   "DELETE /classrooms/{id}",
+   "PUT /classrooms/{id}/teachers",
+   "GET /classrooms/{id}/enrollments",
+   "POST /classrooms/{id}/enrollments",
+   "POST /enrollments/{id}/transfer",
+   "POST /enrollments/{id}/withdraw"
+  ],
+  "actions": [
+   {
+    "label": "Sửa lớp",
+    "permission": "academic.update"
+   },
+   {
+    "label": "Xóa lớp",
+    "permission": "academic.delete"
+   },
+   {
+    "label": "Phân công giáo lý viên",
+    "permission": "classrooms.assign-teachers"
+   },
+   {
+    "label": "Xếp lớp, chuyển lớp, rút lớp",
+    "permission": "enrollments.manage"
+   },
+   {
+    "label": "Xem ghi danh",
+    "permission": "enrollments.view"
+   }
+  ]
+ },
+ {
+  "route": "/admin/lop/{id}/diem-so",
+  "area": "admin",
+  "title": "Sổ điểm",
+  "perm": "grades.view",
+  "endpoints": [
+   "GET /classrooms/{id}/grades",
+   "PUT /classrooms/{id}/grades",
+   "GET /enrollments/{id}/grade",
+   "POST /classrooms/{id}/grade-unlocks",
+   "GET /classrooms/{id}/grade-unlocks",
+   "GET /classrooms/{id}/grades/export"
+  ],
+  "actions": [
+   {
+    "label": "Nhập, sửa điểm",
+    "permission": "grades.update"
+   },
+   {
+    "label": "Mở khóa sổ điểm",
+    "permission": "grades.unlock"
+   },
+   {
+    "label": "Xuất bảng điểm",
+    "permission": "grades.export"
+   }
+  ]
+ },
+ {
+  "route": "/admin/lop/{id}/hoa-thieng",
+  "area": "admin",
+  "title": "Hoa thiêng",
+  "perm": "bouquets.view",
+  "endpoints": [
+   "GET /classrooms/{id}/bouquets",
+   "POST /classrooms/{id}/bouquets",
+   "POST /bouquets/{id}/reverse",
+   "GET /classrooms/{id}/bouquets/leaderboard"
+  ],
+  "actions": [
+   {
+    "label": "Ghi hoa thiêng",
+    "permission": "bouquets.give"
+   },
+   {
+    "label": "Đảo dòng ghi nhầm",
+    "permission": "bouquets.manage"
+   }
+  ]
+ },
+ {
+  "route": "/admin/to-chuc",
+  "area": "admin",
+  "title": "Ngành và cấp lớp",
+  "perm": "AUTHED",
+  "endpoints": [
+   "GET /branches",
+   "GET /class-levels",
+   "POST /branches",
+   "PUT /branches/{id}",
+   "POST /class-levels",
+   "PUT /class-levels/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Thêm, sửa ngành và cấp lớp",
+    "permission": "org.manage"
+   }
+  ]
+ },
+ {
+  "route": "/admin/len-lop",
+  "area": "admin",
+  "title": "Đợt xét lên lớp",
+  "perm": "promotion.view",
+  "endpoints": [
+   "GET /promotion-batches",
+   "POST /promotion-batches"
+  ],
+  "actions": [
+   {
+    "label": "Tạo đợt xét",
+    "permission": "promotion.create"
+   }
+  ]
+ },
+ {
+  "route": "/admin/len-lop/{id}",
+  "area": "admin",
+  "title": "Duyệt đề xuất lên lớp",
+  "perm": "promotion.view",
+  "endpoints": [
+   "GET /promotion-batches/{id}",
+   "GET /promotion-batches/{id}/drafts",
+   "POST /promotion-drafts/{id}/approve",
+   "POST /promotion-drafts/{id}/reject",
+   "PUT /promotion-drafts/{id}/target-class",
+   "POST /promotion-batches/{id}/approve-qualified",
+   "POST /promotion-batches/{id}/apply",
+   "POST /promotion-batches/{id}/cancel"
+  ],
+  "actions": [
+   {
+    "label": "Duyệt, từ chối, chọn lớp đích",
+    "permission": "promotion.decide"
+   },
+   {
+    "label": "Áp dụng đợt",
+    "permission": "promotion.apply"
+   },
+   {
+    "label": "Hủy đợt",
+    "permission": "promotion.create"
+   }
+  ]
+ },
+ {
+  "route": "/admin/trai",
+  "area": "admin",
+  "title": "Sự kiện và trại",
+  "perm": "camps.view",
+  "endpoints": [
+   "GET /camps",
+   "POST /camps",
+   "PUT /camps/{id}",
+   "DELETE /camps/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Tạo, sửa, xóa sự kiện",
+    "permission": "camps.manage"
+   }
+  ]
+ },
+ {
+  "route": "/admin/trai/{id}",
+  "area": "admin",
+  "title": "Đăng ký và thu phí sự kiện",
+  "perm": "camps.view",
+  "endpoints": [
+   "GET /camps/{id}/registrations",
+   "POST /camps/{id}/registrations",
+   "PUT /camps/{id}/registrations/{registrationId}",
+   "DELETE /camps/{id}/registrations/{registrationId}",
+   "POST /camps/registrations/{registrationId}/payments",
+   "POST /camps/payments/{id}/reverse",
+   "GET /camps/{id}/finance"
+  ],
+  "actions": [
+   {
+    "label": "Đăng ký đoàn sinh",
+    "permission": "camps.register"
+   },
+   {
+    "label": "Thu phí, hoàn phí, xem tổng thu",
+    "permission": "camps.collect"
+   }
+  ]
+ },
+ {
+  "route": "/admin/truc-lop",
+  "area": "admin",
+  "title": "Phân công trực lớp",
+  "perm": "duty.view",
+  "endpoints": [
+   "GET /duty-assignments",
+   "POST /duty-assignments",
+   "PUT /duty-assignments/{id}",
+   "DELETE /duty-assignments/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Phân công",
+    "permission": "duty.manage"
+   }
+  ]
+ },
+ {
+  "route": "/admin/giao-an",
+  "area": "admin",
+  "title": "Giáo án",
+  "perm": "lessonplans.view",
+  "endpoints": [
+   "GET /lesson-plans",
+   "GET /lesson-plans/{id}",
+   "POST /lesson-plans",
+   "PUT /lesson-plans/{id}",
+   "DELETE /lesson-plans/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Soạn, sửa giáo án của mình",
+    "permission": "lessonplans.manage"
+   },
+   {
+    "label": "Sửa giáo án của người khác",
+    "permission": "lessonplans.manage-all"
+   }
+  ]
+ },
+ {
+  "route": "/admin/thong-bao",
+  "area": "admin",
+  "title": "Thông báo",
+  "perm": "announcements.view",
+  "endpoints": [
+   "GET /announcements",
+   "POST /announcements",
+   "PUT /announcements/{id}",
+   "DELETE /announcements/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Đăng",
+    "permission": "announcements.create"
+   },
+   {
+    "label": "Sửa",
+    "permission": "announcements.update"
+   },
+   {
+    "label": "Xóa",
+    "permission": "announcements.delete"
+   }
+  ]
+ },
+ {
+  "route": "/admin/tai-lieu",
+  "area": "admin",
+  "title": "Tài liệu",
+  "perm": "documents.view",
+  "endpoints": [
+   "GET /documents",
+   "GET /documents/{id}/download",
+   "POST /documents",
+   "PUT /documents/{id}",
+   "DELETE /documents/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Tải lên",
+    "permission": "documents.create"
+   },
+   {
+    "label": "Sửa",
+    "permission": "documents.update"
+   },
+   {
+    "label": "Xóa",
+    "permission": "documents.delete"
+   }
+  ]
+ },
+ {
+  "route": "/admin/huynh-truong",
+  "area": "admin",
+  "title": "Ban huynh trưởng",
+  "perm": "leaders.view",
+  "endpoints": [
+   "GET /leaders",
+   "POST /leaders",
+   "PUT /leaders/{id}",
+   "DELETE /leaders/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Thêm",
+    "permission": "leaders.create"
+   },
+   {
+    "label": "Sửa",
+    "permission": "leaders.update"
+   },
+   {
+    "label": "Xóa",
+    "permission": "leaders.delete"
+   }
+  ]
+ },
+ {
+  "route": "/admin/banner",
+  "area": "admin",
+  "title": "Banner trang chủ",
+  "perm": "banners.manage",
+  "endpoints": [
+   "GET /public/banners",
+   "POST /banners",
+   "PUT /banners/{id}",
+   "DELETE /banners/{id}"
+  ],
+  "actions": [
+   {
+    "label": "Quản lý banner",
+    "permission": "banners.manage"
+   }
+  ]
+ },
+ {
+  "route": "/admin/tin-tuc",
+  "area": "admin",
+  "title": "Tin tức",
+  "perm": "news.view",
+  "endpoints": [
+   "GET /news/sources",
+   "POST /news/sources",
+   "PUT /news/sources/{id}",
+   "DELETE /news/sources/{id}",
+   "PUT /news/articles/{id}",
+   "GET /public/news"
+  ],
+  "actions": [
+   {
+    "label": "Thêm nguồn",
+    "permission": "news.create"
+   },
+   {
+    "label": "Sửa nguồn, ẩn bài",
+    "permission": "news.update"
+   },
+   {
+    "label": "Xóa nguồn",
+    "permission": "news.delete"
+   }
+  ]
+ },
+ {
+  "route": "/admin/lich-phung-vu",
+  "area": "admin",
+  "title": "Lịch phụng vụ",
+  "perm": "liturgical.view",
+  "endpoints": [
+   "GET /liturgical",
+   "PUT /liturgical/{date}"
+  ],
+  "actions": [
+   {
+    "label": "Ghi đè phụng vụ một ngày",
+    "permission": "liturgical.update"
+   }
+  ]
+ },
+ {
+  "route": "/admin/bao-cao",
+  "area": "admin",
+  "title": "Báo cáo",
+  "perm": "reports.view",
+  "endpoints": [
+   "GET /reports/students-by-branch",
+   "GET /reports/missing-data",
+   "GET /reports/promotion-summary",
+   "GET /reports/grades-summary",
+   "POST /reports/export"
+  ],
+  "actions": [
+   {
+    "label": "Xuất báo cáo",
+    "permission": "reports.export"
+   }
+  ]
+ },
+ {
+  "route": "/admin/nguoi-dung",
+  "area": "admin",
+  "title": "Người dùng",
+  "perm": "users.view",
+  "endpoints": [
+   "GET /users",
+   "GET /users/{id}",
+   "POST /users",
+   "PUT /users/{id}",
+   "PUT /users/{id}/role",
+   "POST /users/{id}/reset-password",
+   "POST /users/{id}/deactivate",
+   "POST /users/{id}/activate"
+  ],
+  "actions": [
+   {
+    "label": "Thêm người dùng",
+    "permission": "users.create"
+   },
+   {
+    "label": "Sửa",
+    "permission": "users.update"
+   },
+   {
+    "label": "Gán vai trò",
+    "permission": "users.assign-role"
+   },
+   {
+    "label": "Đặt lại mật khẩu",
+    "permission": "users.reset-password"
+   },
+   {
+    "label": "Vô hiệu hóa",
+    "permission": "users.delete"
+   }
+  ]
+ },
+ {
+  "route": "/admin/vai-tro",
+  "area": "admin",
+  "title": "Vai trò và quyền",
+  "perm": "roles.view",
+  "endpoints": [
+   "GET /roles",
+   "GET /permissions",
+   "POST /roles",
+   "PUT /roles/{id}",
+   "DELETE /roles/{id}",
+   "PUT /roles/{id}/permissions"
+  ],
+  "actions": [
+   {
+    "label": "Thêm vai trò",
+    "permission": "roles.create"
+   },
+   {
+    "label": "Sửa vai trò",
+    "permission": "roles.update"
+   },
+   {
+    "label": "Xóa vai trò",
+    "permission": "roles.delete"
+   },
+   {
+    "label": "Gán quyền",
+    "permission": "roles.assign"
+   }
+  ]
+ },
+ {
+  "route": "/admin/nhat-ky",
+  "area": "admin",
+  "title": "Nhật ký kiểm toán",
+  "perm": "audit.view",
+  "endpoints": [
+   "GET /audit-logs"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/admin/cau-hinh",
+  "area": "admin",
+  "title": "Cấu hình nghiệp vụ",
+  "perm": "settings.view",
+  "endpoints": [
+   "GET /system/settings",
+   "PUT /system/settings/{key}"
+  ],
+  "actions": [
+   {
+    "label": "Sửa cấu hình",
+    "permission": "settings.manage"
+   }
+  ]
+ },
+ {
+  "route": "/admin/tac-vu",
+  "area": "admin",
+  "title": "Tác vụ nền",
+  "perm": "jobs.view",
+  "endpoints": [
+   "GET /system/jobs",
+   "POST /system/jobs/{name}/run"
+  ],
+  "actions": [
+   {
+    "label": "Chạy tác vụ",
+    "permission": "jobs.run"
+   }
+  ]
+ },
+ {
+  "route": "/",
+  "area": "portal",
+  "title": "Trang chủ",
+  "perm": "PUBLIC",
+  "endpoints": [
+   "GET /public/banners",
+   "GET /public/announcements",
+   "GET /public/liturgical/today",
+   "GET /public/news",
+   "GET /public/stats"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/thong-bao",
+  "area": "portal",
+  "title": "Thông báo giáo xứ",
+  "perm": "PUBLIC",
+  "endpoints": [
+   "GET /public/announcements"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/tin-tuc",
+  "area": "portal",
+  "title": "Tin Giáo hội",
+  "perm": "PUBLIC",
+  "endpoints": [
+   "GET /public/news",
+   "GET /public/news/image"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/thu-vien",
+  "area": "portal",
+  "title": "Thư viện tài liệu",
+  "perm": "PUBLIC",
+  "endpoints": [
+   "GET /public/documents",
+   "GET /public/documents/{id}/download"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/ban-huynh-truong",
+  "area": "portal",
+  "title": "Ban huynh trưởng",
+  "perm": "PUBLIC",
+  "endpoints": [
+   "GET /public/leaders"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/lich-phung-vu",
+  "area": "portal",
+  "title": "Lịch phụng vụ",
+  "perm": "PUBLIC",
+  "endpoints": [
+   "GET /public/liturgical/date/{date}",
+   "GET /public/liturgical/month/{year}/{month}",
+   "GET /public/liturgical/today"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/xac-thuc-chung-chi",
+  "area": "portal",
+  "title": "Xác thực chứng chỉ",
+  "perm": "PUBLIC",
+  "endpoints": [
+   "GET /public/certificates/verify",
+   "GET /public/certificates/pdf"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/phu-huynh",
+  "area": "guardian",
+  "title": "Các con của tôi",
+  "perm": "portal.children.view",
+  "endpoints": [
+   "GET /portal/children",
+   "GET /portal/announcements"
+  ],
+  "actions": []
+ },
+ {
+  "route": "/phu-huynh/{id}",
+  "area": "guardian",
+  "title": "Hồ sơ của con",
+  "perm": "portal.children.view",
+  "endpoints": [
+   "GET /portal/children/{id}",
+   "GET /portal/children/{id}/grades",
+   "GET /portal/children/{id}/certificates",
+   "GET /portal/children/{id}/certificates/{certificateId}/pdf"
+  ],
+  "actions": []
+ }
+]

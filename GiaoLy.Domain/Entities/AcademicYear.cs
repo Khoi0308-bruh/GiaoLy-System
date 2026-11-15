@@ -1,29 +1,49 @@
 namespace GiaoLy.Domain.Entities;
 
-/// <summary>
-/// Entity Niên khóa Giáo lý.
-/// IsLocked: Khi đã khóa, sổ điểm không thể sửa nữa (tự động set khi quá EndDate).
-/// IsArchived: Niên học được lưu trữ vĩnh viễn sau khi đã xử lý xong.
-/// </summary>
 public class AcademicYear
 {
-    public Guid Id { get; set; }
-    public string Name { get; set; } = string.Empty; // Ví dụ: 2025-2026
-    public DateTime StartDate { get; set; }
-    public DateTime EndDate { get; set; }
+    public Guid Id { get; set; } = Guid.NewGuid();
+    public string Name { get; set; } = string.Empty; // Niên khóa (ví dụ: "2026-2027")
+    public DateOnly StartDate { get; set; }
+    public DateOnly EndDate { get; set; }
 
-    /// <summary>Niên học hiện hành đang hoạt động (chỉ 1 niên học IsActive=true tại một thời điểm).</summary>
-    public bool IsActive { get; set; } = false;
+    // Máy trạng thái vòng đời: Planned, Active, Closing, Archived
+    public string Status { get; set; } = "Planned";
 
-    /// <summary>
-    /// Sổ điểm đã bị khóa — không cho phép sửa điểm nữa.
-    /// Tự động set = true bởi GradebookFinalizerService khi vượt quá EndDate.
-    /// </summary>
-    public bool IsLocked { get; set; } = false;
+    public DateTime? ActivatedAt { get; set; }
+    public DateTime? ClosedAt { get; set; }
+    public DateTime? ArchivedAt { get; set; }
+    public DateTime? ReopenedAt { get; set; }
+    public string? ReopenReason { get; set; }
 
-    /// <summary>
-    /// Niên học đã được lưu trữ — hiển thị trong mục lịch sử, ẩn khỏi danh sách hoạt động.
-    /// Tự động set = true cùng lúc với IsLocked.
-    /// </summary>
-    public bool IsArchived { get; set; } = false;
+    public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
+    public DateTime? UpdatedAt { get; set; }
+    public byte[]? RowVersion { get; set; }
+
+    // Compatibility properties
+    public bool IsActive
+    {
+        get => Status == "Active";
+        set
+        {
+            if (value && Status != "Active") Status = "Active";
+        }
+    }
+
+    public bool IsLocked
+    {
+        get => Status == "Closing" || Status == "Archived";
+        set { }
+    }
+
+    public bool IsArchived
+    {
+        get => Status == "Archived";
+        set
+        {
+            if (value) Status = "Archived";
+        }
+    }
+
+    public ICollection<ClassRoom> ClassRooms { get; set; } = new List<ClassRoom>();
 }

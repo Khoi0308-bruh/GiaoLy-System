@@ -1,54 +1,28 @@
-using GiaoLy.Domain.Data;
+using System.Threading;
+using System.Threading.Tasks;
+using GiaoLy.API.Common;
+using GiaoLy.Application.Stats.Contracts;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Caching.Memory;
 
 namespace GiaoLy.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
 public class StatsController : ControllerBase
 {
-    private readonly AppDbContext _context;
-    private readonly IMemoryCache _cache;
+    private readonly IPublicStatsService _statsService;
 
-    public StatsController(AppDbContext context, IMemoryCache cache)
+    public StatsController(IPublicStatsService statsService)
     {
-        _context = context;
-        _cache = cache;
+        _statsService = statsService;
     }
 
-    /// <summary>
-    /// Lấy thống kê chung cho trang chủ public.
-    /// Dữ liệu được cache 15 phút để giảm tải CSDL.
-    /// </summary>
-    [HttpGet("public")]
+    [HttpGet("api/v1/public/stats")]
+    [HttpGet("api/Stats/public")]
     [AllowAnonymous]
-    public async Task<IActionResult> GetPublicStats()
+    public async Task<IActionResult> GetPublicStats(CancellationToken ct)
     {
-        const string cacheKey = "PublicHomePageStats";
-
-        if (!_cache.TryGetValue(cacheKey, out object? cachedStats))
-        {
-            var studentCount = await _context.Students.CountAsync();
-            var activeClassCount = await _context.AcademicYears.CountAsync(x => x.IsActive);
-            var certificateCount = await _context.Certificates.CountAsync();
-
-            cachedStats = new
-            {
-                studentCount,
-                activeClassCount,
-                certificateCount
-            };
-
-            // Lưu cache 15 phút
-            var cacheOptions = new MemoryCacheEntryOptions()
-                .SetAbsoluteExpiration(TimeSpan.FromMinutes(15));
-            
-            _cache.Set(cacheKey, cachedStats, cacheOptions);
-        }
-
-        return Ok(cachedStats);
+        var result = await _statsService.GetPublicStatsAsync(ct);
+        return result.ToActionResult();
     }
 }

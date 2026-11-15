@@ -1,173 +1,103 @@
-using GiaoLy.Domain.Data;
-using GiaoLy.Domain.Entities;
-using Microsoft.AspNetCore.Authorization;
+using GiaoLy.API.Authorization;
+using GiaoLy.API.Common;
+using GiaoLy.Application.Common.Paging;
+using GiaoLy.Application.Identity.Contracts;
+using GiaoLy.Application.Identity.Dtos;
+using GiaoLy.Domain.Constants;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using GiaoLy.API.Helpers;
 
 namespace GiaoLy.API.Controllers;
 
 [ApiController]
-[Route("api/[controller]")]
+[Route("api/v1/users")]
+[Route("api/users")]
 public class UserController : ControllerBase
 {
-    private readonly AppDbContext _context;
+    private readonly IUserService _userService;
 
-    public UserController(AppDbContext context)
+    public UserController(IUserService userService)
     {
-        _context = context;
+        _userService = userService;
     }
 
-    /// <summary>GET liệt kê toàn bộ tài khoản người dùng</summary>
     [HttpGet]
-    [RequirePermission("users.view")]
-    public async Task<ActionResult<IEnumerable<UserDto>>> GetUsers()
+    [RequirePermission(Permissions.Users.View)]
+    public async Task<IActionResult> GetUsers(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] string? search = null,
+        [FromQuery] string? role = null,
+        [FromQuery] int? branchId = null,
+        [FromQuery] bool? isActive = null,
+        CancellationToken ct = default)
     {
-        var users = await _context.Users
-            .OrderByDescending(u => u.CreatedAt)
-            .Select(u => new UserDto
-            {
-                Id = u.Id,
-                Username = u.Username,
-                FullName = u.FullName,
-                Role = u.Role,
-                RoleId = u.RoleId,
-                Branch = u.Branch,
-                CreatedAt = u.CreatedAt
-            })
-            .ToListAsync();
-
-        return Ok(users);
+        var paging = new PagingRequest { Page = page, PageSize = pageSize, Search = search };
+        var result = await _userService.GetUsersAsync(paging, role, branchId, isActive, ct);
+        return result.ToActionResult();
     }
 
-    /// <summary>POST tạo tài khoản người dùng mới</summary>
+    [HttpGet("{id:guid}")]
+    [RequirePermission(Permissions.Users.View)]
+    public async Task<IActionResult> GetUserById(Guid id, CancellationToken ct)
+    {
+        var result = await _userService.GetUserByIdAsync(id, ct);
+        return result.ToActionResult();
+    }
+
     [HttpPost]
-    [RequirePermission("users.create")]
-    public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request)
+    [RequirePermission(Permissions.Users.Create)]
+    public async Task<IActionResult> CreateUser([FromBody] CreateUserRequest request, CancellationToken ct)
     {
-        if (string.IsNullOrWhiteSpace(request.Username))
-            return BadRequest("Tên tài khoản không được để trống.");
-
-        var rawPassword = string.IsNullOrWhiteSpace(request.Password) ? "123456789" : request.Password;
-
-        var exists = await _context.Users.AnyAsync(u => u.Username.ToLower() == request.Username.ToLower());
-        if (exists) return BadRequest("Tên tài khoản này đã tồn tại trên hệ thống.");
-
-        // Bản vá: Ép chuỗi số quyền để khớp chính xác với cấu trúc phân quyền JWT
-        string mappedRole = request.Role switch
+        var result = await _userService.CreateUserAsync(request, ct);
+        if (result.IsSuccess && result.Value.User != null)
         {
-            "1" or "Admin" => "1",
-            "2" or "Secretary" => "2",
-            "3" or "Moderator" => "3",
-            _ => "4" // Viewer / Giáo lý viên thường
-        };
+            return CreatedAtAction(nameof(GetUserById), new { id = result.Value.User.Id }, new
+            {
+                user = result.Value.User,
+                temporaryPassword = result.Value.TemporaryPassword
+            });
+        }
 
-        var user = new User
-        {
-            Id = Guid.NewGuid(),
-            Username = request.Username,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(rawPassword),
-            FullName = request.FullName,
-            Role = mappedRole,
-            RoleId = request.RoleId,
-            Branch = request.Branch,
-            CreatedAt = DateTime.UtcNow
-        };
-
-        _context.Users.Add(user);
-        await _context.SaveChangesAsync();
-
-        return Ok(new UserDto
-        {
-            Id = user.Id,
-            Username = user.Username,
-            FullName = user.FullName,
-            Role = user.Role,
-            RoleId = user.RoleId,
-            Branch = user.Branch,
-            CreatedAt = user.CreatedAt
-        });
+        return result.ToActionResult();
     }
 
-    /// <summary>PUT cập nhật quyền hạn / phân bổ ngành</summary>
     [HttpPut("{id:guid}")]
-    [RequirePermission("users.update")]
-    public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequest request)
+    [RequirePermission(Permissions.Users.Update)]
+    public async Task<IActionResult> UpdateUser(Guid id, [FromBody] UpdateUserRequest request, CancellationToken ct)
     {
-        var user = await _context.Users.FindAsync(id);
-        if (user == null) return NotFound();
-
-        // Bản vá: Ép chuỗi số quyền để khớp chính xác với cấu trúc phân quyền JWT
-        string mappedRole = request.Role switch
-        {
-            "1" or "Admin" => "1",
-            "2" or "Secretary" => "2",
-            "3" or "Moderator" => "3",
-            _ => "4" // Viewer / Giáo lý viên thường
-        };
-
-        user.FullName = request.FullName;
-        user.Role = mappedRole;
-        if (request.RoleId.HasValue || request.RoleId == Guid.Empty) 
-        {
-             user.RoleId = request.RoleId != Guid.Empty ? request.RoleId : null;
-        }
-        user.Branch = request.Branch;
-
-        if (!string.IsNullOrWhiteSpace(request.Password))
-        {
-            user.PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password);
-        }
-
-        await _context.SaveChangesAsync();
-        return NoContent();
+        var result = await _userService.UpdateUserAsync(id, request, ct);
+        return result.ToActionResult();
     }
 
-    /// <summary>DELETE vô hiệu hóa / xóa tài khoản</summary>
-    [HttpDelete("{id:guid}")]
-    [RequirePermission("users.delete")]
-    public async Task<IActionResult> DeleteUser(Guid id)
+    [HttpPut("{id:guid}/role")]
+    [RequirePermission(Permissions.Users.AssignRole)]
+    public async Task<IActionResult> AssignRole(Guid id, [FromBody] AssignRoleRequest request, CancellationToken ct)
     {
-        var user = await _context.Users.FindAsync(id);
-        if (user == null) return NotFound();
-
-        // Không cho phép Admin tự xóa chính mình
-        if (user.Username == "admin")
-            return BadRequest("Không thể xóa tài khoản Quản trị viên hệ thống.");
-
-        _context.Users.Remove(user);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
+        var result = await _userService.AssignRoleAsync(id, request, ct);
+        return result.ToActionResult();
     }
-}
 
-public class UserDto
-{
-    public Guid Id { get; set; }
-    public string Username { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string Role { get; set; } = string.Empty;
-    public Guid? RoleId { get; set; }
-    public int? Branch { get; set; }
-    public DateTime CreatedAt { get; set; }
-}
+    [HttpPost("{id:guid}/reset-password")]
+    [RequirePermission(Permissions.Users.ResetPassword)]
+    public async Task<IActionResult> ResetPassword(Guid id, CancellationToken ct)
+    {
+        var result = await _userService.ResetPasswordAsync(id, ct);
+        return result.ToActionResult();
+    }
 
-public class CreateUserRequest
-{
-    public string Username { get; set; } = string.Empty;
-    public string Password { get; set; } = string.Empty;
-    public string FullName { get; set; } = string.Empty;
-    public string Role { get; set; } = "Viewer";
-    public Guid? RoleId { get; set; }
-    public int? Branch { get; set; }
-}
+    [HttpPost("{id:guid}/deactivate")]
+    [RequirePermission(Permissions.Users.Delete)]
+    public async Task<IActionResult> Deactivate(Guid id, CancellationToken ct)
+    {
+        var result = await _userService.DeactivateUserAsync(id, ct);
+        return result.ToActionResult();
+    }
 
-public class UpdateUserRequest
-{
-    public string FullName { get; set; } = string.Empty;
-    public string Role { get; set; } = "Viewer";
-    public Guid? RoleId { get; set; }
-    public int? Branch { get; set; }
-    public string? Password { get; set; } // Nếu cung cấp thì cập nhật, ngược lại giữ nguyên
+    [HttpPost("{id:guid}/activate")]
+    [RequirePermission(Permissions.Users.Update)]
+    public async Task<IActionResult> Activate(Guid id, CancellationToken ct)
+    {
+        var result = await _userService.ActivateUserAsync(id, ct);
+        return result.ToActionResult();
+    }
 }
