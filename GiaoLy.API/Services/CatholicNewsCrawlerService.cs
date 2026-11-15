@@ -1,7 +1,11 @@
+using System.Net;
+using System.Security.Cryptography;
 using System.ServiceModel.Syndication;
+using System.Text;
 using System.Xml;
 using System.Xml.Linq;
 using System.Text.RegularExpressions;
+using GiaoLy.Domain.Constants;
 using GiaoLy.Domain.Data;
 using GiaoLy.Domain.Entities;
 using Microsoft.Extensions.DependencyInjection;
@@ -33,6 +37,12 @@ public class CatholicNewsCrawlerService : BackgroundService
 
     // Maximum articles saved per source per crawl run
     private const int MaxArticlesPerSource = 50;
+
+    // Số lần thử lại khi lấy RSS thất bại tạm thời (mạng, 5xx, 408, 429)
+    private const int MaxFeedFetchAttempts = 3;
+
+    // Thời gian chờ cơ sở cho backoff lũy thừa: 2s → 4s (kèm jitter ngẫu nhiên)
+    private static readonly TimeSpan FeedRetryBaseDelay = TimeSpan.FromSeconds(2);
 
     public CatholicNewsCrawlerService(
         ILogger<CatholicNewsCrawlerService> logger,
@@ -130,78 +140,182 @@ public class CatholicNewsCrawlerService : BackgroundService
         using var scope     = _serviceProvider.CreateScope();
         var       dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-        var feeds = await dbContext.NewsSources
-            .Where(s => s.IsActive)
-            .ToListAsync(stoppingToken);
+        // Ghi nhận lượt chạy để màn hình "Tác vụ nền" thấy được cả cron tự động.
+        var run = await BackgroundJobRunRecorder.StartAsync(
+            dbContext, BackgroundJobNames.NewsCrawler, nameof(CatholicNewsCrawlerService), stoppingToken);
 
-        foreach (var feed in feeds)
+        var totalSaved = 0;
+        var failedFeeds = 0;
+
+        try
         {
-            if (stoppingToken.IsCancellationRequested) break;
+            var feeds = await dbContext.NewsSources
+                .Where(s => s.IsActive)
+                .ToListAsync(stoppingToken);
 
-            _logger.LogInformation("Đang lấy tin tức từ {Source}...", feed.Name);
+            if (feeds.Count == 0)
+            {
+                await BackgroundJobRunRecorder.FinishAsync(
+                    dbContext, run, BackgroundJobRunRecorder.Succeeded, "Không có nguồn tin RSS nào đang kích hoạt.");
+                return;
+            }
 
+            foreach (var feed in feeds)
+            {
+                if (stoppingToken.IsCancellationRequested) break;
+
+                _logger.LogInformation("Đang lấy tin tức từ {Source}...", feed.Name);
+
+                try
+                {
+                    using var stream = await FetchFeedWithRetryAsync(feed.RssUrl, stoppingToken);
+                    if (stream is null)
+                    {
+                        failedFeeds++;
+                        continue;
+                    }
+
+                    using var xmlReader       = XmlReader.Create(stream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore });
+                    var       syndicationFeed = SyndicationFeed.Load(xmlReader);
+
+                    int savedCount = 0;
+
+                    foreach (var item in syndicationFeed.Items)
+                    {
+                        // Honour the per-source cap
+                        if (savedCount >= MaxArticlesPerSource) break;
+
+                        string link = item.Links.FirstOrDefault()?.Uri?.ToString() ?? string.Empty;
+                        if (string.IsNullOrEmpty(link)) continue;
+
+                        // Skip duplicates
+                        if (await dbContext.NewsArticles.AnyAsync(n => n.Link == link, stoppingToken))
+                            continue;
+
+                        string imageUrl = ExtractImageUrl(item);
+
+                        var news = new NewsArticle
+                        {
+                            Id            = Guid.NewGuid(),
+                            Title         = item.Title?.Text ?? "Không tiêu đề",
+                            Summary       = StripHtml(item.Summary?.Text ?? string.Empty),
+                            Link          = link,
+                            LinkHash      = ComputeSha256(link),
+                            ImageUrl      = imageUrl,
+                            SourceId      = feed.Id,
+                            Category      = "General",
+                            PublishedDate = item.PublishDate.UtcDateTime,
+                            CrawledDate   = DateTime.UtcNow,
+                            IsActive      = true
+                        };
+
+                        dbContext.NewsArticles.Add(news);
+                        savedCount++;
+                    }
+
+                    if (savedCount > 0)
+                    {
+                        await dbContext.SaveChangesAsync(stoppingToken);
+                        totalSaved += savedCount;
+                        _logger.LogInformation(
+                            "Đã lưu {Count}/{Max} tin tức mới từ {Source}.",
+                            savedCount, MaxArticlesPerSource, feed.Name);
+                    }
+                    else
+                    {
+                        _logger.LogInformation("Không có tin mới từ {Source}.", feed.Name);
+                    }
+                }
+                catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+                {
+                    throw;
+                }
+                catch (Exception ex)
+                {
+                    failedFeeds++;
+
+                    // Bỏ các entity đang chờ ghi của nguồn này, nếu không DbContext sẽ tiếp tục
+                    // ném lại đúng lỗi đó ở mọi lần SaveChanges kế tiếp (kể cả khi ghi BackgroundJobRun).
+                    dbContext.ChangeTracker.Clear();
+
+                    _logger.LogWarning("Không thể tải RSS từ {Source}. Lỗi: {Message}", feed.Name, ex.Message);
+                }
+            }
+
+            var message = $"Đã lưu {totalSaved} bài mới từ {feeds.Count - failedFeeds}/{feeds.Count} nguồn tin"
+                          + (failedFeeds > 0 ? $" ({failedFeeds} nguồn lỗi)." : ".");
+
+            await BackgroundJobRunRecorder.FinishAsync(dbContext, run, BackgroundJobRunRecorder.Succeeded, message);
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // Ứng dụng đang tắt: ghi lại trạng thái rồi thoát êm, không coi là lỗi.
+            await BackgroundJobRunRecorder.FinishAsync(
+                dbContext, run, BackgroundJobRunRecorder.Skipped, "Lượt chạy bị huỷ do ứng dụng dừng.");
+        }
+        catch (Exception ex)
+        {
+            await BackgroundJobRunRecorder.FinishAsync(
+                dbContext, run, BackgroundJobRunRecorder.Failed, $"Lỗi: {ex.Message}");
+            throw;
+        }
+    }
+
+    /// <summary>
+    /// Lấy nội dung RSS với retry + backoff lũy thừa (jitter) cho các lỗi tạm thời.
+    /// Trả về <c>null</c> khi mọi lần thử đều thất bại hoặc lỗi không thể phục hồi (4xx).
+    /// </summary>
+    private async Task<Stream?> FetchFeedWithRetryAsync(string url, CancellationToken ct)
+    {
+        for (var attempt = 1; attempt <= MaxFeedFetchAttempts; attempt++)
+        {
             try
             {
-                using var stream          = await _httpClient.GetStreamAsync(feed.RssUrl, stoppingToken);
-                using var xmlReader       = XmlReader.Create(stream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Ignore });
-                var       syndicationFeed = SyndicationFeed.Load(xmlReader);
+                using var response = await _httpClient.GetAsync(url, HttpCompletionOption.ResponseHeadersRead, ct);
 
-                int savedCount = 0;
-
-                foreach (var item in syndicationFeed.Items)
+                if (response.IsSuccessStatusCode)
                 {
-                    // Honour the per-source cap
-                    if (savedCount >= MaxArticlesPerSource) break;
-
-                    string link = item.Links.FirstOrDefault()?.Uri?.ToString() ?? string.Empty;
-                    if (string.IsNullOrEmpty(link)) continue;
-
-                    // Skip duplicates
-                    if (await dbContext.NewsArticles.AnyAsync(n => n.Link == link, stoppingToken))
-                        continue;
-
-                    string imageUrl = ExtractImageUrl(item);
-
-                    var news = new NewsArticle
-                    {
-                        Id            = Guid.NewGuid(),
-                        Title         = item.Title?.Text ?? "Không tiêu đề",
-                        Summary       = StripHtml(item.Summary?.Text ?? string.Empty),
-                        Link          = link,
-                        ImageUrl      = imageUrl,
-                        SourceId      = feed.Id,
-                        Category      = "General",
-                        PublishedDate = item.PublishDate.UtcDateTime,
-                        CrawledDate   = DateTime.UtcNow,
-                        IsActive      = true
-                    };
-
-                    dbContext.NewsArticles.Add(news);
-                    savedCount++;
+                    await using var body = await response.Content.ReadAsStreamAsync(ct);
+                    var buffer = new MemoryStream();
+                    await body.CopyToAsync(buffer, ct);
+                    buffer.Position = 0;
+                    return buffer;
                 }
 
-                if (savedCount > 0)
+                if (!IsTransient(response.StatusCode))
                 {
-                    await dbContext.SaveChangesAsync(stoppingToken);
-                    _logger.LogInformation(
-                        "Đã lưu {Count}/{Max} tin tức mới từ {Source}.",
-                        savedCount, MaxArticlesPerSource, feed.Name);
+                    _logger.LogWarning(
+                        "Nguồn tin {Url} trả về HTTP {Status} — không thử lại.", url, (int)response.StatusCode);
+                    return null;
                 }
-                else
-                {
-                    _logger.LogInformation("Không có tin mới từ {Source}.", feed.Name);
-                }
+
+                _logger.LogWarning(
+                    "Lỗi tạm thời HTTP {Status} khi lấy {Url} (lần {Attempt}/{Max}).",
+                    (int)response.StatusCode, url, attempt, MaxFeedFetchAttempts);
             }
-            catch (Exception ex)
+            catch (OperationCanceledException) when (ct.IsCancellationRequested)
             {
-                _logger.LogWarning("Không thể tải RSS từ {Source}. Lỗi: {Message}", feed.Name, ex.Message);
+                throw;
             }
+            catch (Exception ex) when (ex is HttpRequestException or IOException or TaskCanceledException)
+            {
+                _logger.LogWarning(
+                    ex, "Không lấy được RSS {Url} (lần {Attempt}/{Max}).", url, attempt, MaxFeedFetchAttempts);
+            }
+
+            if (attempt >= MaxFeedFetchAttempts) break;
+
+            var delay = FeedRetryBaseDelay * Math.Pow(2, attempt - 1)
+                        + TimeSpan.FromMilliseconds(Random.Shared.Next(0, 250));
+            await Task.Delay(delay, ct);
         }
 
-        // Force garbage collection after crawling all feeds to free up memory on low-RAM servers
-        GC.Collect();
-        GC.WaitForPendingFinalizers();
+        return null;
     }
+
+    private static bool IsTransient(HttpStatusCode status)
+        => (int)status >= 500
+           || status is HttpStatusCode.RequestTimeout or HttpStatusCode.TooManyRequests;
 
     // ── Image extraction ──────────────────────────────────────────────────────
 
@@ -269,4 +383,11 @@ public class CatholicNewsCrawlerService : BackgroundService
 
     private static string StripHtml(string html) =>
         Regex.Replace(html, "<.*?>", string.Empty, RegexOptions.Singleline).Trim();
+
+    /// <summary>
+    /// Hash liên kết bài viết — khớp với cách <c>BackgroundJobService</c> tính,
+    /// và là giá trị bắt buộc của unique index <c>UQ_NewsArticles_LinkHash</c>.
+    /// </summary>
+    private static string ComputeSha256(string input)
+        => Convert.ToHexString(SHA256.HashData(Encoding.UTF8.GetBytes(input))).ToLowerInvariant();
 }

@@ -1,4 +1,5 @@
 using GiaoLy.API.Helpers;
+using GiaoLy.Domain.Constants;
 using GiaoLy.Domain.Data;
 using Microsoft.EntityFrameworkCore;
 
@@ -44,18 +45,26 @@ public class GradebookFinalizerService : BackgroundService
     {
         _logger.LogInformation("[GradebookFinalizer] Đã khởi động. Sẽ tự quét sau {Delay} giây.", StartupDelay.TotalSeconds);
 
-        // Chờ các service khác khởi động xong (đặc biệt là DbSeeder)
-        await Task.Delay(StartupDelay, stoppingToken);
-
-        // LẦN ĐẦU: Quét ngay lập tức — cơ chế "Tỉnh giấc tự quét"
-        _logger.LogInformation("[GradebookFinalizer] Đang chạy lượt quét đầu tiên (Startup Scan)...");
-        await CheckAndFinalizeAsync();
-
-        // SAU ĐÓ: Lặp lại định kỳ mỗi 6 tiếng
-        using var timer = new PeriodicTimer(CheckInterval);
-        while (await timer.WaitForNextTickAsync(stoppingToken))
+        try
         {
-            await CheckAndFinalizeAsync();
+            // Chờ các service khác khởi động xong (đặc biệt là DbSeeder)
+            await Task.Delay(StartupDelay, stoppingToken);
+
+            // LẦN ĐẦU: Quét ngay lập tức — cơ chế "Tỉnh giấc tự quét"
+            _logger.LogInformation("[GradebookFinalizer] Đang chạy lượt quét đầu tiên (Startup Scan)...");
+            await CheckAndFinalizeAsync(stoppingToken);
+
+            // SAU ĐÓ: Lặp lại định kỳ mỗi 6 tiếng
+            using var timer = new PeriodicTimer(CheckInterval);
+            while (await timer.WaitForNextTickAsync(stoppingToken))
+            {
+                await CheckAndFinalizeAsync(stoppingToken);
+            }
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            // Dừng theo yêu cầu tắt ứng dụng — không phải lỗi, không cần throw.
+            _logger.LogInformation("[GradebookFinalizer] Đã dừng theo yêu cầu tắt ứng dụng.");
         }
     }
 
@@ -64,23 +73,29 @@ public class GradebookFinalizerService : BackgroundService
     /// Sử dụng IServiceScopeFactory vì DbContext là Scoped service,
     /// không thể inject trực tiếp vào Singleton BackgroundService.
     /// </summary>
-    private async Task CheckAndFinalizeAsync()
+    private async Task CheckAndFinalizeAsync(CancellationToken stoppingToken)
     {
+        using var scope = _scopeFactory.CreateScope();
+        var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+        // Ghi nhận lượt chạy để màn hình "Tác vụ nền" thấy được cả lượt tự động.
+        var run = await BackgroundJobRunRecorder.StartAsync(
+            context, BackgroundJobNames.GradebookCloser, nameof(GradebookFinalizerService), stoppingToken);
+
         try
         {
-            using var scope = _scopeFactory.CreateScope();
-            var context = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
-            var today = DateTimeHelper.GetVnToday();
+            var today = DateOnly.FromDateTime(DateTimeHelper.GetVnToday());
 
             // Tìm niên học cần khóa: đang hoạt động, chưa khóa, đã quá EndDate
             var expiredYears = await context.AcademicYears
-                .Where(y => y.IsActive && !y.IsLocked && y.EndDate.Date < today)
-                .ToListAsync();
+                .Where(y => y.IsActive && !y.IsLocked && y.EndDate < today)
+                .ToListAsync(stoppingToken);
 
-            if (!expiredYears.Any())
+            if (expiredYears.Count == 0)
             {
                 _logger.LogDebug("[GradebookFinalizer] Không có niên học nào cần khóa lúc {Time}.", DateTimeHelper.GetVnNow());
+                await BackgroundJobRunRecorder.FinishAsync(
+                    context, run, BackgroundJobRunRecorder.Succeeded, "Không có niên học nào quá hạn cần khóa sổ.");
                 return;
             }
 
@@ -96,11 +111,23 @@ public class GradebookFinalizerService : BackgroundService
                     year.EndDate.ToString("dd/MM/yyyy"));
             }
 
-            await context.SaveChangesAsync();
+            await context.SaveChangesAsync(stoppingToken);
             _logger.LogInformation("[GradebookFinalizer] Đã xử lý {Count} niên học.", expiredYears.Count);
+
+            await BackgroundJobRunRecorder.FinishAsync(
+                context, run, BackgroundJobRunRecorder.Succeeded,
+                $"Đã tự động khóa sổ {expiredYears.Count} niên học: {string.Join(", ", expiredYears.Select(y => y.Name))}.");
+        }
+        catch (OperationCanceledException) when (stoppingToken.IsCancellationRequested)
+        {
+            await BackgroundJobRunRecorder.FinishAsync(
+                context, run, BackgroundJobRunRecorder.Skipped, "Lượt chạy bị huỷ do ứng dụng dừng.");
         }
         catch (Exception ex)
         {
+            await BackgroundJobRunRecorder.FinishAsync(
+                context, run, BackgroundJobRunRecorder.Failed, $"Lỗi: {ex.Message}");
+
             // Log lỗi nhưng KHÔNG throw — không muốn crash toàn bộ Background Service
             _logger.LogError(ex, "[GradebookFinalizer] Lỗi khi kiểm tra khóa sổ điểm.");
         }
