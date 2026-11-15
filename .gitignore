@@ -1,0 +1,65 @@
+# =====================================================================
+# GiaoLy — chặn bí mật, build output và artifact công cụ quay lại repo
+# =====================================================================
+
+# ── Bí mật & cấu hình cục bộ ─────────────────────────────────────────
+.env
+.env.*
+!.env.example
+*.p12
+*.pfx
+*.pem
+*.key
+secrets.json
+appsettings.*.local.json
+.dev.vars
+
+# Sao lưu / dump cơ sở dữ liệu (không bao giờ commit)
+database/backup/
+*.bak
+*.trn
+*.mdf
+*.ldf
+
+# ── .NET ─────────────────────────────────────────────────────────────
+[Bb]in/
+[Oo]bj/
+.vs/
+*.user
+*.suo
+*.userprefs
+TestResults/
+coverage/
+artifacts/
+*.nupkg
+msbuild.log
+*.binlog
+
+# ── Node / Nuxt ──────────────────────────────────────────────────────
+node_modules/
+.pnpm-store/
+.nuxt/
+.output/
+.nitro/
+.cache/
+dist/
+coverage/
+*.tsbuildinfo
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# ── Playwright / e2e ─────────────────────────────────────────────────
+playwright-report/
+test-results/
+blob-report/
+playwright/.cache/
+
+# ── Log, file tạm, hệ điều hành ──────────────────────────────────────
+*.log
+tmp/
+temp/
+.DS_Store
+Thumbs.db
+desktop.ini
