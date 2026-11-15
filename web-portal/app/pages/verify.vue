@@ -11,7 +11,7 @@
           Tra Cứu Điểm Giáo Lý
         </h1>
         <p class="text-yellow-100 max-w-md mx-auto text-sm">
-          Đoàn sinh và phụ huynh nhập họ tên hoặc mã đoàn sinh để xem điểm và thông tin học vụ.
+          Nhập mã đoàn sinh, hoặc họ tên đầy đủ kèm ngày sinh, để xem lớp và điểm trung bình.
         </p>
       </div>
     </section>
@@ -21,17 +21,25 @@
       <div class="glass-card p-6 animate-fade-in-up">
         <form
           id="verify-search-form"
-          class="flex gap-3"
+          class="flex flex-col sm:flex-row gap-3"
           @submit.prevent="search"
         >
           <UInput
             id="verify-search-input"
             v-model="query"
             size="lg"
-            placeholder="Nhập họ tên hoặc mã đoàn sinh..."
+            placeholder="Mã đoàn sinh (VD: TN260001) hoặc họ tên đầy đủ..."
             class="flex-1"
             :disabled="loading"
             leading-icon="i-heroicons-magnifying-glass"
+          />
+          <UInput
+            id="verify-birthdate-input"
+            v-model="birthDate"
+            type="date"
+            size="lg"
+            class="sm:w-48"
+            :disabled="loading"
           />
           <UButton
             id="verify-search-btn"
@@ -45,7 +53,7 @@
           </UButton>
         </form>
         <p class="text-xs text-stone-400 mt-3 text-center">
-          Thông tin chỉ dành cho mục đích tra cứu học vụ nội bộ sứ đoàn.
+          Tra theo họ tên bắt buộc nhập đúng ngày sinh. Thông tin chỉ dành cho mục đích tra cứu học vụ.
         </p>
       </div>
     </section>
@@ -58,91 +66,73 @@
         class="space-y-4"
       >
         <div
-          v-for="n in 3"
+          v-for="n in 1"
           :key="n"
-          class="h-20 bg-stone-100 dark:bg-stone-800 rounded-2xl animate-pulse"
+          class="h-28 bg-stone-100 dark:bg-stone-800 rounded-2xl animate-pulse"
         />
       </div>
 
-      <!-- Results -->
-      <div v-else-if="results.length">
-        <p class="text-sm text-stone-500 dark:text-stone-400 mb-5">
-          Tìm thấy <strong class="text-stone-800 dark:text-white">{{ results.length }}</strong> kết quả cho "<em>{{ lastQuery }}</em>"
-        </p>
+      <!-- Result -->
+      <div
+        v-else-if="result"
+        class="glass-card p-5 animate-fade-in-up"
+      >
+        <div class="flex items-start gap-4">
+          <div :class="[branchColor(result.branch), 'rounded-xl p-3 shrink-0']">
+            <UIcon
+              name="i-heroicons-academic-cap"
+              class="w-6 h-6"
+            />
+          </div>
 
-        <div class="space-y-4">
-          <div
-            v-for="(item, i) in results"
-            :key="item.studentId"
-            :class="['glass-card p-5 animate-fade-in-up']"
-            :style="{ animationDelay: `${i * 0.06}s` }"
-          >
-            <div class="flex items-start gap-4">
-              <!-- Avatar / Icon -->
-              <div :class="[branchColor(item.branch), 'rounded-xl p-3 shrink-0']">
-                <UIcon
-                  name="i-heroicons-academic-cap"
-                  class="w-6 h-6"
-                />
+          <div class="flex-1 min-w-0">
+            <div class="flex flex-wrap items-center gap-2 mb-2">
+              <h2 class="font-bold text-stone-800 dark:text-white">
+                {{ result.displayName }}
+              </h2>
+              <UBadge
+                :color="branchBadgeColor(result.branch)"
+                variant="soft"
+                size="xs"
+              >
+                {{ result.branch || 'Chưa phân ngành' }}
+              </UBadge>
+              <span class="text-xs text-stone-400">{{ result.studentCode }}</span>
+            </div>
+
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-x-6 gap-y-1.5 text-sm">
+              <div>
+                <p class="text-[10px] text-stone-400 uppercase tracking-wider">
+                  Lớp
+                </p>
+                <p class="font-semibold text-stone-700 dark:text-stone-300">
+                  {{ result.className || '—' }}
+                </p>
               </div>
-
-              <div class="flex-1 min-w-0">
-                <div class="flex flex-wrap items-center gap-2 mb-2">
-                  <h2 class="font-bold text-stone-800 dark:text-white">
-                    {{ item.studentName }}
-                  </h2>
-                  <UBadge
-                    :color="branchBadgeColor(item.branch)"
-                    variant="soft"
-                    size="xs"
-                  >
-                    {{ item.branch }}
-                  </UBadge>
-                </div>
-
-                <div class="grid grid-cols-2 md:grid-cols-4 gap-x-6 gap-y-1.5 text-sm">
-                  <div>
-                    <p class="text-[10px] text-stone-400 uppercase tracking-wider">
-                      Lớp
-                    </p>
-                    <p class="font-semibold text-stone-700 dark:text-stone-300">
-                      {{ item.className || '—' }}
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-[10px] text-stone-400 uppercase tracking-wider">
-                      Niên khóa
-                    </p>
-                    <p class="font-semibold text-stone-700 dark:text-stone-300">
-                      {{ item.academicYear || '—' }}
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-[10px] text-stone-400 uppercase tracking-wider">
-                      Điểm Giáo Lý
-                    </p>
-                    <p :class="['font-black text-lg', gradeColor(item.averageGrade)]">
-                      {{ item.averageGrade !== null ? item.averageGrade.toFixed(1) : '—' }}
-                    </p>
-                  </div>
-                  <div>
-                    <p class="text-[10px] text-stone-400 uppercase tracking-wider">
-                      Hạnh Kiểm
-                    </p>
-                    <p class="font-semibold text-stone-700 dark:text-stone-300">
-                      {{ item.conduct || '—' }}
-                    </p>
-                  </div>
-                </div>
+              <div>
+                <p class="text-[10px] text-stone-400 uppercase tracking-wider">
+                  Niên khóa
+                </p>
+                <p class="font-semibold text-stone-700 dark:text-stone-300">
+                  {{ result.academicYear || '—' }}
+                </p>
+              </div>
+              <div>
+                <p class="text-[10px] text-stone-400 uppercase tracking-wider">
+                  Điểm Giáo Lý
+                </p>
+                <p :class="['font-black text-lg', gradeColor(result.averageGrade)]">
+                  {{ result.averageGrade !== null ? result.averageGrade.toFixed(1) : '—' }}
+                </p>
               </div>
             </div>
           </div>
         </div>
       </div>
 
-      <!-- Not found -->
+      <!-- Not found / lỗi -->
       <div
-        v-else-if="searched && !results.length"
+        v-else-if="errorMessage"
         class="text-center py-16 animate-fade-in"
       >
         <UIcon
@@ -150,10 +140,10 @@
           class="w-16 h-16 mx-auto mb-4 text-stone-300 dark:text-stone-600"
         />
         <p class="font-bold text-stone-600 dark:text-stone-400 text-lg">
-          Không tìm thấy kết quả
+          {{ errorMessage }}
         </p>
         <p class="text-stone-400 text-sm mt-2 max-w-sm mx-auto">
-          Vui lòng kiểm tra lại họ tên. Nếu vẫn không tìm thấy, hãy liên hệ thư ký sứ đoàn.
+          Nếu vẫn không tìm thấy, hãy liên hệ thư ký sứ đoàn.
         </p>
       </div>
 
@@ -167,7 +157,7 @@
           class="w-16 h-16 mx-auto mb-4"
         />
         <p class="text-stone-400 dark:text-stone-500">
-          Nhập tên để bắt đầu tra cứu
+          Nhập mã đoàn sinh hoặc họ tên để bắt đầu tra cứu
         </p>
       </div>
     </section>
@@ -181,44 +171,61 @@ useHead({ title: 'Tra Cứu Điểm Giáo Lý – Thiếu Nhi Thánh Thể' })
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
-interface VerifyResult {
-  studentId: string
-  studentName: string
-  branch: string
-  className: string
-  academicYear: string
+/** Khớp đúng 6 trường của api/v1/public/students/lookup — không có dữ liệu định danh nội bộ. */
+interface LookupResult {
+  studentCode: string
+  displayName: string
+  className: string | null
+  branch: string | null
+  academicYear: string | null
   averageGrade: number | null
-  conduct: string | null
 }
 
+const CODE_PATTERN = /^TN\d{4,}$/i
+
 const query = ref('')
-const lastQuery = ref('')
+const birthDate = ref('')
 const loading = ref(false)
-const searched = ref(false)
-const results = ref<VerifyResult[]>([])
+const result = ref<LookupResult | null>(null)
+const errorMessage = ref('')
 
 const search = async () => {
-  if (!query.value.trim()) return
+  const q = query.value.trim()
+  if (!q) return
+
+  const byCode = CODE_PATTERN.test(q)
+  if (!byCode && !birthDate.value) {
+    errorMessage.value = 'Vui lòng nhập ngày sinh khi tra cứu theo họ tên.'
+    result.value = null
+    return
+  }
+
   loading.value = true
-  searched.value = false
-  results.value = []
-  lastQuery.value = query.value
+  result.value = null
+  errorMessage.value = ''
 
   try {
-    const data = await $fetch<VerifyResult[]>(`${apiBase}/api/students/verify`, {
-      query: { q: query.value }
+    result.value = await $fetch<LookupResult>(`${apiBase}/api/v1/public/students/lookup`, {
+      query: byCode ? { code: q } : { fullName: q, birthDate: birthDate.value }
     })
-    results.value = Array.isArray(data) ? data : [data as unknown as VerifyResult]
-  } catch {
-    results.value = []
+  } catch (e) {
+    const status = (e as { statusCode?: number, status?: number })?.statusCode
+      ?? (e as { status?: number })?.status
+    result.value = null
+    errorMessage.value = status === 429
+      ? 'Bạn đã tra cứu quá nhiều lần. Vui lòng thử lại sau một phút.'
+      : status === 409
+        ? 'Có nhiều hồ sơ khớp. Vui lòng tra cứu bằng mã đoàn sinh.'
+        : status === 400
+          ? 'Thông tin nhập chưa đúng. Vui lòng kiểm tra lại.'
+          : 'Không tìm thấy hồ sơ đoàn sinh phù hợp.'
   } finally {
     loading.value = false
-    searched.value = true
   }
 }
 
 // Branch color helpers
-const branchColor = (branch: string) => {
+const branchColor = (branch: string | null) => {
   const map: Record<string, string> = {
     'Ấu Nhi': 'bg-tntt-pink-100 text-tntt-pink-600',
     'Thiếu Nhi': 'bg-tntt-green-100 text-tntt-green-600',
@@ -226,15 +233,15 @@ const branchColor = (branch: string) => {
     'Hiệp Sĩ': 'bg-tntt-gold-100 text-tntt-gold-600',
     'Huynh Trưởng': 'bg-tntt-brown-100 text-tntt-brown-600'
   }
-  return map[branch] ?? 'bg-stone-100 text-stone-600'
+  return (branch && map[branch]) || 'bg-stone-100 text-stone-600'
 }
 
-const branchBadgeColor = (branch: string): 'error' | 'success' | 'info' | 'warning' | 'secondary' | 'neutral' | 'primary' => {
+const branchBadgeColor = (branch: string | null): 'error' | 'success' | 'info' | 'warning' | 'secondary' | 'neutral' | 'primary' => {
   const map: Record<string, 'error' | 'success' | 'info' | 'warning' | 'secondary' | 'neutral' | 'primary'> = {
     'Ấu Nhi': 'error', 'Thiếu Nhi': 'success',
     'Nghĩa Sĩ': 'info', 'Hiệp Sĩ': 'warning', 'Huynh Trưởng': 'secondary'
   }
-  return map[branch] ?? 'neutral'
+  return (branch && map[branch]) || 'neutral'
 }
 
 const gradeColor = (grade: number | null) => {

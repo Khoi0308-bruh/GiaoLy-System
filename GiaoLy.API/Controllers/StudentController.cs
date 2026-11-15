@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using ClosedXML.Excel;
 using Microsoft.AspNetCore.Authorization;
+using GiaoLy.API.Authorization;
 using GiaoLy.API.Helpers;
 
 namespace GiaoLy.API.Controllers;
@@ -32,13 +33,6 @@ public class StudentController : ControllerBase
     public StudentController(AppDbContext context)
     {
         _context = context;
-    }
-
-    // 1. Lấy danh sách tất cả đoàn sinh (Dùng cho Dashboard stats - Cần refactor sau)
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Student>>> GetStudents()
-    {
-        return await _context.Students.ToListAsync();
     }
 
     [HttpGet("paged")]
@@ -530,51 +524,4 @@ public class StudentController : ControllerBase
         return Ok(new { message = $"Đã xếp lớp thành công cho {students.Count} đoàn sinh." });
     }
 
-    [AllowAnonymous]
-    [HttpGet("verify")]
-    public async Task<IActionResult> VerifyStudent([FromQuery] string q)
-    {
-        if (string.IsNullOrWhiteSpace(q) || q.Length < 2)
-            return BadRequest(new { message = "Vui lòng nhập ít nhất 2 ký tự." });
-
-        var keyword = q.Trim().ToLower();
-
-        var students = await _context.Students
-            .Where(s => s.IsActive &&
-                (s.FullName.ToLower().Contains(keyword) ||
-                 s.HolyName.ToLower().Contains(keyword)))
-            .OrderBy(s => s.FullName)
-            .Take(10)
-            .ToListAsync();
-
-        var studentIds = students.Select(s => s.Id).ToList();
-
-        // Lấy điểm trung bình từ bảng Grades
-        var gradeAvgs = await _context.Grades
-            .Where(g => studentIds.Contains(g.StudentId))
-            .GroupBy(g => g.StudentId)
-            .Select(grp => new { StudentId = grp.Key, Avg = grp.Average(g => g.GPA) })
-            .ToListAsync();
-
-        var results = students.Select(s =>
-        {
-            var avg = gradeAvgs.FirstOrDefault(g => g.StudentId == s.Id);
-            return new
-            {
-                studentId = s.Id,
-                studentName = (s.HolyName != null && s.HolyName != "" ? s.HolyName + " " : "") + s.FullName,
-                branch = (int)s.Branch == 1 ? "Ấu Nhi" :
-                         (int)s.Branch == 2 ? "Thiếu Nhi" :
-                         (int)s.Branch == 3 ? "Nghĩa Sĩ" :
-                         (int)s.Branch == 4 ? "Hiệp Sĩ" :
-                         (int)s.Branch == 5 ? "Huynh Trưởng" : "Chưa phân loại",
-                className = s.ClassName ?? "Chưa phân lớp",
-                academicYear = (string?)null,
-                averageGrade = avg != null ? (double?)Math.Round(avg.Avg, 2) : null,
-                conduct = (string?)null
-            };
-        });
-
-        return Ok(results);
-    }
 }
