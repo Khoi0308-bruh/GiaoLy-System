@@ -112,11 +112,21 @@ public static class DependencyInjection
         // Public Content & Announcements Application Services - Package P10
         services.AddMemoryCache();
         services.AddHttpClient();
+        services.AddHttpClient(NewsCrawler.HttpClientName, client =>
+            {
+                client.Timeout = TimeSpan.FromSeconds(30);
+            })
+            .ConfigurePrimaryHttpMessageHandler(() => new HttpClientHandler
+            {
+                AutomaticDecompression =
+                    System.Net.DecompressionMethods.GZip | System.Net.DecompressionMethods.Deflate
+            });
         services.AddScoped<IAnnouncementService, AnnouncementService>();
         services.AddScoped<IBannerService, BannerService>();
         services.AddScoped<IDocumentService, DocumentService>();
         services.AddScoped<ILeaderService, LeaderService>();
         services.AddScoped<INewsService, NewsService>();
+        services.AddScoped<NewsCrawler>();
         services.AddScoped<ILiturgicalService, LiturgicalService>();
         services.AddScoped<IPublicStatsService, PublicStatsService>();
 

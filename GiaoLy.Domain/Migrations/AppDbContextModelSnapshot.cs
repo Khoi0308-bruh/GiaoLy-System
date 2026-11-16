@@ -1489,10 +1489,6 @@ namespace GiaoLy.Domain.Migrations
 
                     b.HasKey("Id");
 
-                    b.HasIndex("Link")
-                        .IsUnique()
-                        .HasDatabaseName("UQ_NewsArticles_Link");
-
                     b.HasIndex("LinkHash")
                         .IsUnique()
                         .HasDatabaseName("UQ_NewsArticles_LinkHash");

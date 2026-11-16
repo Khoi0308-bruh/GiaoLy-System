@@ -918,12 +918,12 @@ public class AppDbContext : DbContext
         {
             b.ToTable("NewsArticles");
             b.HasKey(a => a.Id);
-            b.Property(a => a.Title).IsRequired().HasMaxLength(300);
+            b.Property(a => a.Title).IsRequired().HasMaxLength(NewsArticle.TitleMaxLength);
             b.Property(a => a.Link).IsRequired().HasMaxLength(NewsArticle.LinkMaxLength);
             b.Property(a => a.LinkHash).IsRequired().HasMaxLength(64);
-            b.Property(a => a.Summary).IsRequired().HasMaxLength(1000);
-            b.Property(a => a.ImageUrl).HasMaxLength(1000);
-            b.Property(a => a.Category).IsRequired().HasMaxLength(60);
+            b.Property(a => a.Summary).IsRequired().HasMaxLength(NewsArticle.SummaryMaxLength);
+            b.Property(a => a.ImageUrl).HasMaxLength(NewsArticle.ImageUrlMaxLength);
+            b.Property(a => a.Category).IsRequired().HasMaxLength(NewsArticle.CategoryMaxLength);
 
             b.HasOne(a => a.Source)
              .WithMany(s => s.NewsArticles)
@@ -933,10 +933,6 @@ public class AppDbContext : DbContext
             b.HasIndex(a => a.LinkHash)
              .IsUnique()
              .HasDatabaseName("UQ_NewsArticles_LinkHash");
-
-            b.HasIndex(a => a.Link)
-             .IsUnique()
-             .HasDatabaseName("UQ_NewsArticles_Link");
 
             b.HasIndex(a => new { a.IsActive, a.PublishedAt })
              .HasDatabaseName("IX_NewsArticles_Published");

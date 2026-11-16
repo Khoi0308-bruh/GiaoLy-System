@@ -1,22 +1,15 @@
 using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
-using System.Net.Http;
-using System.Security.Cryptography;
-using System.ServiceModel.Syndication;
-using System.Text;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using System.Xml;
 using GiaoLy.Application.Common.Results;
 using GiaoLy.Application.Platform.Contracts;
 using GiaoLy.Application.Platform.Dtos;
 using GiaoLy.Domain.Constants;
 using GiaoLy.Domain.Data;
 using GiaoLy.Domain.Entities;
-using GiaoLy.Domain.Rules;
+using GiaoLy.Infrastructure.Services.News;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -25,16 +18,16 @@ namespace GiaoLy.Infrastructure.Services.Platform;
 public class BackgroundJobService : IBackgroundJobService
 {
     private readonly AppDbContext _context;
-    private readonly IHttpClientFactory _httpClientFactory;
+    private readonly NewsCrawler _newsCrawler;
     private readonly ILogger<BackgroundJobService> _logger;
 
     public BackgroundJobService(
         AppDbContext context,
-        IHttpClientFactory httpClientFactory,
+        NewsCrawler newsCrawler,
         ILogger<BackgroundJobService> logger)
     {
         _context = context;
-        _httpClientFactory = httpClientFactory;
+        _newsCrawler = newsCrawler;
         _logger = logger;
     }
 
@@ -181,87 +174,14 @@ public class BackgroundJobService : IBackgroundJobService
 
     private async Task<string> ExecuteNewsCrawlerAsync(CancellationToken ct)
     {
-        var sources = await _context.NewsSources
-            .Where(s => s.IsActive)
-            .ToListAsync(ct);
+        var result = await _newsCrawler.CrawlAsync(ct);
 
-        if (!sources.Any())
+        if (result.Sources == 0)
             return "Không có nguồn tin RSS nào đang kích hoạt.";
 
-        var httpClient = _httpClientFactory.CreateClient();
-        httpClient.Timeout = TimeSpan.FromSeconds(15);
-        int totalNewArticles = 0;
-
-        foreach (var source in sources)
-        {
-            try
-            {
-                if (!SafeUrlValidator.TryValidateAndGetSafeUri(source.RssUrl, out _, out var errorMsg))
-                {
-                    _logger.LogWarning("Bỏ qua nguồn tin {Source}: URL không an toàn ({Reason})", source.Name, errorMsg);
-                    continue;
-                }
-
-                using var response = await httpClient.GetAsync(source.RssUrl, ct);
-                if (!response.IsSuccessStatusCode) continue;
-
-                await using var stream = await response.Content.ReadAsStreamAsync(ct);
-                using var reader = XmlReader.Create(stream);
-                var feed = SyndicationFeed.Load(reader);
-                if (feed == null) continue;
-
-                var items = feed.Items.Take(15).ToList();
-                foreach (var item in items)
-                {
-                    var link = item.Links.FirstOrDefault()?.Uri.ToString() ?? "";
-                    if (string.IsNullOrWhiteSpace(link)) continue;
-
-                    if (link.Length > NewsArticle.LinkMaxLength)
-                    {
-                        _logger.LogWarning(
-                            "Bỏ qua bài viết có liên kết dài hơn {Max} ký tự từ {Source}: {Link}",
-                            NewsArticle.LinkMaxLength, source.Name, link);
-                        continue;
-                    }
-
-                    var linkHash = ComputeSha256(link);
-                    var exists = await _context.NewsArticles.AnyAsync(a => a.LinkHash == linkHash, ct);
-                    if (exists) continue;
-
-                    var title = item.Title?.Text ?? "Tin tức Công giáo";
-                    var summary = item.Summary?.Text ?? "";
-                    if (summary.Length > 2000) summary = summary[..1997] + "...";
-
-                    var imageUrl = ExtractImageUrl(item);
-                    var pubDate = item.PublishDate.UtcDateTime;
-                    if (pubDate == default) pubDate = DateTime.UtcNow;
-
-                    var article = new NewsArticle
-                    {
-                        SourceId = source.Id,
-                        Title = title,
-                        Link = link,
-                        LinkHash = linkHash,
-                        Summary = summary,
-                        ImageUrl = imageUrl,
-                        Category = source.Name,
-                        PublishedAt = pubDate,
-                        CrawledAt = DateTime.UtcNow,
-                        IsActive = true
-                    };
-
-                    _context.NewsArticles.Add(article);
-                    totalNewArticles++;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogWarning(ex, "Lỗi cào RSS nguồn {Source}", source.Name);
-            }
-        }
-
-        await _context.SaveChangesAsync(ct);
-        return $"Đã cào thành công {totalNewArticles} bài viết mới từ {sources.Count} nguồn tin.";
+        var succeeded = result.Sources - result.FailedSources;
+        return $"Đã cào thành công {result.Saved} bài viết mới từ {succeeded}/{result.Sources} nguồn tin"
+               + (result.FailedSources > 0 ? $" ({result.FailedSources} nguồn lỗi)." : ".");
     }
 
     private async Task<string> ExecuteTokenCleanupAsync(CancellationToken ct)
@@ -314,24 +234,4 @@ public class BackgroundJobService : IBackgroundJobService
         return $"Đã dọn dẹp/lưu trữ {oldAuditLogs.Count} dòng nhật ký kiểm toán quá hạn 24 tháng.";
     }
 
-    private static string ComputeSha256(string input)
-    {
-        var bytes = SHA256.HashData(Encoding.UTF8.GetBytes(input));
-        return Convert.ToHexString(bytes).ToLowerInvariant();
-    }
-
-    private static string? ExtractImageUrl(SyndicationItem item)
-    {
-        foreach (var link in item.Links)
-        {
-            if (link.MediaType?.StartsWith("image/", StringComparison.OrdinalIgnoreCase) == true)
-                return link.Uri.ToString();
-        }
-
-        var match = Regex.Match(item.Summary?.Text ?? "", "<img[^>]+src=[\"']([^\"']+)[\"']", RegexOptions.IgnoreCase);
-        if (match.Success)
-            return match.Groups[1].Value;
-
-        return null;
-    }
 }
