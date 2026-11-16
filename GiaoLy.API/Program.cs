@@ -41,7 +41,9 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = config["Jwt:Issuer"],
             ValidAudience = config["Jwt:Audience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtKey)),
+            // Không cho phép lệch giờ mặc định 5 phút: access token phải hết hạn đúng exp.
+            ClockSkew = TimeSpan.Zero
         };
     });
 
@@ -112,10 +114,13 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseCors("AllowNuxt");
+
+// Authentication phải chạy TRƯỚC rate limiter để policy upload/export phân vùng theo user
+// (httpContext.User đã có danh tính); request ẩn danh vẫn rơi về phân vùng IP.
+app.UseAuthentication();
 app.UseRateLimiter();
 app.UseHttpsRedirection();
 
-app.UseAuthentication();
 app.UseMiddleware<SessionValidationMiddleware>();
 app.UseAuthorization();
 

@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using System.Text.Json;
 using System.Threading.RateLimiting;
 using GiaoLy.Application.Common.Errors;
@@ -14,6 +15,27 @@ public static class RateLimiterExtensions
     public const string PolicyUpload = "upload";
     public const string PolicyExport = "export";
 
+    /// <summary>
+    /// Khoá phân vùng cho các policy chỉ áp dụng sau khi đã xác thực:
+    /// user đã đăng nhập → <c>user:{id}</c> (ổn định kể cả khi đổi username);
+    /// chưa đăng nhập → <c>ip:{ip}</c>.
+    /// Vì vậy <c>UseAuthentication()</c> phải chạy trước <c>UseRateLimiter()</c>.
+    /// </summary>
+    private static string GetUserOrIpPartitionKey(HttpContext httpContext)
+    {
+        if (httpContext.User.Identity?.IsAuthenticated == true)
+        {
+            var userId = httpContext.User.FindFirstValue(ClaimTypes.NameIdentifier)
+                         ?? httpContext.User.Identity.Name;
+            if (!string.IsNullOrWhiteSpace(userId))
+            {
+                return $"user:{userId}";
+            }
+        }
+
+        return $"ip:{httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown"}";
+    }
+
     public static IServiceCollection AddGiaoLyRateLimiting(this IServiceCollection services, IConfiguration? config = null)
     {
         // Mức mặc định cho mọi endpoint chưa khai báo policy riêng (per IP, mỗi phút).
@@ -24,7 +46,8 @@ public static class RateLimiterExtensions
         {
             options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
 
-            // Middleware rate limiter chạy TRƯỚC UseAuthentication nên chưa có user: phân vùng theo IP.
+            // Global limiter vẫn phân vùng theo IP: chặn lưu lượng ẩn danh trước khi xác thực.
+            // Các policy upload/export dùng GetUserOrIpPartitionKey sau khi UseAuthentication đã chạy.
             options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(httpContext =>
                 RateLimitPartition.GetFixedWindowLimiter(
                     httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
@@ -100,7 +123,7 @@ public static class RateLimiterExtensions
             // Upload policy: 20 req/hour per user (or IP if unauthenticated)
             options.AddPolicy(PolicyUpload, httpContext =>
                 RateLimitPartition.GetFixedWindowLimiter(
-                    httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    GetUserOrIpPartitionKey(httpContext),
                     _ => new FixedWindowRateLimiterOptions
                     {
                         PermitLimit = 20,
@@ -112,7 +135,7 @@ public static class RateLimiterExtensions
             // Export policy: 10 req/hour per user (or IP if unauthenticated)
             options.AddPolicy(PolicyExport, httpContext =>
                 RateLimitPartition.GetFixedWindowLimiter(
-                    httpContext.User.Identity?.Name ?? httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    GetUserOrIpPartitionKey(httpContext),
                     _ => new FixedWindowRateLimiterOptions
                     {
                         PermitLimit = 10,
