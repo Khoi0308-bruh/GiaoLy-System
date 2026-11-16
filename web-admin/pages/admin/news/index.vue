@@ -267,7 +267,7 @@ interface NewsArticle {
 
 // Fetch
 const { data: rawArticles, pending, error, refresh } = await useFetch<NewsArticle[]>(
-  () => `${apiBase}/api/news/catholic`,
+  () => `${apiBase}/api/v1/public/news`,
   { default: () => [] as NewsArticle[], server: false }
 )
 

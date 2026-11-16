@@ -52,7 +52,7 @@
       <h3 class="font-bold text-xl text-stone-800 dark:text-stone-200">Kéo thả file hoặc Click để tải lên</h3>
       <p class="text-sm text-stone-500 mt-2">Hỗ trợ định dạng: Excel (.xlsx, .xls) hoặc Word (.docx)</p>
       <div class="mt-8 flex justify-center">
-        <UButton color="primary" variant="soft" icon="i-heroicons-document-arrow-down" label="Tải File Excel Mẫu" to="/api/Student/export-template" external target="_blank" />
+        <UButton color="primary" variant="soft" icon="i-heroicons-document-arrow-down" label="Tải File Excel Mẫu" to="/api/v1/imports/students/template" external target="_blank" />
       </div>
     </div>
 

@@ -114,7 +114,7 @@
               <div class="mt-auto pt-4 border-t border-stone-200/50 dark:border-stone-800/50 flex items-center justify-between">
                 <UBadge :label="doc.category" color="sky" variant="soft" size="xs" class="rounded-lg" />
                 <div class="flex gap-1">
-                  <UButton icon="i-heroicons-arrow-down-tray" color="primary" variant="ghost" size="sm" class="rounded-xl hover:bg-sky-50 dark:hover:bg-sky-900/20" :to="`/api/Document/download/${doc.id}`" target="_blank" external />
+                  <UButton icon="i-heroicons-arrow-down-tray" color="primary" variant="ghost" size="sm" class="rounded-xl hover:bg-sky-50 dark:hover:bg-sky-900/20" :to="`/api/v1/documents/${doc.id}/download`" target="_blank" external />
                   <UTooltip text="Xóa File" v-if="auth?.hasPermission('documents.delete')">
                     <UButton icon="i-heroicons-trash" color="error" variant="ghost" size="sm" class="rounded-xl hover:bg-red-50 dark:hover:bg-red-900/20" @click="confirmDelete(doc)" />
                   </UTooltip>
