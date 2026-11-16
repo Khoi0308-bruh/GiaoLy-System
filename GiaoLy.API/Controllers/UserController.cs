@@ -10,7 +10,6 @@ namespace GiaoLy.API.Controllers;
 
 [ApiController]
 [Route("api/v1/users")]
-[Route("api/users")]
 public class UserController : ControllerBase
 {
     private readonly IUserService _userService;

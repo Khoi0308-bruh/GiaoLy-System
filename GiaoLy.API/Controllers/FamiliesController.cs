@@ -18,7 +18,6 @@ public class FamiliesController : ControllerBase
     }
 
     [HttpGet("api/v1/families")]
-    [HttpGet("api/families")]
     [RequirePermission(Permissions.Students.View)]
     public async Task<IActionResult> GetFamilies([FromQuery] Guid? classRoomId, CancellationToken ct)
     {
@@ -27,7 +26,6 @@ public class FamiliesController : ControllerBase
     }
 
     [HttpPost("api/v1/families")]
-    [HttpPost("api/families")]
     [RequirePermission(Permissions.Academic.FamiliesManage)]
     public async Task<IActionResult> CreateFamily([FromBody] CreateFamilyRequest request, CancellationToken ct)
     {
@@ -36,7 +34,6 @@ public class FamiliesController : ControllerBase
     }
 
     [HttpPut("api/v1/families/{id:guid}")]
-    [HttpPut("api/families/{id:guid}")]
     [RequirePermission(Permissions.Academic.FamiliesManage)]
     public async Task<IActionResult> UpdateFamily(Guid id, [FromBody] UpdateFamilyRequest request, CancellationToken ct)
     {
@@ -45,7 +42,6 @@ public class FamiliesController : ControllerBase
     }
 
     [HttpDelete("api/v1/families/{id:guid}")]
-    [HttpDelete("api/families/{id:guid}")]
     [RequirePermission(Permissions.Academic.FamiliesManage)]
     public async Task<IActionResult> DeleteFamily(Guid id, CancellationToken ct)
     {
@@ -54,7 +50,6 @@ public class FamiliesController : ControllerBase
     }
 
     [HttpPut("api/v1/families/{id:guid}/members")]
-    [HttpPut("api/families/{id:guid}/members")]
     [RequirePermission(Permissions.Academic.FamiliesManage)]
     public async Task<IActionResult> AssignFamilyMembers(Guid id, [FromBody] AssignFamilyMembersRequest request, CancellationToken ct)
     {

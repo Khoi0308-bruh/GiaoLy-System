@@ -18,7 +18,6 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet("api/v1/roles")]
-    [HttpGet("api/roles")]
     [RequirePermission(Permissions.Roles.View)]
     public async Task<IActionResult> GetRoles(CancellationToken ct)
     {
@@ -27,7 +26,6 @@ public class RolesController : ControllerBase
     }
 
     [HttpPost("api/v1/roles")]
-    [HttpPost("api/roles")]
     [RequirePermission(Permissions.Roles.Create)]
     public async Task<IActionResult> CreateRole([FromBody] CreateRoleRequest request, CancellationToken ct)
     {
@@ -36,7 +34,6 @@ public class RolesController : ControllerBase
     }
 
     [HttpPut("api/v1/roles/{id:guid}")]
-    [HttpPut("api/roles/{id:guid}")]
     [RequirePermission(Permissions.Roles.Update)]
     public async Task<IActionResult> UpdateRole(Guid id, [FromBody] UpdateRoleRequest request, CancellationToken ct)
     {
@@ -45,7 +42,6 @@ public class RolesController : ControllerBase
     }
 
     [HttpDelete("api/v1/roles/{id:guid}")]
-    [HttpDelete("api/roles/{id:guid}")]
     [RequirePermission(Permissions.Roles.Delete)]
     public async Task<IActionResult> DeleteRole(Guid id, CancellationToken ct)
     {
@@ -54,7 +50,6 @@ public class RolesController : ControllerBase
     }
 
     [HttpGet("api/v1/permissions")]
-    [HttpGet("api/permissions")]
     [RequirePermission(Permissions.Roles.View)]
     public async Task<IActionResult> GetPermissions(CancellationToken ct)
     {
@@ -63,7 +58,6 @@ public class RolesController : ControllerBase
     }
 
     [HttpPut("api/v1/roles/{id:guid}/permissions")]
-    [HttpPut("api/roles/{id:guid}/permissions")]
     [RequirePermission(Permissions.Roles.Assign)]
     public async Task<IActionResult> AssignPermissions(Guid id, [FromBody] AssignPermissionsRequest request, CancellationToken ct)
     {

@@ -18,7 +18,6 @@ public class StatsController : ControllerBase
     }
 
     [HttpGet("api/v1/public/stats")]
-    [HttpGet("api/Stats/public")]
     [AllowAnonymous]
     public async Task<IActionResult> GetPublicStats(CancellationToken ct)
     {

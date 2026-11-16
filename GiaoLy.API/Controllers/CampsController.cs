@@ -22,7 +22,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpGet("api/v1/camps")]
-    [HttpGet("api/CampEvent")]
     [RequirePermission(Permissions.Camps.View)]
     public async Task<IActionResult> GetEvents(
         [FromQuery] int? branchId,
@@ -34,7 +33,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpGet("api/v1/camps/{id:guid}")]
-    [HttpGet("api/CampEvent/{id:guid}")]
     [RequirePermission(Permissions.Camps.View)]
     public async Task<IActionResult> GetEventById(Guid id, CancellationToken ct)
     {
@@ -43,7 +41,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpPost("api/v1/camps")]
-    [HttpPost("api/CampEvent")]
     [RequirePermission(Permissions.Camps.Manage)]
     public async Task<IActionResult> CreateEvent([FromBody] CreateCampEventRequest request, CancellationToken ct)
     {
@@ -52,7 +49,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpPut("api/v1/camps/{id:guid}")]
-    [HttpPut("api/CampEvent/{id:guid}")]
     [RequirePermission(Permissions.Camps.Manage)]
     public async Task<IActionResult> UpdateEvent(Guid id, [FromBody] UpdateCampEventRequest request, CancellationToken ct)
     {
@@ -61,7 +57,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpDelete("api/v1/camps/{id:guid}")]
-    [HttpDelete("api/CampEvent/{id:guid}")]
     [RequirePermission(Permissions.Camps.Manage)]
     public async Task<IActionResult> DeleteEvent(Guid id, CancellationToken ct)
     {
@@ -70,7 +65,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpGet("api/v1/camps/{id:guid}/registrations")]
-    [HttpGet("api/CampEvent/{id:guid}/registrations")]
     [RequirePermission(Permissions.Camps.View)]
     public async Task<IActionResult> GetRegistrations(Guid id, CancellationToken ct)
     {
@@ -79,7 +73,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpPost("api/v1/camps/{id:guid}/registrations")]
-    [HttpPost("api/CampEvent/{id:guid}/registrations")]
     [RequirePermission(Permissions.Camps.Register)]
     public async Task<IActionResult> RegisterStudent(Guid id, [FromBody] CreateCampRegistrationRequest request, CancellationToken ct)
     {
@@ -88,7 +81,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpPut("api/v1/camps/{id:guid}/registrations/{registrationId:guid}")]
-    [HttpPut("api/CampEvent/{id:guid}/registrations/{registrationId:guid}")]
     [RequirePermission(Permissions.Camps.Register)]
     public async Task<IActionResult> UpdateRegistration(
         Guid id,
@@ -101,7 +93,6 @@ public class CampsController : ControllerBase
     }
 
     [HttpDelete("api/v1/camps/{id:guid}/registrations/{registrationId:guid}")]
-    [HttpDelete("api/CampEvent/{id:guid}/registrations/{registrationId:guid}")]
     [RequirePermission(Permissions.Camps.Register)]
     public async Task<IActionResult> CancelRegistration(Guid id, Guid registrationId, CancellationToken ct)
     {

@@ -23,7 +23,6 @@ public class NewsController : ControllerBase
     }
 
     [HttpGet("api/v1/public/news")]
-    [HttpGet("api/News/catholic")]
     [AllowAnonymous]
     public async Task<IActionResult> GetPublicNews(
         [FromQuery] int page = 1,
@@ -36,7 +35,6 @@ public class NewsController : ControllerBase
     }
 
     [HttpGet("api/v1/public/news/image")]
-    [HttpGet("api/News/proxy-image")]
     [AllowAnonymous]
     public async Task<IActionResult> ProxyImage([FromQuery] string url, CancellationToken ct)
     {
@@ -49,7 +47,6 @@ public class NewsController : ControllerBase
     }
 
     [HttpGet("api/v1/news/sources")]
-    [HttpGet("api/News/sources")]
     [RequirePermission(Permissions.News.View)]
     public async Task<IActionResult> GetNewsSources(CancellationToken ct)
     {
@@ -58,7 +55,6 @@ public class NewsController : ControllerBase
     }
 
     [HttpPost("api/v1/news/sources")]
-    [HttpPost("api/News/sources")]
     [RequirePermission(Permissions.News.Create)]
     public async Task<IActionResult> CreateNewsSource([FromBody] CreateNewsSourceRequest request, CancellationToken ct)
     {
@@ -67,7 +63,6 @@ public class NewsController : ControllerBase
     }
 
     [HttpPut("api/v1/news/sources/{id:guid}")]
-    [HttpPut("api/News/sources/{id:guid}")]
     [RequirePermission(Permissions.News.Update)]
     public async Task<IActionResult> UpdateNewsSource(Guid id, [FromBody] UpdateNewsSourceRequest request, CancellationToken ct)
     {
@@ -76,7 +71,6 @@ public class NewsController : ControllerBase
     }
 
     [HttpDelete("api/v1/news/sources/{id:guid}")]
-    [HttpDelete("api/News/sources/{id:guid}")]
     [RequirePermission(Permissions.News.Delete)]
     public async Task<IActionResult> DeleteNewsSource(Guid id, CancellationToken ct)
     {

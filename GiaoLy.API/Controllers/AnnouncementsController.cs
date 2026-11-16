@@ -23,7 +23,6 @@ public class AnnouncementsController : ControllerBase
     }
 
     [HttpGet("api/v1/public/announcements")]
-    [HttpGet("api/public/announcements")]
     [AllowAnonymous]
     public async Task<IActionResult> GetPublicAnnouncements(CancellationToken ct)
     {
@@ -32,7 +31,6 @@ public class AnnouncementsController : ControllerBase
     }
 
     [HttpGet("api/v1/announcements")]
-    [HttpGet("api/Announcement")]
     [RequirePermission(Permissions.Announcements.View)]
     public async Task<IActionResult> GetMyAnnouncements(
         [FromQuery] int? branchId,
@@ -44,7 +42,6 @@ public class AnnouncementsController : ControllerBase
     }
 
     [HttpGet("api/v1/announcements/{id:guid}")]
-    [HttpGet("api/Announcement/{id:guid}")]
     [RequirePermission(Permissions.Announcements.View)]
     public async Task<IActionResult> GetAnnouncementById(Guid id, CancellationToken ct)
     {
@@ -53,7 +50,6 @@ public class AnnouncementsController : ControllerBase
     }
 
     [HttpPost("api/v1/announcements")]
-    [HttpPost("api/Announcement")]
     [RequirePermission(Permissions.Announcements.Create)]
     public async Task<IActionResult> CreateAnnouncement(
         [FromBody] CreateAnnouncementRequest request,
@@ -64,7 +60,6 @@ public class AnnouncementsController : ControllerBase
     }
 
     [HttpPut("api/v1/announcements/{id:guid}")]
-    [HttpPut("api/Announcement/{id:guid}")]
     [RequirePermission(Permissions.Announcements.Update)]
     public async Task<IActionResult> UpdateAnnouncement(
         Guid id,
@@ -76,7 +71,6 @@ public class AnnouncementsController : ControllerBase
     }
 
     [HttpDelete("api/v1/announcements/{id:guid}")]
-    [HttpDelete("api/Announcement/{id:guid}")]
     [RequirePermission(Permissions.Announcements.Delete)]
     public async Task<IActionResult> DeleteAnnouncement(Guid id, CancellationToken ct)
     {

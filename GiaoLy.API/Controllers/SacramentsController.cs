@@ -18,7 +18,6 @@ public class SacramentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/{id:guid}/sacraments")]
-    [HttpGet("api/students/{id:guid}/sacraments")]
     [RequirePermission(Permissions.Sacraments.View)]
     public async Task<IActionResult> GetStudentSacraments(Guid id, CancellationToken ct)
     {
@@ -27,7 +26,6 @@ public class SacramentsController : ControllerBase
     }
 
     [HttpPut("api/v1/students/{id:guid}/sacraments/{type}")]
-    [HttpPut("api/students/{id:guid}/sacraments/{type}")]
     [RequirePermission(Permissions.Sacraments.Update)]
     public async Task<IActionResult> UpsertStudentSacrament(
         Guid id,
@@ -40,7 +38,6 @@ public class SacramentsController : ControllerBase
     }
 
     [HttpDelete("api/v1/students/{id:guid}/sacraments/{type}")]
-    [HttpDelete("api/students/{id:guid}/sacraments/{type}")]
     [RequirePermission(Permissions.Sacraments.Update)]
     public async Task<IActionResult> DeleteStudentSacrament(Guid id, string type, CancellationToken ct)
     {
@@ -49,7 +46,6 @@ public class SacramentsController : ControllerBase
     }
 
     [HttpGet("api/v1/sacrament-requirements")]
-    [HttpGet("api/sacrament-requirements")]
     [RequirePermission(Permissions.Sacraments.View)]
     public async Task<IActionResult> GetRequirements([FromQuery] string? sacramentType, CancellationToken ct)
     {
@@ -58,7 +54,6 @@ public class SacramentsController : ControllerBase
     }
 
     [HttpPost("api/v1/sacrament-requirements")]
-    [HttpPost("api/sacrament-requirements")]
     [RequirePermission(Permissions.Sacraments.ManageRequirements)]
     public async Task<IActionResult> CreateRequirement(
         [FromBody] CreateSacramentRequirementRequest request,
@@ -69,7 +64,6 @@ public class SacramentsController : ControllerBase
     }
 
     [HttpPut("api/v1/sacrament-requirements/{id:guid}")]
-    [HttpPut("api/sacrament-requirements/{id:guid}")]
     [RequirePermission(Permissions.Sacraments.ManageRequirements)]
     public async Task<IActionResult> UpdateRequirement(
         Guid id,
@@ -81,7 +75,6 @@ public class SacramentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/{id:guid}/requirement-progress")]
-    [HttpGet("api/students/{id:guid}/requirement-progress")]
     [RequirePermission(Permissions.Sacraments.View)]
     public async Task<IActionResult> GetRequirementProgress(
         Guid id,
@@ -93,7 +86,6 @@ public class SacramentsController : ControllerBase
     }
 
     [HttpPut("api/v1/students/{id:guid}/requirement-progress/{requirementId:guid}")]
-    [HttpPut("api/students/{id:guid}/requirement-progress/{requirementId:guid}")]
     [RequirePermission(Permissions.Sacraments.Update)]
     public async Task<IActionResult> UpdateRequirementProgress(
         Guid id,

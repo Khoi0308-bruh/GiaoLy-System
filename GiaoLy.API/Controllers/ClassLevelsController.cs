@@ -19,7 +19,6 @@ public class ClassLevelsController : ControllerBase
     }
 
     [HttpGet("api/v1/class-levels")]
-    [HttpGet("api/class-levels")]
     [Authorize]
     public async Task<IActionResult> GetClassLevels(CancellationToken ct)
     {
@@ -28,7 +27,6 @@ public class ClassLevelsController : ControllerBase
     }
 
     [HttpPost("api/v1/class-levels")]
-    [HttpPost("api/class-levels")]
     [RequirePermission(Permissions.Academic.OrgManage)]
     public async Task<IActionResult> CreateClassLevel([FromBody] CreateClassLevelRequest request, CancellationToken ct)
     {
@@ -37,7 +35,6 @@ public class ClassLevelsController : ControllerBase
     }
 
     [HttpPut("api/v1/class-levels/{id:int}")]
-    [HttpPut("api/class-levels/{id:int}")]
     [RequirePermission(Permissions.Academic.OrgManage)]
     public async Task<IActionResult> UpdateClassLevel(int id, [FromBody] UpdateClassLevelRequest request, CancellationToken ct)
     {

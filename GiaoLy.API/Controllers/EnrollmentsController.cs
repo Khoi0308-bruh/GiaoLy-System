@@ -18,7 +18,6 @@ public class EnrollmentsController : ControllerBase
     }
 
     [HttpGet("api/v1/classrooms/{id:guid}/enrollments")]
-    [HttpGet("api/classrooms/{id:guid}/enrollments")]
     [RequirePermission(Permissions.Enrollments.View)]
     public async Task<IActionResult> GetClassRoomEnrollments(Guid id, CancellationToken ct)
     {
@@ -27,7 +26,6 @@ public class EnrollmentsController : ControllerBase
     }
 
     [HttpPost("api/v1/classrooms/{id:guid}/enrollments")]
-    [HttpPost("api/classrooms/{id:guid}/enrollments")]
     [RequirePermission(Permissions.Enrollments.Manage)]
     public async Task<IActionResult> EnrollStudents(
         Guid id,
@@ -39,7 +37,6 @@ public class EnrollmentsController : ControllerBase
     }
 
     [HttpPost("api/v1/enrollments/{id:guid}/transfer")]
-    [HttpPost("api/enrollments/{id:guid}/transfer")]
     [RequirePermission(Permissions.Enrollments.Manage)]
     public async Task<IActionResult> TransferEnrollment(
         Guid id,
@@ -51,7 +48,6 @@ public class EnrollmentsController : ControllerBase
     }
 
     [HttpPost("api/v1/enrollments/{id:guid}/withdraw")]
-    [HttpPost("api/enrollments/{id:guid}/withdraw")]
     [RequirePermission(Permissions.Enrollments.Manage)]
     public async Task<IActionResult> WithdrawEnrollment(
         Guid id,
@@ -63,7 +59,6 @@ public class EnrollmentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/{id:guid}/enrollments")]
-    [HttpGet("api/students/{id:guid}/enrollments")]
     [RequirePermission(Permissions.Enrollments.View)]
     public async Task<IActionResult> GetStudentEnrollments(Guid id, CancellationToken ct)
     {

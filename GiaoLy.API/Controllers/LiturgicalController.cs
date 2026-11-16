@@ -23,7 +23,6 @@ public class LiturgicalController : ControllerBase
     }
 
     [HttpGet("api/v1/public/liturgical/today")]
-    [HttpGet("api/Liturgical/today")]
     [AllowAnonymous]
     public async Task<IActionResult> GetToday(CancellationToken ct)
     {
@@ -32,7 +31,6 @@ public class LiturgicalController : ControllerBase
     }
 
     [HttpGet("api/v1/public/liturgical/date/{date}")]
-    [HttpGet("api/Liturgical/{date}")]
     [AllowAnonymous]
     public async Task<IActionResult> GetByDate(string date, CancellationToken ct)
     {

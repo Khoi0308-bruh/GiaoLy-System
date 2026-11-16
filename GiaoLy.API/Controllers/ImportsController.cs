@@ -18,7 +18,6 @@ public class ImportsController : ControllerBase
     }
 
     [HttpGet("api/v1/imports/students/template")]
-    [HttpGet("api/imports/students/template")]
     [RequirePermission(Permissions.Students.Import)]
     public async Task<IActionResult> DownloadStudentTemplate(CancellationToken ct)
     {
@@ -33,7 +32,6 @@ public class ImportsController : ControllerBase
     }
 
     [HttpPost("api/v1/imports/students")]
-    [HttpPost("api/imports/students")]
     [RequirePermission(Permissions.Students.Import)]
     [EnableRateLimiting("upload")]
     [RequestSizeLimit(10 * 1024 * 1024)]
@@ -55,7 +53,6 @@ public class ImportsController : ControllerBase
     }
 
     [HttpGet("api/v1/imports/{id:guid}")]
-    [HttpGet("api/imports/{id:guid}")]
     [RequirePermission(Permissions.Students.Import)]
     public async Task<IActionResult> GetImportJob(Guid id, CancellationToken ct)
     {
@@ -64,7 +61,6 @@ public class ImportsController : ControllerBase
     }
 
     [HttpPost("api/v1/imports/{id:guid}/apply")]
-    [HttpPost("api/imports/{id:guid}/apply")]
     [RequirePermission(Permissions.Students.Import)]
     public async Task<IActionResult> ApplyImportJob(Guid id, CancellationToken ct)
     {
@@ -73,7 +69,6 @@ public class ImportsController : ControllerBase
     }
 
     [HttpGet("api/v1/imports")]
-    [HttpGet("api/imports")]
     [RequirePermission(Permissions.Students.Import)]
     public async Task<IActionResult> GetImportHistory([FromQuery] string? type, CancellationToken ct)
     {

@@ -22,7 +22,6 @@ public class DutyAssignmentsController : ControllerBase
     }
 
     [HttpGet("api/v1/duty-assignments")]
-    [HttpGet("api/DutyAssignment")]
     [RequirePermission(Permissions.Duty.View)]
     public async Task<IActionResult> GetAssignments(
         [FromQuery] Guid? classRoomId,
@@ -36,7 +35,6 @@ public class DutyAssignmentsController : ControllerBase
     }
 
     [HttpGet("api/v1/duty-assignments/classroom/{classRoomId:guid}")]
-    [HttpGet("api/DutyAssignment/classroom/{classRoomId:guid}")]
     [RequirePermission(Permissions.Duty.View)]
     public async Task<IActionResult> GetByClassRoom(Guid classRoomId, CancellationToken ct)
     {
@@ -45,7 +43,6 @@ public class DutyAssignmentsController : ControllerBase
     }
 
     [HttpGet("api/v1/duty-assignments/{id:guid}")]
-    [HttpGet("api/DutyAssignment/{id:guid}")]
     [RequirePermission(Permissions.Duty.View)]
     public async Task<IActionResult> GetAssignmentById(Guid id, CancellationToken ct)
     {
@@ -54,7 +51,6 @@ public class DutyAssignmentsController : ControllerBase
     }
 
     [HttpPost("api/v1/duty-assignments")]
-    [HttpPost("api/DutyAssignment")]
     [RequirePermission(Permissions.Duty.Manage)]
     public async Task<IActionResult> CreateAssignment([FromBody] CreateDutyAssignmentRequest request, CancellationToken ct)
     {
@@ -63,7 +59,6 @@ public class DutyAssignmentsController : ControllerBase
     }
 
     [HttpPut("api/v1/duty-assignments/{id:guid}")]
-    [HttpPut("api/DutyAssignment/{id:guid}")]
     [RequirePermission(Permissions.Duty.Manage)]
     public async Task<IActionResult> UpdateAssignment(Guid id, [FromBody] UpdateDutyAssignmentRequest request, CancellationToken ct)
     {
@@ -72,7 +67,6 @@ public class DutyAssignmentsController : ControllerBase
     }
 
     [HttpDelete("api/v1/duty-assignments/{id:guid}")]
-    [HttpDelete("api/DutyAssignment/{id:guid}")]
     [RequirePermission(Permissions.Duty.Manage)]
     public async Task<IActionResult> DeleteAssignment(Guid id, CancellationToken ct)
     {

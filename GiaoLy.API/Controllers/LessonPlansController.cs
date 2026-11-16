@@ -22,7 +22,6 @@ public class LessonPlansController : ControllerBase
     }
 
     [HttpGet("api/v1/lesson-plans")]
-    [HttpGet("api/LessonPlan")]
     [RequirePermission(Permissions.LessonPlans.View)]
     public async Task<IActionResult> GetLessonPlans(
         [FromQuery] Guid? classRoomId,
@@ -35,7 +34,6 @@ public class LessonPlansController : ControllerBase
     }
 
     [HttpGet("api/v1/lesson-plans/{id:guid}")]
-    [HttpGet("api/LessonPlan/{id:guid}")]
     [RequirePermission(Permissions.LessonPlans.View)]
     public async Task<IActionResult> GetLessonPlanById(Guid id, CancellationToken ct)
     {
@@ -44,7 +42,6 @@ public class LessonPlansController : ControllerBase
     }
 
     [HttpPost("api/v1/lesson-plans")]
-    [HttpPost("api/LessonPlan")]
     [RequirePermission(Permissions.LessonPlans.Manage)]
     public async Task<IActionResult> CreateLessonPlan([FromBody] CreateLessonPlanRequest request, CancellationToken ct)
     {
@@ -53,7 +50,6 @@ public class LessonPlansController : ControllerBase
     }
 
     [HttpPut("api/v1/lesson-plans/{id:guid}")]
-    [HttpPut("api/LessonPlan/{id:guid}")]
     [RequirePermission(Permissions.LessonPlans.Manage)]
     public async Task<IActionResult> UpdateLessonPlan(
         Guid id,
@@ -65,7 +61,6 @@ public class LessonPlansController : ControllerBase
     }
 
     [HttpDelete("api/v1/lesson-plans/{id:guid}")]
-    [HttpDelete("api/LessonPlan/{id:guid}")]
     [RequirePermission(Permissions.LessonPlans.Manage)]
     public async Task<IActionResult> DeleteLessonPlan(Guid id, CancellationToken ct)
     {

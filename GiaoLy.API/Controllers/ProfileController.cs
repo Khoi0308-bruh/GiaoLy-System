@@ -11,7 +11,6 @@ namespace GiaoLy.API.Controllers;
 [ApiController]
 [Authorize]
 [Route("api/v1/me")]
-[Route("api/me")]
 public class ProfileController : ControllerBase
 {
     private readonly IAuthService _authService;

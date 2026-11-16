@@ -24,7 +24,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students")]
-    [HttpGet("api/students")]
     [RequirePermission(Permissions.Students.View)]
     public async Task<IActionResult> GetStudents([FromQuery] StudentFilterRequest request, CancellationToken ct)
     {
@@ -33,7 +32,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/{id:guid}")]
-    [HttpGet("api/students/{id:guid}")]
     [RequirePermission(Permissions.Students.View)]
     public async Task<IActionResult> GetStudentById(Guid id, CancellationToken ct)
     {
@@ -42,7 +40,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("api/v1/students")]
-    [HttpPost("api/students")]
     [RequirePermission(Permissions.Students.Create)]
     public async Task<IActionResult> CreateStudent([FromBody] CreateStudentRequest request, CancellationToken ct)
     {
@@ -51,7 +48,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPatch("api/v1/students/{id:guid}")]
-    [HttpPatch("api/students/{id:guid}")]
     [RequirePermission(Permissions.Students.Update)]
     public async Task<IActionResult> UpdateStudent(Guid id, [FromBody] UpdateStudentRequest request, CancellationToken ct)
     {
@@ -60,7 +56,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("api/v1/students/{id:guid}/status")]
-    [HttpPost("api/students/{id:guid}/status")]
     [RequirePermission(Permissions.Students.ChangeStatus)]
     public async Task<IActionResult> ChangeStudentStatus(Guid id, [FromBody] ChangeStudentStatusRequest request, CancellationToken ct)
     {
@@ -69,7 +64,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpDelete("api/v1/students/{id:guid}")]
-    [HttpDelete("api/students/{id:guid}")]
     [RequirePermission(Permissions.Students.Delete)]
     public async Task<IActionResult> DeleteStudent(Guid id, CancellationToken ct)
     {
@@ -78,7 +72,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("api/v1/students/{id:guid}/restore")]
-    [HttpPost("api/students/{id:guid}/restore")]
     [RequirePermission(Permissions.Students.Restore)]
     public async Task<IActionResult> RestoreStudent(Guid id, CancellationToken ct)
     {
@@ -87,7 +80,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("api/v1/students/{id:guid}/photo")]
-    [HttpPost("api/students/{id:guid}/photo")]
     [RequirePermission(Permissions.Students.Update)]
     [EnableRateLimiting("upload")]
     [RequestSizeLimit(2 * 1024 * 1024)]
@@ -109,7 +101,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/{id:guid}/guardians")]
-    [HttpGet("api/students/{id:guid}/guardians")]
     [RequirePermission(Permissions.Students.ViewContact)]
     public async Task<IActionResult> GetStudentGuardians(Guid id, CancellationToken ct)
     {
@@ -118,7 +109,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPut("api/v1/students/{id:guid}/guardians")]
-    [HttpPut("api/students/{id:guid}/guardians")]
     [RequirePermission(Permissions.Students.Update)]
     public async Task<IActionResult> UpdateStudentGuardians(Guid id, [FromBody] List<GuardianDto> guardians, CancellationToken ct)
     {
@@ -127,7 +117,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/{id:guid}/notes")]
-    [HttpGet("api/students/{id:guid}/notes")]
     [RequirePermission(Permissions.Students.View)]
     public async Task<IActionResult> GetStudentNotes(Guid id, CancellationToken ct)
     {
@@ -136,7 +125,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("api/v1/students/{id:guid}/notes")]
-    [HttpPost("api/students/{id:guid}/notes")]
     [RequirePermission(Permissions.Students.NotesWrite)]
     public async Task<IActionResult> CreateStudentNote(Guid id, [FromBody] CreateStudentNoteRequest request, CancellationToken ct)
     {
@@ -145,7 +133,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpDelete("api/v1/student-notes/{noteId:guid}")]
-    [HttpDelete("api/student-notes/{noteId:guid}")]
     [RequirePermission(Permissions.Students.NotesWrite)]
     public async Task<IActionResult> DeleteStudentNote(Guid noteId, CancellationToken ct)
     {
@@ -154,7 +141,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/{id:guid}/history")]
-    [HttpGet("api/students/{id:guid}/history")]
     [RequirePermission(Permissions.Students.View)]
     public async Task<IActionResult> GetStudentHistory(Guid id, CancellationToken ct)
     {
@@ -163,7 +149,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpPost("api/v1/students/duplicates/check")]
-    [HttpPost("api/students/duplicates/check")]
     [RequirePermission(Permissions.Students.Create)]
     public async Task<IActionResult> CheckDuplicate([FromBody] CheckDuplicateRequest request, CancellationToken ct)
     {
@@ -172,7 +157,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/unassigned")]
-    [HttpGet("api/students/unassigned")]
     [RequirePermission(Permissions.Students.View)]
     public async Task<IActionResult> GetUnassignedStudents(CancellationToken ct)
     {
@@ -181,7 +165,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/stats")]
-    [HttpGet("api/students/stats")]
     [RequirePermission(Permissions.Students.View)]
     public async Task<IActionResult> GetStudentStats(CancellationToken ct)
     {
@@ -190,7 +173,6 @@ public class StudentsController : ControllerBase
     }
 
     [HttpGet("api/v1/students/export")]
-    [HttpGet("api/students/export")]
     [RequirePermission(Permissions.Students.Export)]
     [EnableRateLimiting("export")]
     public async Task<IActionResult> ExportStudents(

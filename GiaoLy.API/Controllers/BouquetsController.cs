@@ -22,7 +22,6 @@ public class BouquetsController : ControllerBase
     }
 
     [HttpGet("api/v1/classrooms/{classRoomId:guid}/bouquets")]
-    [HttpGet("api/SpiritualBouquet/classroom/{classRoomId:guid}")]
     [RequirePermission(Permissions.Bouquets.View)]
     public async Task<IActionResult> GetClassBouquets(Guid classRoomId, CancellationToken ct)
     {

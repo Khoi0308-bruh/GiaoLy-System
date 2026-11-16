@@ -9,7 +9,6 @@ namespace GiaoLy.API.Controllers;
 
 [ApiController]
 [Route("api/v1/guardian-links")]
-[Route("api/guardian-links")]
 public class GuardianLinksController : ControllerBase
 {
     private readonly IGuardianLinkService _guardianLinkService;

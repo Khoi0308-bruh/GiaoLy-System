@@ -19,7 +19,6 @@ public class BranchesController : ControllerBase
     }
 
     [HttpGet("api/v1/branches")]
-    [HttpGet("api/branches")]
     [Authorize]
     public async Task<IActionResult> GetBranches(CancellationToken ct)
     {
@@ -28,7 +27,6 @@ public class BranchesController : ControllerBase
     }
 
     [HttpPost("api/v1/branches")]
-    [HttpPost("api/branches")]
     [RequirePermission(Permissions.Academic.OrgManage)]
     public async Task<IActionResult> CreateBranch([FromBody] CreateBranchRequest request, CancellationToken ct)
     {
@@ -37,7 +35,6 @@ public class BranchesController : ControllerBase
     }
 
     [HttpPut("api/v1/branches/{id:int}")]
-    [HttpPut("api/branches/{id:int}")]
     [RequirePermission(Permissions.Academic.OrgManage)]
     public async Task<IActionResult> UpdateBranch(int id, [FromBody] UpdateBranchRequest request, CancellationToken ct)
     {

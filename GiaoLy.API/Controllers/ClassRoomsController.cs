@@ -18,7 +18,6 @@ public class ClassRoomsController : ControllerBase
     }
 
     [HttpGet("api/v1/classrooms/{id:guid}")]
-    [HttpGet("api/classrooms/{id:guid}")]
     [RequirePermission(Permissions.Academic.View)]
     public async Task<IActionResult> GetClassRoomById(Guid id, CancellationToken ct)
     {
@@ -27,7 +26,6 @@ public class ClassRoomsController : ControllerBase
     }
 
     [HttpPut("api/v1/classrooms/{id:guid}")]
-    [HttpPut("api/classrooms/{id:guid}")]
     [RequirePermission(Permissions.Academic.Update)]
     public async Task<IActionResult> UpdateClassRoom(Guid id, [FromBody] UpdateClassRoomRequest request, CancellationToken ct)
     {
@@ -36,7 +34,6 @@ public class ClassRoomsController : ControllerBase
     }
 
     [HttpDelete("api/v1/classrooms/{id:guid}")]
-    [HttpDelete("api/classrooms/{id:guid}")]
     [RequirePermission(Permissions.Academic.Delete)]
     public async Task<IActionResult> DeleteClassRoom(Guid id, CancellationToken ct)
     {
@@ -45,7 +42,6 @@ public class ClassRoomsController : ControllerBase
     }
 
     [HttpPut("api/v1/classrooms/{id:guid}/teachers")]
-    [HttpPut("api/classrooms/{id:guid}/teachers")]
     [RequirePermission(Permissions.Academic.AssignTeachers)]
     public async Task<IActionResult> AssignTeachers(Guid id, [FromBody] AssignTeachersRequest request, CancellationToken ct)
     {
@@ -54,7 +50,6 @@ public class ClassRoomsController : ControllerBase
     }
 
     [HttpGet("api/v1/classrooms/{id:guid}/roster")]
-    [HttpGet("api/classrooms/{id:guid}/roster")]
     [RequirePermission(Permissions.Students.View)]
     public async Task<IActionResult> GetClassRoster(Guid id, CancellationToken ct)
     {

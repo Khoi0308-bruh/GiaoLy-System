@@ -23,7 +23,6 @@ public class BannersController : ControllerBase
     }
 
     [HttpGet("api/v1/public/banners")]
-    [HttpGet("api/banners/active")]
     [AllowAnonymous]
     public async Task<IActionResult> GetPublicBanners(CancellationToken ct)
     {
@@ -32,7 +31,6 @@ public class BannersController : ControllerBase
     }
 
     [HttpGet("api/v1/banners")]
-    [HttpGet("api/banners")]
     [RequirePermission(Permissions.Content.BannersManage)]
     public async Task<IActionResult> GetAllBanners(CancellationToken ct)
     {
@@ -49,7 +47,6 @@ public class BannersController : ControllerBase
     }
 
     [HttpPost("api/v1/banners")]
-    [HttpPost("api/banners")]
     [RequirePermission(Permissions.Content.BannersManage)]
     public async Task<IActionResult> CreateBanner([FromBody] CreateBannerRequest request, CancellationToken ct)
     {
@@ -58,7 +55,6 @@ public class BannersController : ControllerBase
     }
 
     [HttpPut("api/v1/banners/{id:guid}")]
-    [HttpPut("api/banners/{id:guid}")]
     [RequirePermission(Permissions.Content.BannersManage)]
     public async Task<IActionResult> UpdateBanner(Guid id, [FromBody] UpdateBannerRequest request, CancellationToken ct)
     {
@@ -67,7 +63,6 @@ public class BannersController : ControllerBase
     }
 
     [HttpDelete("api/v1/banners/{id:guid}")]
-    [HttpDelete("api/banners/{id:guid}")]
     [RequirePermission(Permissions.Content.BannersManage)]
     public async Task<IActionResult> DeleteBanner(Guid id, CancellationToken ct)
     {

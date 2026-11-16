@@ -18,7 +18,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpGet("api/v1/promotion-batches")]
-    [HttpGet("api/promotion-batches")]
     [RequirePermission(Permissions.Promotion.View)]
     public async Task<IActionResult> GetBatches(CancellationToken ct)
     {
@@ -27,7 +26,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpPost("api/v1/promotion-batches")]
-    [HttpPost("api/promotion-batches")]
     [RequirePermission(Permissions.Promotion.Create)]
     public async Task<IActionResult> CreateOrGetBatch([FromBody] CreatePromotionBatchRequest request, CancellationToken ct)
     {
@@ -36,7 +34,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpGet("api/v1/promotion-batches/{id:guid}")]
-    [HttpGet("api/promotion-batches/{id:guid}")]
     [RequirePermission(Permissions.Promotion.View)]
     public async Task<IActionResult> GetBatchById(Guid id, CancellationToken ct)
     {
@@ -45,7 +42,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpGet("api/v1/promotion-batches/{id:guid}/drafts")]
-    [HttpGet("api/promotion-batches/{id:guid}/drafts")]
     [RequirePermission(Permissions.Promotion.View)]
     public async Task<IActionResult> GetBatchDrafts(
         Guid id,
@@ -57,7 +53,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpPost("api/v1/promotion-drafts/{id:guid}/approve")]
-    [HttpPost("api/promotion-drafts/{id:guid}/approve")]
     [RequirePermission(Permissions.Promotion.Decide)]
     public async Task<IActionResult> ApproveDraft(Guid id, CancellationToken ct)
     {
@@ -66,7 +61,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpPost("api/v1/promotion-drafts/{id:guid}/reject")]
-    [HttpPost("api/promotion-drafts/{id:guid}/reject")]
     [RequirePermission(Permissions.Promotion.Decide)]
     public async Task<IActionResult> RejectDraft(
         Guid id,
@@ -78,7 +72,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpPut("api/v1/promotion-drafts/{id:guid}/target-class")]
-    [HttpPut("api/promotion-drafts/{id:guid}/target-class")]
     [RequirePermission(Permissions.Promotion.Decide)]
     public async Task<IActionResult> UpdateDraftTargetClass(
         Guid id,
@@ -90,7 +83,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpPost("api/v1/promotion-batches/{id:guid}/approve-qualified")]
-    [HttpPost("api/promotion-batches/{id:guid}/approve-qualified")]
     [RequirePermission(Permissions.Promotion.Decide)]
     public async Task<IActionResult> ApproveQualifiedDrafts(Guid id, CancellationToken ct)
     {
@@ -99,7 +91,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpPost("api/v1/promotion-batches/{id:guid}/apply")]
-    [HttpPost("api/promotion-batches/{id:guid}/apply")]
     [RequirePermission(Permissions.Promotion.Apply)]
     public async Task<IActionResult> ApplyBatch(
         Guid id,
@@ -111,7 +102,6 @@ public class PromotionController : ControllerBase
     }
 
     [HttpPost("api/v1/promotion-batches/{id:guid}/cancel")]
-    [HttpPost("api/promotion-batches/{id:guid}/cancel")]
     [RequirePermission(Permissions.Promotion.Create)]
     public async Task<IActionResult> CancelBatch(Guid id, CancellationToken ct)
     {

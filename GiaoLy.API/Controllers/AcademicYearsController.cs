@@ -22,7 +22,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpGet("api/v1/academic-years")]
-    [HttpGet("api/academic-years")]
     [RequirePermission(Permissions.Academic.View)]
     public async Task<IActionResult> GetAcademicYears(CancellationToken ct)
     {
@@ -31,7 +30,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpGet("api/v1/academic-years/active")]
-    [HttpGet("api/academic-years/active")]
     [RequirePermission(Permissions.Academic.View)]
     public async Task<IActionResult> GetActiveAcademicYear(CancellationToken ct)
     {
@@ -40,7 +38,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpGet("api/v1/academic-years/{id:guid}")]
-    [HttpGet("api/academic-years/{id:guid}")]
     [RequirePermission(Permissions.Academic.View)]
     public async Task<IActionResult> GetAcademicYearById(Guid id, CancellationToken ct)
     {
@@ -49,7 +46,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpPost("api/v1/academic-years")]
-    [HttpPost("api/academic-years")]
     [RequirePermission(Permissions.Academic.Create)]
     public async Task<IActionResult> CreateAcademicYear([FromBody] CreateAcademicYearRequest request, CancellationToken ct)
     {
@@ -58,7 +54,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpPut("api/v1/academic-years/{id:guid}")]
-    [HttpPut("api/academic-years/{id:guid}")]
     [RequirePermission(Permissions.Academic.Update)]
     public async Task<IActionResult> UpdateAcademicYear(Guid id, [FromBody] UpdateAcademicYearRequest request, CancellationToken ct)
     {
@@ -67,7 +62,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpDelete("api/v1/academic-years/{id:guid}")]
-    [HttpDelete("api/academic-years/{id:guid}")]
     [RequirePermission(Permissions.Academic.Delete)]
     public async Task<IActionResult> DeleteAcademicYear(Guid id, CancellationToken ct)
     {
@@ -76,7 +70,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpPost("api/v1/academic-years/{id:guid}/activate")]
-    [HttpPost("api/academic-years/{id:guid}/activate")]
     [RequirePermission(Permissions.Academic.Lifecycle)]
     public async Task<IActionResult> ActivateAcademicYear(Guid id, CancellationToken ct)
     {
@@ -85,7 +78,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpPost("api/v1/academic-years/{id:guid}/close")]
-    [HttpPost("api/academic-years/{id:guid}/close")]
     [RequirePermission(Permissions.Academic.Lifecycle)]
     public async Task<IActionResult> CloseAcademicYear(Guid id, CancellationToken ct)
     {
@@ -94,7 +86,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpPost("api/v1/academic-years/{id:guid}/archive")]
-    [HttpPost("api/academic-years/{id:guid}/archive")]
     [RequirePermission(Permissions.Academic.Lifecycle)]
     public async Task<IActionResult> ArchiveAcademicYear(Guid id, CancellationToken ct)
     {
@@ -103,7 +94,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpPost("api/v1/academic-years/{id:guid}/reopen")]
-    [HttpPost("api/academic-years/{id:guid}/reopen")]
     [RequirePermission(Permissions.Academic.Lifecycle)]
     public async Task<IActionResult> ReopenAcademicYear(Guid id, [FromBody] ReopenAcademicYearRequest request, CancellationToken ct)
     {
@@ -112,7 +102,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpPost("api/v1/academic-years/{id:guid}/clone-structure")]
-    [HttpPost("api/academic-years/{id:guid}/clone-structure")]
     [RequirePermission(Permissions.Academic.Update)]
     public async Task<IActionResult> CloneStructure(Guid id, [FromBody] CloneStructureRequest request, CancellationToken ct)
     {
@@ -121,7 +110,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpGet("api/v1/academic-years/{yearId:guid}/classrooms")]
-    [HttpGet("api/academic-years/{yearId:guid}/classrooms")]
     [RequirePermission(Permissions.Academic.View)]
     public async Task<IActionResult> GetClassRoomsByYear(Guid yearId, CancellationToken ct)
     {
@@ -130,7 +118,6 @@ public class AcademicYearsController : ControllerBase
     }
 
     [HttpPost("api/v1/academic-years/{yearId:guid}/classrooms")]
-    [HttpPost("api/academic-years/{yearId:guid}/classrooms")]
     [RequirePermission(Permissions.Academic.Create)]
     public async Task<IActionResult> CreateClassRoom(Guid yearId, [FromBody] CreateClassRoomRequest request, CancellationToken ct)
     {

@@ -23,7 +23,6 @@ public class LeadersController : ControllerBase
     }
 
     [HttpGet("api/v1/public/leaders")]
-    [HttpGet("api/Leader")]
     [AllowAnonymous]
     public async Task<IActionResult> GetPublicLeaders(CancellationToken ct)
     {
@@ -43,7 +42,6 @@ public class LeadersController : ControllerBase
     }
 
     [HttpGet("api/v1/leaders/{id:guid}")]
-    [HttpGet("api/Leader/{id:guid}")]
     [RequirePermission(Permissions.Leaders.View)]
     public async Task<IActionResult> GetLeaderById(Guid id, CancellationToken ct)
     {
@@ -52,7 +50,6 @@ public class LeadersController : ControllerBase
     }
 
     [HttpPost("api/v1/leaders")]
-    [HttpPost("api/Leader")]
     [RequirePermission(Permissions.Leaders.Create)]
     public async Task<IActionResult> CreateLeader([FromBody] CreateLeaderRequest request, CancellationToken ct)
     {
@@ -61,7 +58,6 @@ public class LeadersController : ControllerBase
     }
 
     [HttpPut("api/v1/leaders/{id:guid}")]
-    [HttpPut("api/Leader/{id:guid}")]
     [RequirePermission(Permissions.Leaders.Update)]
     public async Task<IActionResult> UpdateLeader(Guid id, [FromBody] UpdateLeaderRequest request, CancellationToken ct)
     {
@@ -70,7 +66,6 @@ public class LeadersController : ControllerBase
     }
 
     [HttpDelete("api/v1/leaders/{id:guid}")]
-    [HttpDelete("api/Leader/{id:guid}")]
     [RequirePermission(Permissions.Leaders.Delete)]
     public async Task<IActionResult> DeleteLeader(Guid id, CancellationToken ct)
     {

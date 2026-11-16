@@ -18,7 +18,6 @@ public class GradesController : ControllerBase
     }
 
     [HttpGet("api/v1/classrooms/{id:guid}/grades")]
-    [HttpGet("api/classrooms/{id:guid}/grades")]
     [RequirePermission(Permissions.Grades.View)]
     public async Task<IActionResult> GetClassRoomGrades(Guid id, CancellationToken ct)
     {
@@ -27,7 +26,6 @@ public class GradesController : ControllerBase
     }
 
     [HttpPut("api/v1/classrooms/{id:guid}/grades")]
-    [HttpPut("api/classrooms/{id:guid}/grades")]
     [RequirePermission(Permissions.Grades.Update)]
     public async Task<IActionResult> UpdateClassRoomGrades(
         Guid id,
@@ -39,7 +37,6 @@ public class GradesController : ControllerBase
     }
 
     [HttpGet("api/v1/enrollments/{id:guid}/grade")]
-    [HttpGet("api/enrollments/{id:guid}/grade")]
     [RequirePermission(Permissions.Grades.View)]
     public async Task<IActionResult> GetEnrollmentGrade(Guid id, CancellationToken ct)
     {
@@ -48,7 +45,6 @@ public class GradesController : ControllerBase
     }
 
     [HttpPost("api/v1/classrooms/{id:guid}/grade-unlocks")]
-    [HttpPost("api/classrooms/{id:guid}/grade-unlocks")]
     [RequirePermission(Permissions.Grades.Unlock)]
     public async Task<IActionResult> CreateGradeUnlock(
         Guid id,
@@ -60,7 +56,6 @@ public class GradesController : ControllerBase
     }
 
     [HttpGet("api/v1/classrooms/{id:guid}/grade-unlocks")]
-    [HttpGet("api/classrooms/{id:guid}/grade-unlocks")]
     [RequirePermission(Permissions.Grades.View)]
     public async Task<IActionResult> GetGradeUnlocks(Guid id, CancellationToken ct)
     {
@@ -69,7 +64,6 @@ public class GradesController : ControllerBase
     }
 
     [HttpGet("api/v1/classrooms/{id:guid}/grades/export")]
-    [HttpGet("api/classrooms/{id:guid}/grades/export")]
     [RequirePermission(Permissions.Grades.Export)]
     public async Task<IActionResult> ExportClassRoomGrades(Guid id, CancellationToken ct)
     {
