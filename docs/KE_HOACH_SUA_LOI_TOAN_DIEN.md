@@ -260,13 +260,13 @@ curl -i -X POST http://localhost:5000/api/v1/auth/login \
 
 ## 7. GIAI ĐOẠN 2 — BACKEND: KIẾN TRÚC & NHẤT QUÁN (4–5 ngày)
 
-### G2-1. Chuẩn hoá route
+### G2-1. Chuẩn hoá route — ✅ hoàn tất 16/11/2026
 - **Hiện trạng:** mỗi action khai báo 2 route (`api/v1/...` và `api/...`); `Auth`, `Profile`, `User`, `GuardianLinks` khai báo 2 `[Route]`.
 - **Cách làm:** giữ **duy nhất** `/api/v1/*`; xoá route không version. Với `api/auth|me|users|guardian-links` bỏ attribute `[Route("api/...")]` thứ hai.
 - **Nghiệm thu:** `grep -c 'Http.*"api/' Controllers/*.cs` không còn route thiếu `v1`; frontend gọi đúng; 404 với route cũ (có thông báo deprecation trong docs).
 - **Ước lượng:** 3 giờ.
 
-### G2-2. Xoá controller legacy (sau G3a)
+### G2-2. Xoá controller legacy (sau G3a) — ✅ hoàn tất 16/11/2026
 | Xoá | Thay bằng |
 |---|---|
 | `StudentController` (`/api/Student`) | `StudentsController` (`/api/v1/students`) |
@@ -282,6 +282,25 @@ curl -i -X POST http://localhost:5000/api/v1/auth/login \
 - **Nghiệm thu:** số controller legacy = 0; build xanh; toàn bộ màn hình vẫn chạy; `tools/fe_lint.js` PASS sau khi cập nhật catalog.
 - **Ước lượng:** 1 ngày.
 
+#### G2-1 + G2-2 — Hoàn tất 16/11/2026
+
+**Đã xoá 8 controller legacy:** `StudentController`, `GradeController`, `AcademicYearController`, `EnrollmentController`, `CertificateController`, `SacramentController`, `StudentScoreController`, `DraftActionController` (thay bằng các controller `*sController` + `PromotionController` tương ứng). `HealthController` giữ lại; action `Health()` không truy vấn DB, chỉ `Ready()` mới kiểm tra kết nối.
+
+**Đã bỏ 150 attribute route không version** (và 4 `[Route("api/...")]` trùng) trên 28 controller còn lại. Kiểm tra sau khi sửa:
+```
+grep -n 'api/' Controllers/*.cs  → 0 dòng không phải api/v1
+[Route(  → chỉ còn api/v1/auth, api/v1/guardian-links, api/v1/me, api/v1/users, api/v1/public/students
+```
+**Ngoại lệ được giữ có chủ đích:** `GET /health` và `GET /health/ready` (probe hạ tầng, không phải API nghiệp vụ).
+
+**Thông báo ngừng hỗ trợ:** mọi đường dẫn dạng `/api/Student`, `/api/Grade`, `/api/AcademicYear`, `/api/Enrollment`, `/api/Certificate`, `/api/Sacrament`, `/api/StudentScore`, `/api/DraftAction`, `/api/Announcement`, `/api/CampEvent`, `/api/Document`, `/api/DutyAssignment`, `/api/Leader`, `/api/LessonPlan`, `/api/News/*`, `/api/SpiritualBouquet/*`, `/api/Stats/public`, `/api/users`, `/api/me`, `/api/auth/*`, `/api/guardian-links`, `/api/branches`, `/api/class-levels`, `/api/classrooms/*`, `/api/roles`, `/api/permissions`, `/api/imports`, `/api/promotion-batches`, `/api/families`, `/api/banners/*`, `/api/public/*`, `/api/liturgical/*` **đã ngừng hỗ trợ từ 16/11/2026 và trả 404**; dùng `/api/v1/...` tương ứng.
+
+**Frontend đã cập nhật sang v1:** `web-portal` (thông báo, lãnh đạo, thư viện, tin tức, banner, lịch phụng vụ hôm nay) và `web-admin` (mẫu import, tải tài liệu, danh sách tin công khai).
+
+**Kiểm chứng thực tế:** build **0 warning / 0 error**; **40** URL legacy đại diện → **404** toàn bộ; 7 route public v1 → **200**; `POST /api/v1/auth/login` → **200**; 10 route nghiệp vụ v1 có token (`students`, `branches`, `class-levels`, `academic-years`, `roles`, `permissions`, `imports`, `promotion-batches`, `families`, `users`) → **200**; web-admin `http://localhost:3000` → **200**.
+
+**Còn tồn tại (ngoài phạm vi G2-2):** `web-admin/pages/admin/news/index.vue` còn gọi `POST /api/news/sync` và `PATCH /api/news/{id}/toggle` — hai route này **không tồn tại ở cả bản cũ lẫn v1** (cần làm ở G3a/G2-9); `web-portal/app/pages/liturgical.vue` gọi `/api/liturgical` không có endpoint công khai tương đương. `tools/authz-matrix/endpoints.json`/`results.json` đang là catalog cũ, cần quét lại ở G2-9.
+
 ### G2-3. Áp scope (ABAC) cho mọi service nghiệp vụ
 - **Hiện trạng:** chỉ 10/34 service dùng `IScopeContext`.
 - **Ưu tiên bắt buộc:** `GradeService`, `CertificateService`, `EnrollmentService`, `PromotionService`, `ImportExportService`, `CampsService`.
@@ -293,6 +312,7 @@ curl -i -X POST http://localhost:5000/api/v1/auth/login \
 - **File:** `Infrastructure/Security/TokenService.cs`, `appsettings.json`, `Common/ConfigurationValidator.cs`
 - **Cách làm:** `TokenService` đọc `Jwt:ExpiryMinutes` (mặc định **20**) và `Jwt:RefreshTokenDays` (mặc định **14**) từ `IConfiguration`; giá trị ≤ 0 hoặc không phải số → ném lỗi cấu hình rõ ràng. `appsettings.json` khai báo 20/14; `appsettings.Production.json` giữ **120 phút / 14 ngày**. Validator chặn `ExpiryMinutes` ngoài 1–1440 và `RefreshTokenDays` ngoài 1–365.
 - **Nghiệm thu (đã đạt):** đổi `Jwt__ExpiryMinutes`/`Jwt__RefreshTokenDays` bằng biến môi trường → `exp` của access token và hạn cookie `refreshToken` thay đổi theo, **không cần build lại**; giá trị sai → app dừng với thông báo rõ.
+- **Bổ sung 16/11/2026:** `TokenValidationParameters.ClockSkew = TimeSpan.Zero` trong `Program.cs` — bỏ dung sai 5 phút mặc định để access token bị từ chối đúng `exp`. Đã kiểm với `Jwt__ExpiryMinutes=1`: token còn 59 giây hợp lệ, sau 65 giây trả 401, `POST /auth/refresh` cấp token mới và request được thử lại thành công; web-admin tự refresh khi gặp 401 mà không đá người dùng về trang đăng nhập.
 - **Ước lượng:** 2 giờ → thực tế ~0,5 giờ.
 
 ### G2-5. Dọn đăng ký DI trùng & mã chết — ✅ hoàn tất 15/11/2026
@@ -699,7 +719,7 @@ Kiểm chứng sau khi dọn: build 0 warning/0 error; `health=200`, `GET /api/v
 "RateLimiting": { "Global": { "PermitLimit": 120, "WindowSeconds": 60 } }
 ```
 
-- Partition theo IP (middleware rate limiter chạy **trước** `UseAuthentication` nên chưa có user để phân vùng).
+- Global limiter partition theo IP; riêng `upload`/`export` partition theo **user id** sau xác thực: `UseAuthentication()` đã được chuyển lên trước `UseRateLimiter()` (16/11/2026), request ẩn danh vẫn rơi về IP. Đã đo cùng một IP: `admin` hết 10 lượt export → 429 trong khi `thuky` vẫn 200; `admin` hết 20 lượt upload → 429 trong khi `thuky` vẫn 400 (chưa chạm hạn mức).
 - Áp cho mọi endpoint **chưa** có `[EnableRateLimiting]`; endpoint có policy riêng vẫn ăn cả policy riêng **và** global (đã đo: global=5 làm endpoint `verify` 10/phút bị chặn ở request thứ 6).
 
 **Kết quả đo:**
