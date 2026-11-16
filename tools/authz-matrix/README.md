@@ -54,4 +54,7 @@ scope, không phải phân quyền.
   ẩn danh → **401**, tức lớp phân quyền vẫn đúng.
 - Ngoài phạm vi nhưng phát hiện khi kiểm: `GET /swagger/v1/swagger.json` trả **500** do
   trùng `schemaId` `IssueCertificateRequest` giữa `GiaoLy.API.Controllers` và
-  `GiaoLy.Application.Certificates.Dtos`.
+  `GiaoLy.Application.Certificates.Dtos`. **Đã xử lý 16/11/2026:** lớp trùng trong
+  `GiaoLy.API.Controllers` bị xoá cùng controller legacy (G2-2); lỗi 500 còn lại của Swagger
+  là `DocumentsController.UploadDocument` dùng `[FromForm] IFormFile` — đã gom vào form model
+  `UploadDocumentForm`. `GET /swagger/v1/swagger.json` hiện trả **200** (148 path, 72 schema).

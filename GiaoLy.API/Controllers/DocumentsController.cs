@@ -25,7 +25,6 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpGet("api/v1/public/documents")]
-    [HttpGet("api/public/documents")]
     [AllowAnonymous]
     public async Task<IActionResult> GetPublicDocuments(
         [FromQuery] int? branchId,
@@ -38,7 +37,6 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpGet("api/v1/public/documents/{id:guid}/download")]
-    [HttpGet("api/public/documents/{id:guid}/download")]
     [AllowAnonymous]
     public async Task<IActionResult> DownloadPublicDocument(Guid id, CancellationToken ct)
     {
@@ -51,7 +49,6 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpGet("api/v1/documents")]
-    [HttpGet("api/Document")]
     [RequirePermission(Permissions.Documents.View)]
     public async Task<IActionResult> GetInternalDocuments(
         [FromQuery] int? branchId,
@@ -64,7 +61,6 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpGet("api/v1/documents/{id:guid}/download")]
-    [HttpGet("api/Document/{id:guid}/download")]
     [RequirePermission(Permissions.Documents.View)]
     public async Task<IActionResult> DownloadInternalDocument(Guid id, CancellationToken ct)
     {
@@ -77,17 +73,12 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpPost("api/v1/documents")]
-    [HttpPost("api/Document/upload")]
     [RequirePermission(Permissions.Documents.Create)]
     public async Task<IActionResult> UploadDocument(
-        [FromForm] IFormFile? file,
-        [FromForm] string? category,
-        [FromForm] int? branchId,
-        [FromForm] Guid? academicYearId,
-        [FromForm] string? accessLevel,
-        [FromForm] string? tags,
+        [FromForm] UploadDocumentForm form,
         CancellationToken ct)
     {
+        var file = form.File;
         if (file == null || file.Length == 0)
         {
             return BadRequest(new { message = "Vui lòng chọn tệp tin tải lên" });
@@ -100,11 +91,11 @@ public class DocumentsController : ControllerBase
         var request = new CreateDocumentRequest
         {
             FileName = file.FileName,
-            Category = category ?? "Giáo án",
-            BranchId = branchId,
-            AcademicYearId = academicYearId,
-            AccessLevel = accessLevel ?? "Internal",
-            Tags = tags,
+            Category = form.Category ?? "Giáo án",
+            BranchId = form.BranchId,
+            AcademicYearId = form.AcademicYearId,
+            AccessLevel = form.AccessLevel ?? "Internal",
+            Tags = form.Tags,
             ContentType = file.ContentType,
             FileBytes = fileBytes
         };
@@ -114,7 +105,6 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpPut("api/v1/documents/{id:guid}")]
-    [HttpPut("api/Document/{id:guid}")]
     [RequirePermission(Permissions.Documents.Update)]
     public async Task<IActionResult> UpdateDocument(
         Guid id,
@@ -126,11 +116,24 @@ public class DocumentsController : ControllerBase
     }
 
     [HttpDelete("api/v1/documents/{id:guid}")]
-    [HttpDelete("api/Document/{id:guid}")]
     [RequirePermission(Permissions.Documents.Delete)]
     public async Task<IActionResult> DeleteDocument(Guid id, CancellationToken ct)
     {
         var result = await _documentService.DeleteDocumentAsync(id, ct);
         return result.ToActionResult();
     }
+}
+
+/// <summary>
+/// Form upload tài liệu: gom nhiều trường vào một model để Swashbuckle sinh được schema
+/// (dùng [FromForm] trực tiếp trên tham số IFormFile làm SwaggerGen ném lỗi 500).
+/// </summary>
+public class UploadDocumentForm
+{
+    public IFormFile? File { get; set; }
+    public string? Category { get; set; }
+    public int? BranchId { get; set; }
+    public Guid? AcademicYearId { get; set; }
+    public string? AccessLevel { get; set; }
+    public string? Tags { get; set; }
 }
