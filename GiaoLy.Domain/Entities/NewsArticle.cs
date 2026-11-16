@@ -4,6 +4,12 @@ namespace GiaoLy.Domain.Entities;
 
 public class NewsArticle
 {
+    /// <summary>
+    /// Độ dài tối đa của <see cref="Link"/>. Giới hạn này vừa đủ cho URL bài viết và
+    /// nằm trong giới hạn khoá index của SQL Server (1700 byte → nvarchar(800)).
+    /// </summary>
+    public const int LinkMaxLength = 800;
+
     public Guid Id { get; set; } = Guid.NewGuid();
     public Guid? SourceId { get; set; }
     public string Title { get; set; } = string.Empty;

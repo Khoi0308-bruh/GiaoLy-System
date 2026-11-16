@@ -1457,8 +1457,8 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("Link")
                         .IsRequired()
-                        .HasMaxLength(1000)
-                        .HasColumnType("nvarchar(1000)");
+                        .HasMaxLength(800)
+                        .HasColumnType("nvarchar(800)");
 
                     b.Property<string>("LinkHash")
                         .IsRequired()
@@ -1488,6 +1488,10 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("datetime2");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Link")
+                        .IsUnique()
+                        .HasDatabaseName("UQ_NewsArticles_Link");
 
                     b.HasIndex("LinkHash")
                         .IsUnique()

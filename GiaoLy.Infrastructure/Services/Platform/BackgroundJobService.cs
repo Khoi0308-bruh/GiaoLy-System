@@ -216,6 +216,14 @@ public class BackgroundJobService : IBackgroundJobService
                     var link = item.Links.FirstOrDefault()?.Uri.ToString() ?? "";
                     if (string.IsNullOrWhiteSpace(link)) continue;
 
+                    if (link.Length > NewsArticle.LinkMaxLength)
+                    {
+                        _logger.LogWarning(
+                            "Bỏ qua bài viết có liên kết dài hơn {Max} ký tự từ {Source}: {Link}",
+                            NewsArticle.LinkMaxLength, source.Name, link);
+                        continue;
+                    }
+
                     var linkHash = ComputeSha256(link);
                     var exists = await _context.NewsArticles.AnyAsync(a => a.LinkHash == linkHash, ct);
                     if (exists) continue;

@@ -188,8 +188,20 @@ public class CatholicNewsCrawlerService : BackgroundService
                         string link = item.Links.FirstOrDefault()?.Uri?.ToString() ?? string.Empty;
                         if (string.IsNullOrEmpty(link)) continue;
 
-                        // Skip duplicates
-                        if (await dbContext.NewsArticles.AnyAsync(n => n.Link == link, stoppingToken))
+                        // Link có unique index nên không thể dài hơn LinkMaxLength; bỏ qua thay vì
+                        // để SaveChanges ném lỗi và làm hỏng cả nguồn tin.
+                        if (link.Length > NewsArticle.LinkMaxLength)
+                        {
+                            _logger.LogWarning(
+                                "Bỏ qua bài viết có liên kết dài hơn {Max} ký tự từ {Source}: {Link}",
+                                NewsArticle.LinkMaxLength, feed.Name, link);
+                            continue;
+                        }
+
+                        // Skip duplicates bằng LinkHash — tận dụng unique index UQ_NewsArticles_LinkHash
+                        // thay vì quét bảng theo Link.
+                        var linkHash = ComputeSha256(link);
+                        if (await dbContext.NewsArticles.AnyAsync(n => n.LinkHash == linkHash, stoppingToken))
                             continue;
 
                         string imageUrl = ExtractImageUrl(item);
@@ -200,7 +212,7 @@ public class CatholicNewsCrawlerService : BackgroundService
                             Title         = item.Title?.Text ?? "Không tiêu đề",
                             Summary       = StripHtml(item.Summary?.Text ?? string.Empty),
                             Link          = link,
-                            LinkHash      = ComputeSha256(link),
+                            LinkHash      = linkHash,
                             ImageUrl      = imageUrl,
                             SourceId      = feed.Id,
                             Category      = "General",
