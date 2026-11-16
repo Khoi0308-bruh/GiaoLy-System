@@ -13,7 +13,7 @@ interface LiturgicalEvent {
 const config = useRuntimeConfig()
 
 // Fetch today's Liturgical Event
-const { data: liturgicalToday } = await useFetch<LiturgicalEvent>('/api/liturgical/today', {
+const { data: liturgicalToday } = await useFetch<LiturgicalEvent>('/api/v1/public/liturgical/today', {
   baseURL: config.public.apiBase
 })
 

@@ -152,7 +152,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'default', public: true })
 useHead({ title: 'Thông Báo – Thiếu Nhi Thánh Thể' })
 
 const config = useRuntimeConfig()
@@ -190,7 +190,7 @@ const refresh = async () => {
   loading.value = true
   error.value = null
   try {
-    const data = await $fetch<Announcement[]>(`${apiBase}/api/announcements`, {
+    const data = await $fetch<Announcement[]>(`${apiBase}/api/v1/public/announcements`, {
       query: { limit: 50, sort: 'newest' }
     })
     announcements.value = Array.isArray(data) ? data : []

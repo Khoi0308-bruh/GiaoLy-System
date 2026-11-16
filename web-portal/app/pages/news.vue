@@ -135,7 +135,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'default', public: true })
 useHead({ title: 'Tin Tức Công Giáo – Thiếu Nhi Thánh Thể' })
 
 const config = useRuntimeConfig()
@@ -156,7 +156,7 @@ const loading = ref(true)
 const articles = ref<Article[]>([])
 const activeSource = ref<string | null>(null)
 
-const { data } = await useFetch<Article[]>(`${apiBase}/api/news/catholic`, {
+const { data } = await useFetch<Article[]>(`${apiBase}/api/v1/public/news`, {
   query: { limit: 50, sort: 'newest' },
   default: () => []
 })
@@ -172,7 +172,7 @@ const filteredArticles = computed(() =>
 )
 
 const imageProxyUrl = (url: string) =>
-  `${apiBase}/api/news/image-proxy?url=${encodeURIComponent(url)}`
+  `${apiBase}/api/v1/public/news/image?url=${encodeURIComponent(url)}`
 
 const formatDate = (dateStr: string) =>
   new Date(dateStr).toLocaleDateString('vi-VN', { day: '2-digit', month: '2-digit', year: 'numeric' })

@@ -15,11 +15,11 @@ interface Announcement {
 
 const config = useRuntimeConfig()
 
-const { data: news } = await useFetch<NewsArticle[]>('/api/news/catholic?limit=4', {
+const { data: news } = await useFetch<NewsArticle[]>('/api/v1/public/news?limit=4', {
   baseURL: config.public.apiBase
 })
 
-const { data: announcements } = await useFetch<Announcement[]>('/api/announcement?limit=5', {
+const { data: announcements } = await useFetch<Announcement[]>('/api/v1/public/announcements?limit=5', {
   baseURL: config.public.apiBase
 })
 </script>

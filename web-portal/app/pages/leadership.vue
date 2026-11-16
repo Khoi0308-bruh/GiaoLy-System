@@ -374,7 +374,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'default', public: true })
 useHead({ title: 'Sơ Đồ Tổ Chức Xứ Đoàn – Thiếu Nhi Thánh Thể' })
 
 const config = useRuntimeConfig()
@@ -453,7 +453,7 @@ const branchColumns = [
 
 // Tải dữ liệu từ API
 try {
-  const { data } = await useFetch<Leader[]>(`${apiBase}/api/leader`)
+  const { data } = await useFetch<Leader[]>(`${apiBase}/api/v1/public/leaders`)
   if (data.value && data.value.length) {
     leaders.value = data.value.filter(l => l.isActive)
   }

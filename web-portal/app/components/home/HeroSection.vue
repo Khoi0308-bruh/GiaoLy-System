@@ -15,7 +15,7 @@ interface BannerItem {
 const config = useRuntimeConfig()
 
 // Gọi API lấy danh sách banner đang hoạt động
-const { data: apiBanners } = await useFetch<BannerItem[]>('/api/banners/active', {
+const { data: apiBanners } = await useFetch<BannerItem[]>('/api/v1/public/banners', {
   baseURL: config.public.apiBase
 })
 

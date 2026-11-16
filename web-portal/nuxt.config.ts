@@ -7,6 +7,12 @@ export default defineNuxtConfig({
     '@nuxtjs/google-fonts'
   ],
 
+  // @pinia/nuxt chỉ quét <srcDir>/stores của app hiện tại, không quét store trong layer,
+  // nên phải khai báo tường minh để useSessionStore() auto-import hoạt động.
+  pinia: {
+    storesDirs: ['stores', '../layer/app/stores']
+  },
+
   devtools: {
     enabled: true
   },

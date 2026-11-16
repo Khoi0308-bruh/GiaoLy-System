@@ -4,6 +4,8 @@ import SpiritualSection from '~/components/home/SpiritualSection.vue'
 import NewsAndAnnouncementsSection from '~/components/home/NewsAndAnnouncementsSection.vue'
 import TenCommandmentsSection from '~/components/home/TenCommandmentsSection.vue'
 
+definePageMeta({ public: true })
+
 useHead({
   title: 'Trang Chủ - Thiếu Nhi Thánh Thể'
 })

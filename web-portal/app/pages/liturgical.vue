@@ -93,7 +93,7 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'default', public: true })
 useHead({ title: 'Lịch Phụng Vụ – Thiếu Nhi Thánh Thể' })
 
 const config = useRuntimeConfig()

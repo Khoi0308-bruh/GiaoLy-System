@@ -364,7 +364,7 @@
 </template>
 
 <script setup>
-definePageMeta({ layout: 'default' })
+definePageMeta({ layout: 'default', public: true })
 useHead({ title: 'Thư Viện Tài Liệu - Thiếu Nhi Thánh Thể' })
 
 const auth = reactive({ user: null })
@@ -419,7 +419,7 @@ watch([searchQuery, selectedCategory, selectedBranch], () => {
 })
 
 // Fetch documents from server
-const { data: documents, pending } = await useFetch('/api/Document', {
+const { data: documents, pending } = await useFetch('/api/v1/public/documents', {
   baseURL: config.public.apiBase,
   query: fetchParams,
   default: () => [],
