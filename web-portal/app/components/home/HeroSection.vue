@@ -56,13 +56,24 @@ const handleSearch = () => {
   navigateTo(`/verify?q=${encodeURIComponent(searchQuery.value.trim())}`)
 }
 
-// Thống kê nhanh (quick stats)
-const quickStats = [
-  { label: 'Đoàn Sinh', value: '120+', icon: 'i-heroicons-users' },
-  { label: 'Huynh Trưởng', value: '24', icon: 'i-heroicons-academic-cap' },
-  { label: 'Lớp Học', value: '8', icon: 'i-heroicons-building-library' },
-  { label: 'Năm Hoạt Động', value: '15+', icon: 'i-heroicons-star' },
-]
+// Thống kê nhanh — lấy từ API công khai, không hard-code.
+interface PublicStats {
+  totalStudents: number
+  totalCatechists: number
+  totalClasses: number
+  totalActiveAcademicYears: number
+}
+
+const { data: publicStats } = await useFetch<PublicStats>('/api/v1/public/stats', {
+  baseURL: config.public.apiBase
+})
+
+const quickStats = computed(() => [
+  { label: 'Đoàn Sinh', value: publicStats.value?.totalStudents ?? 0, icon: 'i-heroicons-users' },
+  { label: 'Huynh Trưởng', value: publicStats.value?.totalCatechists ?? 0, icon: 'i-heroicons-academic-cap' },
+  { label: 'Lớp Học', value: publicStats.value?.totalClasses ?? 0, icon: 'i-heroicons-building-library' },
+  { label: 'Niên Khóa', value: publicStats.value?.totalActiveAcademicYears ?? 0, icon: 'i-heroicons-star' },
+])
 </script>
 
 <template>

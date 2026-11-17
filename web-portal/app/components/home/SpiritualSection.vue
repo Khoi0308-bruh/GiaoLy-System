@@ -35,13 +35,14 @@ const wordOfGodContent = computed(() => wordOfGod.value.text)
 const wordOfGodReference = computed(() => wordOfGod.value.reference)
 
 // Ánh xạ màu phụng vụ sang màu thực tế
+// API trả màu phụng vụ bằng tiếng Anh (Green, White, Red...).
 const liturgicalColorMap: Record<string, { bg: string; text: string; dot: string; label: string }> = {
-  'Đỏ':   { bg: 'rgba(139,26,26,0.08)',  text: '#8b1a1a', dot: '#c0392b', label: 'Màu Đỏ' },
-  'Tím':  { bg: 'rgba(76,29,149,0.08)',  text: '#4c1d95', dot: '#7c3aed', label: 'Màu Tím' },
-  'Xanh': { bg: 'rgba(26,58,107,0.08)',  text: '#1a3a6b', dot: '#2a5298', label: 'Màu Xanh' },
-  'Trắng':{ bg: 'rgba(201,169,110,0.1)', text: '#a07840', dot: '#c9a96e', label: 'Màu Trắng' },
-  'Xanh lá':{ bg: 'rgba(22,101,52,0.08)',text: '#166534', dot: '#16a34a', label: 'Màu Xanh Lá' },
-  'Hồng': { bg: 'rgba(219,39,119,0.08)', text: '#be185d', dot: '#db2777', label: 'Màu Hồng' },
+  Red:    { bg: 'rgba(139,26,26,0.08)',  text: '#8b1a1a', dot: '#c0392b', label: 'Màu Đỏ' },
+  Violet: { bg: 'rgba(76,29,149,0.08)',  text: '#4c1d95', dot: '#7c3aed', label: 'Màu Tím' },
+  Green:  { bg: 'rgba(22,101,52,0.08)',  text: '#166534', dot: '#16a34a', label: 'Màu Xanh Lá' },
+  White:  { bg: 'rgba(201,169,110,0.1)', text: '#a07840', dot: '#c9a96e', label: 'Màu Trắng' },
+  Rose:   { bg: 'rgba(219,39,119,0.08)', text: '#be185d', dot: '#db2777', label: 'Màu Hồng' },
+  Gold:   { bg: 'rgba(201,169,110,0.1)', text: '#a07840', dot: '#c9a96e', label: 'Màu Vàng Kim' },
 }
 
 const liturgicalStyle = computed(() => {

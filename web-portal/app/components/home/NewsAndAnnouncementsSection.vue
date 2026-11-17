@@ -9,8 +9,9 @@ interface NewsArticle {
 interface Announcement {
   id: string
   title: string
-  isUrgent: boolean
-  createdDate: string
+  announcementType: string
+  publishedAt: string
+  createdAt?: string
 }
 
 const config = useRuntimeConfig()
@@ -22,6 +23,14 @@ const { data: news } = await useFetch<NewsArticle[]>('/api/v1/public/news?limit=
 const { data: announcements } = await useFetch<Announcement[]>('/api/v1/public/announcements?limit=5', {
   baseURL: config.public.apiBase
 })
+
+const isUrgent = (item: Announcement) => item.announcementType === 'Urgent'
+
+const formatAnnouncementDate = (value?: string | null) => {
+  if (!value) return '—'
+  const date = new Date(value)
+  return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString('vi-VN')
+}
 </script>
 
 <template>
@@ -177,14 +186,14 @@ const { data: announcements } = await useFetch<Announcement[]>('/api/v1/public/a
           :key="item.id"
           to="/thong-bao"
           class="group flex items-start gap-4 p-4 md:p-5 rounded-2xl border transition-all duration-300 hover:-translate-y-0.5 cursor-pointer"
-          :style="item.isUrgent
+          :style="isUrgent(item)
             ? 'background: rgba(139,26,26,0.04); border-color: rgba(139,26,26,0.15);'
             : 'background: rgba(26,58,107,0.03); border-color: rgba(201,169,110,0.15);'"
         >
           <!-- Icon / Số thứ tự -->
           <div class="shrink-0 mt-0.5">
             <!-- Icon khẩn cấp -->
-            <div v-if="item.isUrgent"
+            <div v-if="isUrgent(item)"
               class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
               style="background: rgba(139,26,26,0.1);"
             >
@@ -207,7 +216,7 @@ const { data: announcements } = await useFetch<Announcement[]>('/api/v1/public/a
           <div class="flex-1 min-w-0">
             <h4
               class="font-bold text-[15px] leading-snug mb-2 transition-colors duration-200 group-hover:text-navy line-clamp-2"
-              :class="item.isUrgent ? 'text-red-800 dark:text-red-400' : 'text-stone-800 dark:text-stone-100'"
+              :class="isUrgent(item) ? 'text-red-800 dark:text-red-400' : 'text-stone-800 dark:text-stone-100'"
             >
               {{ item.title }}
             </h4>
@@ -215,11 +224,11 @@ const { data: announcements } = await useFetch<Announcement[]>('/api/v1/public/a
               <!-- Ngày đăng -->
               <span class="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
                 <UIcon name="i-heroicons-calendar" class="w-3.5 h-3.5" />
-                {{ new Date(item.createdDate).toLocaleDateString('vi-VN') }}
+                {{ formatAnnouncementDate(item.publishedAt || item.createdAt) }}
               </span>
               <!-- Badge khẩn -->
               <UBadge
-                v-if="item.isUrgent"
+                v-if="isUrgent(item)"
                 color="error"
                 variant="subtle"
                 size="xs"

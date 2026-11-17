@@ -81,7 +81,10 @@ async function fetchActiveYear() {
   try {
     activeYear.value = await api.get<AcademicYear>('/academic-years/active')
   } catch (e) {
-    errorYear.value = e as ApiError
+    // Chưa có niên khóa active là trạng thái hợp lệ, không phải lỗi cần hiển thị.
+    const err = e as ApiError
+    activeYear.value = null
+    if (err.status !== 404) errorYear.value = err
   } finally {
     loadingYear.value = false
   }
