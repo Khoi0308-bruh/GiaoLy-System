@@ -69,6 +69,8 @@ export function useApi() {
     put: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PUT', body }),
     patch: <T>(path: string, body?: unknown) => request<T>(path, { method: 'PATCH', body }),
     del: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
+    // Nhiều trang gọi `api.delete(...)`; giữ cả hai tên để không phải sửa từng trang.
+    delete: <T>(path: string) => request<T>(path, { method: 'DELETE' }),
 
     /**
      * Tải file (Excel/PDF) — dùng chung đường 401 → refresh → thử lại như các request khác.
