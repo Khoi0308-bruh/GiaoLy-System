@@ -6,6 +6,7 @@ using GiaoLy.API.Authorization;
 using GiaoLy.API.Common;
 using GiaoLy.Application.News.Contracts;
 using GiaoLy.Application.News.Dtos;
+using GiaoLy.Application.Platform.Contracts;
 using GiaoLy.Domain.Constants;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -16,10 +17,12 @@ namespace GiaoLy.API.Controllers;
 public class NewsController : ControllerBase
 {
     private readonly INewsService _newsService;
+    private readonly IBackgroundJobService _jobService;
 
-    public NewsController(INewsService newsService)
+    public NewsController(INewsService newsService, IBackgroundJobService jobService)
     {
         _newsService = newsService;
+        _jobService = jobService;
     }
 
     [HttpGet("api/v1/public/news")]
@@ -44,6 +47,30 @@ public class NewsController : ControllerBase
 
         var dto = result.Value!;
         return File(dto.ImageStream, dto.ContentType);
+    }
+
+    [HttpGet("api/v1/news/articles")]
+    [RequirePermission(Permissions.News.View)]
+    public async Task<IActionResult> GetAdminNews(
+        [FromQuery] int page = 1,
+        [FromQuery] int pageSize = 20,
+        [FromQuery] Guid? sourceId = null,
+        [FromQuery] bool? isActive = null,
+        CancellationToken ct = default)
+    {
+        var result = await _newsService.GetAdminNewsAsync(page, pageSize, sourceId, isActive, ct);
+        return result.ToActionResult();
+    }
+
+    [HttpPost("api/v1/news/sync")]
+    [RequirePermission(Permissions.News.Update)]
+    public async Task<IActionResult> SyncNews(CancellationToken ct)
+    {
+        var result = await _jobService.RunJobAsync(
+            BackgroundJobNames.NewsCrawler,
+            User.Identity?.Name ?? "Admin",
+            ct);
+        return result.ToActionResult();
     }
 
     [HttpGet("api/v1/news/sources")]

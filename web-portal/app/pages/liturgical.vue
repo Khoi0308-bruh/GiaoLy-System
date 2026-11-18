@@ -33,6 +33,30 @@
       </div>
 
       <div
+        v-else-if="loadError"
+        class="text-center py-16 text-stone-500"
+      >
+        <UIcon
+          name="i-heroicons-exclamation-circle"
+          class="w-12 h-12 mx-auto mb-3 text-red-400"
+        />
+        <p class="font-bold">
+          Không thể tải lịch phụng vụ
+        </p>
+        <p class="text-sm text-stone-400 mt-1">
+          {{ loadError }}
+        </p>
+        <UButton
+          class="mt-4"
+          color="primary"
+          variant="soft"
+          @click="load"
+        >
+          Thử lại
+        </UButton>
+      </div>
+
+      <div
         v-else-if="entries.length"
         class="space-y-3"
       >
@@ -99,6 +123,14 @@ useHead({ title: 'Lịch Phụng Vụ – Thiếu Nhi Thánh Thể' })
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase
 
+interface ApiLiturgicalEntry {
+  eventDate: string
+  title: string
+  colorNameVi?: string
+  description?: string
+  level?: string
+}
+
 interface LiturgicalEntry {
   date: string
   title?: string
@@ -107,12 +139,53 @@ interface LiturgicalEntry {
   season?: string
 }
 
-const loading = ref(true)
-const entries = ref<LiturgicalEntry[]>([])
+const { data, status, error, refresh } = await useAsyncData<LiturgicalEntry[]>(
+  'liturgical-calendar',
+  async () => {
+    const now = new Date()
+    const year = now.getFullYear()
+    const month = now.getMonth() + 1
 
-const { data } = await useFetch<LiturgicalEntry[]>(`${apiBase}/api/liturgical`)
-entries.value = data.value ?? []
-loading.value = false
+    // Hai nguồn độc lập: một nguồn lỗi vẫn hiển thị được dữ liệu của nguồn còn lại.
+    const [todayResult, monthResult] = await Promise.allSettled([
+      $fetch<ApiLiturgicalEntry>(`${apiBase}/api/v1/public/liturgical/today`),
+      $fetch<ApiLiturgicalEntry[]>(`${apiBase}/api/v1/public/liturgical/month/${year}/${month}`),
+    ])
+
+    if (todayResult.status === 'rejected' && monthResult.status === 'rejected') {
+      throw todayResult.reason
+    }
+
+    const today = todayResult.status === 'fulfilled' ? todayResult.value : null
+    const monthEvents = monthResult.status === 'fulfilled' ? monthResult.value : []
+
+    // Gộp lịch hôm nay với các ngày lễ/override trong tháng; ngày hôm nay được ưu tiên.
+    const byDate = new Map<string, ApiLiturgicalEntry>()
+    for (const entry of [...monthEvents, ...(today ? [today] : [])]) {
+      if (entry?.eventDate) byDate.set(entry.eventDate, entry)
+    }
+
+    return [...byDate.values()]
+      .sort((a, b) => a.eventDate.localeCompare(b.eventDate))
+      .map(entry => ({
+        date: entry.eventDate,
+        title: entry.title,
+        liturgyName: entry.title,
+        description: entry.description,
+        season: entry.colorNameVi,
+      }))
+  }
+)
+
+const entries = computed(() => data.value ?? [])
+const loading = computed(() => status.value === 'pending')
+const loadError = computed(() => {
+  if (!error.value) return null
+  const err = error.value as unknown as { data?: { detail?: string; message?: string }; message?: string }
+  return err?.data?.detail || err?.data?.message || err?.message || 'Lỗi không xác định'
+})
+
+const load = () => refresh()
 
 const isToday = (dateStr: string) => {
   const today = new Date()

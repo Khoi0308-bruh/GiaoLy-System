@@ -26,6 +26,14 @@ interface NewsSourceItem {
   createdAt: string
 }
 
+interface PagedNews {
+  items: NewsArticleItem[]
+  totalCount: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
 const api = useApi()
 const toast = useToast()
 const { can } = usePermissions()
@@ -35,7 +43,11 @@ const activeTab = ref<'articles' | 'sources'>('articles')
 const articles = ref<NewsArticleItem[]>([])
 const sources = ref<NewsSourceItem[]>([])
 const loading = ref(true)
+const syncing = ref(false)
 const error = ref<ApiError | null>(null)
+const page = ref(1)
+const pageSize = 24
+const total = ref(0)
 
 // Modal Thêm / Sửa nguồn
 const sourceFormOpen = ref(false)
@@ -58,10 +70,11 @@ async function loadData() {
   error.value = null
   try {
     const [resArticles, resSources] = await Promise.all([
-      api.get<any>('/public/news?pageSize=50'),
+      api.get<PagedNews>(`/news/articles?page=${page.value}&pageSize=${pageSize}`),
       api.get<NewsSourceItem[]>('/news/sources').catch(() => [])
     ])
-    articles.value = resArticles?.items || resArticles || []
+    articles.value = resArticles?.items || []
+    total.value = resArticles?.totalCount || 0
     sources.value = resSources || []
   } catch (e) {
     error.value = e as ApiError
@@ -71,6 +84,26 @@ async function loadData() {
 }
 
 onMounted(loadData)
+watch(page, loadData)
+
+async function syncNews() {
+  syncing.value = true
+  try {
+    const result = await api.post<{ status: string, message?: string }>('/news/sync')
+    if (result.status !== 'Succeeded') {
+      throw new Error(result.message || 'Tác vụ đồng bộ không hoàn tất.')
+    }
+    toast.add({ title: 'Đã đồng bộ tin tức', description: result.message, color: 'success' })
+    // Đang ở trang 1 thì tải lại ngay; trang khác thì để watch(page) tải lại, tránh gọi 2 lần.
+    if (page.value === 1) await loadData()
+    else page.value = 1
+  } catch (e) {
+    const err = e as ApiError
+    toast.add({ title: 'Không thể đồng bộ tin tức', description: err.detail || err.message, color: 'error' })
+  } finally {
+    syncing.value = false
+  }
+}
 
 // ── Ẩn / Hiện bài viết ─────────────────────────────────
 async function toggleArticleActive(a: NewsArticleItem) {
@@ -172,6 +205,16 @@ async function handleDeleteSource() {
     >
       <template #actions>
         <UButton
+          v-if="can(PERMISSIONS.News.Update)"
+          color="neutral"
+          variant="soft"
+          icon="i-lucide-refresh-cw"
+          :loading="syncing"
+          @click="syncNews"
+        >
+          Đồng bộ tin
+        </UButton>
+        <UButton
           v-if="can(PERMISSIONS.News.Create)"
           color="primary"
           icon="i-lucide-rss"
@@ -193,7 +236,7 @@ async function handleDeleteSource() {
         @click="activeTab = 'articles'"
       >
         <UIcon name="i-lucide-newspaper" class="mr-1.5 inline h-4 w-4" />
-        Danh sách bài viết ({{ articles.length }})
+        Danh sách bài viết ({{ total }})
       </button>
       <button
         type="button"
@@ -282,6 +325,17 @@ async function handleDeleteSource() {
             </div>
           </div>
         </div>
+      </div>
+
+      <div v-if="total > pageSize" class="mt-6 flex flex-col items-center justify-between gap-3 sm:flex-row">
+        <p class="text-xs font-semibold text-stone-500">
+          Hiển thị {{ (page - 1) * pageSize + 1 }}–{{ Math.min(page * pageSize, total) }} trong {{ total }} bài viết
+        </p>
+        <UPagination
+          v-model:page="page"
+          :total="total"
+          :items-per-page="pageSize"
+        />
       </div>
     </div>
 

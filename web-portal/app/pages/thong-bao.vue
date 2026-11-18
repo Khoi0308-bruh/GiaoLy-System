@@ -195,44 +195,8 @@ const refresh = async () => {
     })
     announcements.value = Array.isArray(data) ? data : []
   } catch (e: unknown) {
+    announcements.value = []
     error.value = e instanceof Error ? e.message : 'Lỗi không xác định'
-    // Fallback mock data khi API chưa chạy
-    announcements.value = [
-      {
-        id: '1',
-        title: 'Thông báo khai giảng năm học Giáo lý mới 2026-2027',
-        content: 'Kính thưa quý Phụ huynh, Chúa nhật tuần sau Giáo xứ sẽ chính thức khai giảng năm học mới. Thánh lễ lúc 7:30 sáng, sau đó các em sẽ tập trung theo lớp đã được phân bổ.',
-        category: 'Học vụ',
-        isImportant: true,
-        publishedAt: '2026-08-25T07:00:00Z'
-      },
-      {
-        id: '2',
-        title: 'Thay đổi giờ lễ cho khối Ấu Nhi ngày Chúa Nhật',
-        content: 'Do thời tiết nắng nóng, giờ lễ của khối Ấu Nhi sẽ được chuyển lên sớm hơn 30 phút. Phụ huynh vui lòng đưa các em đến đúng giờ.',
-        category: 'Sinh hoạt',
-        isImportant: false,
-        publishedAt: '2026-08-20T07:00:00Z'
-      },
-      {
-        id: '3',
-        title: 'Đăng ký tham gia cắm trại ngành Nghĩa Sĩ',
-        content: 'Trại hè sẽ diễn ra vào cuối tháng 8. Các em Nghĩa Sĩ đăng ký trực tiếp cho Huynh trưởng phụ trách lớp trước ngày 22/08.',
-        category: 'Sinh hoạt',
-        isImportant: false,
-        publishedAt: '2026-08-15T07:00:00Z'
-      },
-      {
-        id: '4',
-        title: 'Họp phụ huynh đầu năm học',
-        content: 'Ban Điều Hành kính mời Quý Phụ Huynh tham dự buổi họp phụ huynh đầu năm học. Thời gian: 8:00 sáng Chúa Nhật 01/09/2026 tại hội trường giáo xứ.',
-        category: 'Giáo xứ',
-        isImportant: true,
-        publishedAt: '2026-08-10T07:00:00Z'
-      }
-    ]
-    // Clear the error so fallback data shows
-    error.value = null
   } finally {
     loading.value = false
   }

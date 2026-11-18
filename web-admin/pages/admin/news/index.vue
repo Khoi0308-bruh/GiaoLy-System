@@ -30,18 +30,14 @@
           <UBadge
             v-if="total > 0"
             :label="`${total} bai viet`"
-            color="sky"
-            variant="soft"
             size="lg"
-            class="rounded-2xl font-black text-sm px-4"
+            class="rounded-2xl font-black text-sm px-4 bg-sky-100 text-sky-700 dark:bg-sky-900/60 dark:text-sky-300"
           />
           <UButton
             label="Dong bo ngay"
             icon="i-heroicons-arrow-path"
-            color="sky"
-            variant="solid"
             size="lg"
-            class="rounded-2xl shadow-lg shadow-sky-500/20 hover:-translate-y-0.5 transition-transform font-bold uppercase tracking-wider"
+            class="rounded-2xl bg-sky-500 hover:bg-sky-600 text-white shadow-lg shadow-sky-500/20 hover:-translate-y-0.5 transition-transform font-bold uppercase tracking-wider"
             :loading="syncing"
             @click="syncNow"
           />
@@ -95,7 +91,7 @@
 
       <!-- EMPTY -->
       <div
-        v-else-if="!paginatedArticles.length"
+        v-else-if="!articles.length"
         class="text-center py-24 bg-white/40 dark:bg-stone-900/40 backdrop-blur-xl rounded-[2rem] border border-white/50 dark:border-stone-800 shadow-sm"
       >
         <UIcon name="i-heroicons-newspaper" class="w-16 h-16 text-stone-300 dark:text-stone-700 mx-auto mb-4" />
@@ -105,8 +101,7 @@
           label="Dong bo ngay"
           icon="i-heroicons-arrow-path"
           variant="soft"
-          color="sky"
-          class="mt-4 rounded-xl font-bold"
+          class="mt-4 rounded-xl font-bold bg-sky-100 text-sky-700 hover:bg-sky-200 dark:bg-sky-900/50 dark:text-sky-300"
           @click="syncNow"
         />
       </div>
@@ -117,7 +112,7 @@
         class="bg-white/50 dark:bg-stone-900/50 backdrop-blur-xl border border-white/60 dark:border-stone-800 shadow-xl rounded-[2rem] overflow-hidden"
       >
         <UTable
-          :rows="paginatedArticles"
+          :data="articles"
           :columns="columns"
           :ui="{
             wrapper: 'overflow-x-auto',
@@ -128,54 +123,53 @@
           }"
         >
           <!-- Tieu de -->
-          <template #title-data="{ row }">
+          <template #title-cell="{ row }">
             <div class="max-w-sm">
               <a
-                v-if="row.url"
-                :href="row.url"
+                v-if="row.original.link"
+                :href="row.original.link"
                 target="_blank"
                 rel="noopener"
                 class="font-bold text-stone-800 dark:text-white hover:text-sky-600 dark:hover:text-sky-400 transition-colors line-clamp-2 leading-snug"
-              >{{ row.title }}</a>
+              >{{ row.original.title }}</a>
               <p v-else class="font-bold text-stone-800 dark:text-white line-clamp-2 leading-snug">
-                {{ row.title }}
+                {{ row.original.title }}
               </p>
             </div>
           </template>
 
           <!-- Nguon -->
-          <template #source-data="{ row }">
+          <template #sourceName-cell="{ row }">
             <div class="flex items-center gap-2">
               <div class="w-2 h-2 rounded-full bg-sky-400 flex-shrink-0"></div>
-              <span class="text-xs font-bold text-stone-600 dark:text-stone-300 whitespace-nowrap">{{ row.source || '—' }}</span>
+              <span class="text-xs font-bold text-stone-600 dark:text-stone-300 whitespace-nowrap">{{ row.original.sourceName || '—' }}</span>
             </div>
           </template>
 
           <!-- Danh muc -->
-          <template #category-data="{ row }">
+          <template #category-cell="{ row }">
             <UBadge
-              v-if="row.category"
-              :label="row.category"
-              color="indigo"
+              v-if="row.original.category"
+              :label="row.original.category"
               variant="soft"
               size="xs"
-              class="font-bold uppercase tracking-wide rounded-lg whitespace-nowrap"
+              class="font-bold uppercase tracking-wide rounded-lg whitespace-nowrap bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300"
             />
             <span v-else class="text-xs text-stone-400">—</span>
           </template>
 
           <!-- Ngay dang -->
-          <template #publishedAt-data="{ row }">
+          <template #publishedAt-cell="{ row }">
             <span class="text-xs font-bold text-stone-500 whitespace-nowrap">
-              {{ formatDate(row.publishedAt) }}
+              {{ formatDate(row.original.publishedAt) }}
             </span>
           </template>
 
           <!-- Trang thai -->
-          <template #isActive-data="{ row }">
+          <template #isActive-cell="{ row }">
             <UBadge
-              :label="row.isActive ? 'Hien' : 'An'"
-              :color="row.isActive ? 'success' : 'neutral'"
+              :label="row.original.isActive ? 'Hien' : 'An'"
+              :color="row.original.isActive ? 'success' : 'neutral'"
               variant="soft"
               size="xs"
               class="font-black uppercase tracking-widest rounded-lg"
@@ -183,25 +177,25 @@
           </template>
 
           <!-- Hanh dong -->
-          <template #actions-data="{ row }">
+          <template #actions-cell="{ row }">
             <div class="flex items-center gap-1">
               <UButton
-                v-if="row.url"
+                v-if="row.original.link"
                 icon="i-heroicons-arrow-top-right-on-square"
                 color="neutral"
                 variant="ghost"
                 size="xs"
                 class="rounded-lg"
-                :to="row.url"
+                :to="row.original.link"
                 target="_blank"
               />
               <UButton
-                :icon="row.isActive ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'"
-                :color="row.isActive ? 'warning' : 'success'"
+                :icon="row.original.isActive ? 'i-heroicons-eye-slash' : 'i-heroicons-eye'"
+                :color="row.original.isActive ? 'warning' : 'success'"
                 variant="ghost"
                 size="xs"
                 class="rounded-lg"
-                @click="toggleActive(row)"
+                @click="toggleActive(row.original)"
               />
             </div>
           </template>
@@ -240,6 +234,8 @@ useHead({ title: 'Quan Ly Tin Tuc RSS - GiaoLy Admin' })
 const toast = useToast()
 const config = useRuntimeConfig()
 const apiBase = config.public.apiBase as string
+// Phiên đăng nhập thực tế nằm ở session store của layer (cookie + access token).
+const session = useSessionStore()
 
 // State
 const selectedSource = ref('')
@@ -258,65 +254,101 @@ const perPageOptions = [
 interface NewsArticle {
   id: string | number
   title: string
-  url?: string
-  source?: string
+  link?: string
+  sourceId?: string
+  sourceName?: string
+  summary?: string
+  imageUrl?: string
   category?: string
   publishedAt?: string
   isActive: boolean
 }
 
-// Fetch
-const { data: rawArticles, pending, error, refresh } = await useFetch<NewsArticle[]>(
-  () => `${apiBase}/api/v1/public/news`,
-  { default: () => [] as NewsArticle[], server: false }
+interface NewsSource {
+  id: string
+  name: string
+}
+
+interface PagedNews {
+  items: NewsArticle[]
+  totalCount: number
+  page: number
+  pageSize: number
+  totalPages: number
+}
+
+const authHeaders = computed<Record<string, string>>(() =>
+  session.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}
 )
 
-// Source filter options
-const sourceOptions = computed(() => {
-  const sources = [...new Set((rawArticles.value ?? []).map(a => a.source).filter(Boolean))] as string[]
-  return [
-    { label: 'Tat Ca Nguon', value: '' },
-    ...sources.map(s => ({ label: s, value: s })),
-  ]
+const requestUrl = computed(() => {
+  const params = new URLSearchParams({
+    page: String(currentPage.value),
+    pageSize: String(perPage.value),
+  })
+  if (selectedSource.value) params.set('sourceId', selectedSource.value)
+  return `${apiBase}/api/v1/news/articles?${params.toString()}`
 })
 
-// Filtered + paginated
-const filteredArticles = computed(() => {
-  const list = rawArticles.value ?? []
-  if (!selectedSource.value) return list
-  return list.filter(a => a.source === selectedSource.value)
+// Server-side paginated admin list (includes hidden articles)
+const { data: newsPage, pending, error, refresh } = await useFetch<PagedNews>(requestUrl, {
+  headers: authHeaders,
+  credentials: 'include',
+  server: false,
+  default: () => ({ items: [], totalCount: 0, page: 1, pageSize: 15, totalPages: 0 }),
 })
 
-const total = computed(() => filteredArticles.value.length)
+const { data: sources } = await useFetch<NewsSource[]>(`${apiBase}/api/v1/news/sources`, {
+  headers: authHeaders,
+  credentials: 'include',
+  server: false,
+  default: () => [] as NewsSource[],
+})
+
+const articles = computed(() => newsPage.value?.items ?? [])
+const total = computed(() => newsPage.value?.totalCount ?? 0)
 const rangeStart = computed(() => total.value === 0 ? 0 : (currentPage.value - 1) * perPage.value + 1)
 const rangeEnd = computed(() => Math.min(currentPage.value * perPage.value, total.value))
 
-const paginatedArticles = computed(() => {
-  const start = (currentPage.value - 1) * perPage.value
-  return filteredArticles.value.slice(start, start + perPage.value)
-})
+// Source filter options
+const sourceOptions = computed(() => [
+  { label: 'Tat Ca Nguon', value: '' },
+  ...(sources.value ?? []).map(s => ({ label: s.name, value: s.id })),
+])
 
 watch([selectedSource, perPage], () => { currentPage.value = 1 })
 
 // Columns
 const columns = [
-  { key: 'title',       label: 'Tieu De' },
-  { key: 'source',      label: 'Nguon' },
-  { key: 'category',    label: 'Danh Muc' },
-  { key: 'publishedAt', label: 'Ngay Dang' },
-  { key: 'isActive',    label: 'Trang Thai' },
-  { key: 'actions',     label: '' },
+  { accessorKey: 'title',       header: 'Tieu De' },
+  { accessorKey: 'sourceName',  header: 'Nguon' },
+  { accessorKey: 'category',    header: 'Danh Muc' },
+  { accessorKey: 'publishedAt', header: 'Ngay Dang' },
+  { accessorKey: 'isActive',    header: 'Trang Thai' },
+  { accessorKey: 'actions',     header: '' },
 ]
+
+const getErrorMessage = (e: unknown, fallback: string) => {
+  // API trả ProblemDetails nên thông điệp tiếng Việt nằm ở `detail`.
+  const err = e as { data?: { detail?: string; message?: string }; message?: string }
+  return err?.data?.detail || err?.data?.message || err?.message || fallback
+}
 
 // Sync action
 const syncNow = async () => {
   syncing.value = true
   try {
-    await $fetch(`${apiBase}/api/news/sync`, { method: 'POST' })
-    toast.add({ title: 'Dong bo thanh cong', description: 'Da cap nhat tin tuc moi nhat.', color: 'success' })
+    const result = await $fetch<{ status: string; message?: string }>(
+      `${apiBase}/api/v1/news/sync`,
+      { method: 'POST', headers: authHeaders.value, credentials: 'include' }
+    )
+    if (result.status !== 'Succeeded') {
+      throw new Error(result.message || 'Tac vu dong bo khong hoan tat.')
+    }
+    toast.add({ title: 'Dong bo thanh cong', description: result.message, color: 'success' })
     await refresh()
-  } catch {
-    toast.add({ title: 'Loi dong bo', description: 'Khong the ket noi toi may chu.', color: 'error' })
+  } catch (e: unknown) {
+    toast.add({ title: 'Loi dong bo', description: getErrorMessage(e, 'Khong the ket noi toi may chu.'), color: 'error' })
   } finally {
     syncing.value = false
   }
@@ -325,14 +357,19 @@ const syncNow = async () => {
 // Toggle active
 const toggleActive = async (article: NewsArticle) => {
   try {
-    await $fetch(`${apiBase}/api/news/${article.id}/toggle`, { method: 'PATCH' })
-    article.isActive = !article.isActive
+    await $fetch(`${apiBase}/api/v1/news/articles/${article.id}`, {
+      method: 'PUT',
+      headers: authHeaders.value,
+      credentials: 'include',
+      body: { isActive: !article.isActive },
+    })
     toast.add({
-      title: article.isActive ? 'Da hien bai viet' : 'Da an bai viet',
+      title: article.isActive ? 'Da an bai viet' : 'Da hien bai viet',
       color: 'success',
     })
-  } catch {
-    toast.add({ title: 'Loi cap nhat', color: 'error' })
+    await refresh()
+  } catch (e: unknown) {
+    toast.add({ title: 'Loi cap nhat', description: getErrorMessage(e, 'Khong the cap nhat bai viet.'), color: 'error' })
   }
 }
 

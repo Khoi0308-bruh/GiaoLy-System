@@ -6,6 +6,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using GiaoLy.Application.Common.Errors;
+using GiaoLy.Application.Common.Paging;
 using GiaoLy.Application.Common.Results;
 using GiaoLy.Application.News.Contracts;
 using GiaoLy.Application.News.Dtos;
@@ -49,6 +50,7 @@ public class NewsService : INewsService
 
         var list = await query
             .OrderByDescending(a => a.PublishedAt)
+            .ThenByDescending(a => a.Id)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .ToListAsync(ct);
@@ -68,6 +70,53 @@ public class NewsService : INewsService
         }).ToList();
 
         return Result.Ok(dtos);
+    }
+
+    public async Task<Result<PagedList<NewsArticleDto>>> GetAdminNewsAsync(
+        int page = 1,
+        int pageSize = 20,
+        Guid? sourceId = null,
+        bool? isActive = null,
+        CancellationToken ct = default)
+    {
+        page = Math.Max(1, page);
+        pageSize = Math.Clamp(pageSize, 1, 100);
+
+        var query = _context.NewsArticles
+            .AsNoTracking()
+            .Include(a => a.Source)
+            .AsQueryable();
+
+        if (sourceId.HasValue)
+            query = query.Where(a => a.SourceId == sourceId.Value);
+
+        if (isActive.HasValue)
+            query = query.Where(a => a.IsActive == isActive.Value);
+
+        var totalCount = await query.CountAsync(ct);
+
+        var list = await query
+            .OrderByDescending(a => a.PublishedAt)
+            .ThenByDescending(a => a.Id)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
+            .ToListAsync(ct);
+
+        var dtos = list.Select(a => new NewsArticleDto
+        {
+            Id = a.Id,
+            SourceId = a.SourceId,
+            SourceName = a.Source?.Name,
+            Title = a.Title,
+            Link = a.Link,
+            Summary = a.Summary,
+            ImageUrl = a.ImageUrl,
+            Category = a.Category,
+            PublishedAt = a.PublishedAt,
+            IsActive = a.IsActive
+        }).ToList();
+
+        return Result.Ok(new PagedList<NewsArticleDto>(dtos, totalCount, page, pageSize));
     }
 
     public async Task<Result<ProxyImageResultDto>> ProxyImageAsync(string imageUrl, CancellationToken ct = default)
