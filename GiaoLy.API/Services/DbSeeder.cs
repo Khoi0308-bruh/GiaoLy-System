@@ -16,6 +16,7 @@ public static class DbSeeder
         context.Database.Migrate();
 
         SeedBranches(context);
+        SeedAcademicYear(context);
         SeedNewsSources(context);
         SeedLeaders(context);
         SeedSystemSettings(context);
@@ -24,6 +25,37 @@ public static class DbSeeder
         SeedInitialUsers(context, config, env);
         // Phải đứng sau SeedInitialUsers: Announcements.AuthorUserId là FK NOT NULL tới Users.
         SeedAnnouncements(context);
+    }
+
+    /// <summary>
+    /// Niên khóa đang hoạt động là dữ liệu gốc: dashboard, chọn lớp khi đăng thông báo,
+    /// giáo án, trực lớp đều gọi <c>GET /academic-years/active</c>. Một database mới tinh
+    /// không có niên khóa nào nên các màn hình đó rơi vào trạng thái trống ngay từ lần
+    /// đăng nhập đầu tiên.
+    ///
+    /// Chỉ tạo khi bảng hoàn toàn trống: không bao giờ ghi đè hay tự bật một niên khóa
+    /// đã có trong dữ liệu thật. Niên khóa mới được tạo thẳng ở trạng thái 'Active'
+    /// (bỏ qua quy tắc CanActivate yêu cầu phải có sẵn lớp học) vì đây là bản ghi mồi
+    /// để hệ thống sử dụng được ngay sau khi cài đặt.
+    /// </summary>
+    private static void SeedAcademicYear(AppDbContext context)
+    {
+        if (context.AcademicYears.Any()) return;
+
+        var now = DateTime.UtcNow;
+        // Năm học bắt đầu từ tháng 9: từ tháng 8 trở đi tính niên khóa mới.
+        var startYear = now.Month >= 8 ? now.Year : now.Year - 1;
+
+        context.AcademicYears.Add(new AcademicYear
+        {
+            Name = $"{startYear}–{startYear + 1}",
+            StartDate = new DateOnly(startYear, 9, 1),
+            EndDate = new DateOnly(startYear + 1, 6, 30),
+            Status = AcademicYearStateMachine.StatusActive,
+            ActivatedAt = now,
+            CreatedAt = now
+        });
+        context.SaveChanges();
     }
 
     /// <summary>

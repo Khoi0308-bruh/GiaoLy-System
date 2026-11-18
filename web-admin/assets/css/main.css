@@ -46,18 +46,8 @@
   --color-ivory-200: #f0ede6;
   --color-ivory-300: #e6e0d5;
 
-  /* ── Nuxt UI Primary mapping → Marian Blue ── */
-  --color-primary-50:  var(--color-marian-blue-50);
-  --color-primary-100: var(--color-marian-blue-100);
-  --color-primary-200: var(--color-marian-blue-200);
-  --color-primary-300: var(--color-marian-blue-300);
-  --color-primary-400: var(--color-marian-blue-400);
-  --color-primary-500: var(--color-marian-blue-500);
-  --color-primary-600: var(--color-marian-blue-600);
-  --color-primary-700: var(--color-marian-blue-700);
-  --color-primary-800: var(--color-marian-blue-800);
-  --color-primary-900: var(--color-marian-blue-900);
-  --color-primary-950: var(--color-marian-blue-950);
+  /* Primary: Nuxt UI tự sinh --color-primary-* từ ui.colors.primary = 'marian-blue'
+     trong app.config.ts, nên không cần khai báo lại ở đây. */
 
   /* ── Nuxt UI Neutral mapping → Stone ── */
   --color-neutral-50:  #fafaf9;

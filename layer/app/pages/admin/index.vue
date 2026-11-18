@@ -208,7 +208,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
         </div>
 
         <div class="flex items-center gap-3">
-          <StatusChip v-if="activeYear" :status="activeYear.status === 'Active' ? 'Active' : 'Locked'" />
+          <StatusChip v-if="activeYear" domain="year" :value="activeYear.status" />
           <UButton
             to="/admin/nien-khoa"
             variant="outline"

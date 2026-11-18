@@ -15,6 +15,7 @@ using GiaoLy.Domain.Entities;
 using GiaoLy.Domain.Rules;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace GiaoLy.Infrastructure.Services.Documents;
 
@@ -23,17 +24,20 @@ public class DocumentService : IDocumentService
     private readonly AppDbContext _context;
     private readonly ICurrentUser _currentUser;
     private readonly IWebHostEnvironment _env;
+    private readonly ILogger<DocumentService> _logger;
 
     private readonly string _storageFolder;
 
     public DocumentService(
         AppDbContext context,
         ICurrentUser currentUser,
-        IWebHostEnvironment env)
+        IWebHostEnvironment env,
+        ILogger<DocumentService> logger)
     {
         _context = context;
         _currentUser = currentUser;
         _env = env;
+        _logger = logger;
 
         // Secure storage directory outside wwwroot / public directory
         _storageFolder = Path.Combine(_env.ContentRootPath, "App_Data", "Documents");
@@ -270,7 +274,40 @@ public class DocumentService : IDocumentService
         doc.DeletedAt = DateTime.UtcNow;
         await _context.SaveChangesAsync(ct);
 
+        // Xoá luôn tệp vật lý để không còn tệp mồ côi trong App_Data/Documents.
+        DeleteStoredFile(doc.StoredFileName);
+
         return Result.Ok(true);
+    }
+
+    /// <summary>
+    /// Xoá tệp đã lưu trên đĩa. Không làm hỏng thao tác xoá bản ghi nếu tệp
+    /// đã bị xoá trước đó hoặc đang bị khoá bởi tiến trình khác.
+    /// </summary>
+    private void DeleteStoredFile(string? storedFileName)
+    {
+        if (string.IsNullOrWhiteSpace(storedFileName))
+            return;
+
+        var fileName = Path.GetFileName(storedFileName);
+        if (string.IsNullOrEmpty(fileName))
+            return;
+
+        var physicalPath = Path.Combine(_storageFolder, fileName);
+
+        try
+        {
+            if (File.Exists(physicalPath))
+                File.Delete(physicalPath);
+        }
+        catch (IOException ex)
+        {
+            _logger.LogWarning(ex, "Không thể xoá tệp tài liệu {FileName} trên đĩa", fileName);
+        }
+        catch (UnauthorizedAccessException ex)
+        {
+            _logger.LogWarning(ex, "Không có quyền xoá tệp tài liệu {FileName} trên đĩa", fileName);
+        }
     }
 
     private async Task<Result<DocumentDto>> GetDocumentDtoByIdAsync(Guid id, CancellationToken ct)
