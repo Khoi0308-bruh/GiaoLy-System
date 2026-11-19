@@ -6,6 +6,40 @@ export interface LiturgicalDay {
   description?: string
 }
 
+/**
+ * Hợp đồng thật của API `/public/liturgical/*` (BE: LiturgicalEventDto).
+ * Các trang phải đọc đúng các trường này, không dùng tên tự đặt như
+ * `date`, `celebrationTitle`, `liturgicalColor`, `rank`…
+ */
+export interface LiturgicalEventDto {
+  id: string
+  eventDate: string
+  title: string
+  color: string
+  colorNameVi: string
+  level: string
+  description?: string | null
+  isOverride: boolean
+  wordOfGodOverride?: string | null
+  wordOfGodReference?: string | null
+}
+
+export type LiturgicalDisplayColor = 'White' | 'Red' | 'Green' | 'Violet' | 'Rose' | 'Gold'
+
+/**
+ * API trả `color` bằng tiếng Anh (Purple, Green…) hoặc đôi khi tiếng Việt.
+ * Chuẩn hoá về khoá hiển thị màu mà các bảng COLOR_MAP trong UI đang dùng.
+ */
+export function liturgicalDisplayColor(color?: string | null): LiturgicalDisplayColor {
+  const c = (color ?? '').toLowerCase()
+  if (/purple|violet|tím/.test(c)) return 'Violet'
+  if (/gold|vàng/.test(c)) return 'Gold'
+  if (/white|trắng/.test(c)) return 'White'
+  if (/red|đỏ/.test(c)) return 'Red'
+  if (/rose|pink|hồng/.test(c)) return 'Rose'
+  return 'Green'
+}
+
 export type LiturgicalKey = 'green' | 'violet' | 'white' | 'red' | 'rose' | 'black'
 
 export function toLiturgicalKey(color: string | undefined | null): LiturgicalKey {

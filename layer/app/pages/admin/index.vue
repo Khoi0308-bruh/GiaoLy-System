@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { PERMISSIONS } from '~/shared/permissions'
 import { ApiError } from '~/composables/useApi'
+import { liturgicalDisplayColor, type LiturgicalEventDto } from '~/composables/useLiturgical'
 
 definePageMeta({ layout: 'admin' })
 
@@ -39,18 +40,11 @@ interface Announcement {
   isPinned?: boolean
 }
 
-interface LiturgicalDay {
-  date: string
-  celebrationTitle: string
-  liturgicalColor: 'White' | 'Red' | 'Green' | 'Violet' | 'Rose' | 'Gold'
-  rank: string
-  readingsSummary?: string | null
-}
-
 const activeYear = ref<AcademicYear | null>(null)
 const dashboardStats = ref<DashboardReport | null>(null)
 const announcements = ref<Announcement[]>([])
-const liturgicalToday = ref<LiturgicalDay | null>(null)
+const liturgicalToday = ref<LiturgicalEventDto | null>(null)
+const liturgicalColor = computed(() => liturgicalDisplayColor(liturgicalToday.value?.color))
 
 const loadingYear = ref(false)
 const loadingStats = ref(false)
@@ -66,7 +60,7 @@ async function fetchLiturgicalToday() {
   loadingLiturgical.value = true
   errorLiturgical.value = null
   try {
-    liturgicalToday.value = await api.get<LiturgicalDay>('/public/liturgical/today')
+    liturgicalToday.value = await api.get<LiturgicalEventDto>('/public/liturgical/today')
   } catch (e) {
     errorLiturgical.value = e as ApiError
   } finally {
@@ -152,7 +146,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
     <div
       v-if="liturgicalToday"
       class="rounded-xl border border-stone-200 bg-white p-4 shadow-sm border-l-4 transition-all"
-      :class="COLOR_MAP[liturgicalToday.liturgicalColor]?.border || 'border-l-amber-500'"
+      :class="COLOR_MAP[liturgicalColor]?.border || 'border-l-amber-500'"
     >
       <div class="flex flex-wrap items-center justify-between gap-3">
         <div class="flex items-center gap-3">
@@ -164,18 +158,18 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
               <span class="text-xs font-semibold uppercase tracking-wider text-stone-500">Phụng vụ hôm nay</span>
               <span
                 class="rounded-full px-2 py-0.5 text-xs font-medium border"
-                :class="COLOR_MAP[liturgicalToday.liturgicalColor]?.badge || 'bg-stone-100 text-stone-800'"
+                :class="COLOR_MAP[liturgicalColor]?.badge || 'bg-stone-100 text-stone-800'"
               >
-                Màu áo lễ: {{ COLOR_MAP[liturgicalToday.liturgicalColor]?.label || liturgicalToday.liturgicalColor }}
+                Màu áo lễ: {{ COLOR_MAP[liturgicalColor]?.label || liturgicalColor }}
               </span>
             </div>
             <h2 class="text-base font-bold text-stone-900">
-              {{ liturgicalToday.celebrationTitle }}
+              {{ liturgicalToday.title }}
             </h2>
           </div>
         </div>
-        <div v-if="liturgicalToday.readingsSummary" class="text-xs text-stone-600 max-w-md text-right hidden md:block">
-          {{ liturgicalToday.readingsSummary }}
+        <div v-if="liturgicalToday.wordOfGodReference" class="text-xs text-stone-600 max-w-md text-right hidden md:block">
+          {{ liturgicalToday.wordOfGodReference }}
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ApiError } from '~/composables/useApi'
+import { liturgicalDisplayColor, type LiturgicalDisplayColor, type LiturgicalEventDto } from '~/composables/useLiturgical'
 
 definePageMeta({ public: true })
 
@@ -9,7 +10,7 @@ interface LiturgicalDaySummary {
   date: string
   dayOfMonth: number
   celebrationTitle: string
-  liturgicalColor: 'White' | 'Red' | 'Green' | 'Violet' | 'Rose' | 'Gold'
+  liturgicalColor: LiturgicalDisplayColor
   rank: string
   isSunday?: boolean
 }
@@ -17,16 +18,41 @@ interface LiturgicalDaySummary {
 interface LiturgicalDayDetail {
   date: string
   celebrationTitle: string
-  liturgicalColor: 'White' | 'Red' | 'Green' | 'Violet' | 'Rose' | 'Gold'
+  liturgicalColor: LiturgicalDisplayColor
   rank: string
-  season?: string | null
-  readings?: {
-    firstReading?: string | null
-    responsorialPsalm?: string | null
-    secondReading?: string | null
-    gospel?: string | null
-  } | null
-  notes?: string | null
+  colorName?: string | null
+  description?: string | null
+  wordOfGodReference?: string | null
+  wordOfGodOverride?: string | null
+}
+
+/**
+ * API trả LiturgicalEventDto (eventDate, title, color, colorNameVi, level,
+ * description, wordOfGodReference, wordOfGodOverride). Đổi tên trường ngay tại
+ * biên để template chỉ làm việc với một hình dạng dữ liệu duy nhất.
+ */
+function mapDay(e: LiturgicalEventDto): LiturgicalDayDetail {
+  return {
+    date: e.eventDate,
+    celebrationTitle: e.title,
+    liturgicalColor: liturgicalDisplayColor(e.color),
+    rank: e.level,
+    colorName: e.colorNameVi || null,
+    description: e.description ?? null,
+    wordOfGodReference: e.wordOfGodReference ?? null,
+    wordOfGodOverride: e.wordOfGodOverride ?? null
+  }
+}
+
+function mapSummary(e: LiturgicalEventDto): LiturgicalDaySummary {
+  return {
+    date: e.eventDate,
+    dayOfMonth: Number(e.eventDate.slice(8, 10)) || 1,
+    celebrationTitle: e.title,
+    liturgicalColor: liturgicalDisplayColor(e.color),
+    rank: e.level,
+    isSunday: new Date(`${e.eventDate}T00:00:00`).getDay() === 0
+  }
 }
 
 const now = new Date()
@@ -57,7 +83,7 @@ async function fetchToday() {
   loadingToday.value = true
   errorToday.value = null
   try {
-    todayLiturgical.value = await api.get<LiturgicalDayDetail>('/public/liturgical/today')
+    todayLiturgical.value = mapDay(await api.get<LiturgicalEventDto>('/public/liturgical/today'))
     if (!activeDateDetail.value) {
       activeDateDetail.value = todayLiturgical.value
     }
@@ -72,18 +98,10 @@ async function fetchMonth() {
   loadingMonth.value = true
   errorMonth.value = null
   try {
-    const res = await api.get<{ days?: LiturgicalDaySummary[], data?: LiturgicalDaySummary[] } | LiturgicalDaySummary[]>(
+    const res = await api.get<LiturgicalEventDto[]>(
       `/public/liturgical/month/${selectedYear.value}/${selectedMonth.value}`
     )
-    if (Array.isArray(res)) {
-      monthDays.value = res
-    } else if (res && Array.isArray(res.days)) {
-      monthDays.value = res.days
-    } else if (res && Array.isArray(res.data)) {
-      monthDays.value = res.data
-    } else {
-      monthDays.value = []
-    }
+    monthDays.value = Array.isArray(res) ? res.map(mapSummary) : []
   } catch (e) {
     errorMonth.value = e as ApiError
   } finally {
@@ -95,7 +113,7 @@ async function selectDate(dateStr: string) {
   loadingDetail.value = true
   errorDetail.value = null
   try {
-    activeDateDetail.value = await api.get<LiturgicalDayDetail>(`/public/liturgical/date/${dateStr}`)
+    activeDateDetail.value = mapDay(await api.get<LiturgicalEventDto>(`/public/liturgical/date/${dateStr}`))
   } catch (e) {
     errorDetail.value = e as ApiError
   } finally {
@@ -197,8 +215,8 @@ onMounted(() => {
             <h2 class="font-serif text-2xl font-bold text-stone-900">
               {{ todayLiturgical.celebrationTitle }}
             </h2>
-            <p v-if="todayLiturgical.season" class="text-xs text-stone-600">
-              Mùa phụng vụ: <strong class="text-stone-800">{{ todayLiturgical.season }}</strong>
+            <p v-if="todayLiturgical.colorName" class="text-xs text-stone-600">
+              Phẩm phục: <strong class="text-stone-800">{{ todayLiturgical.colorName }}</strong>
             </p>
           </div>
 
@@ -331,8 +349,8 @@ onMounted(() => {
               <div class="font-semibold text-stone-800">
                 Phẩm phục: Màu {{ COLOR_MAP[activeDateDetail.liturgicalColor]?.label || activeDateDetail.liturgicalColor }}
               </div>
-              <div v-if="activeDateDetail.notes" class="text-stone-600 mt-1 leading-relaxed">
-                {{ activeDateDetail.notes }}
+              <div v-if="activeDateDetail.description" class="text-stone-600 mt-1 leading-relaxed">
+                {{ activeDateDetail.description }}
               </div>
             </div>
 
@@ -340,33 +358,23 @@ onMounted(() => {
             <div class="space-y-3">
               <h3 class="text-xs font-bold uppercase tracking-wider text-[#1D3A73] flex items-center gap-1.5">
                 <UIcon name="i-heroicons-book-open" class="h-4 w-4 text-[#A8812A]" />
-                Các bài đọc Kinh Thánh trong Thánh lễ
+                Lời Chúa trong ngày
               </h3>
 
-              <div v-if="activeDateDetail.readings" class="space-y-2.5 text-xs">
-                <div v-if="activeDateDetail.readings.firstReading" class="p-2.5 rounded-lg bg-stone-50 border border-stone-100">
-                  <div class="font-bold text-stone-700">Bài đọc 1:</div>
-                  <div class="text-stone-900 mt-0.5">{{ activeDateDetail.readings.firstReading }}</div>
+              <div v-if="activeDateDetail.wordOfGodReference || activeDateDetail.wordOfGodOverride" class="space-y-2.5 text-xs">
+                <div v-if="activeDateDetail.wordOfGodReference" class="p-2.5 rounded-lg bg-stone-50 border border-stone-100">
+                  <div class="font-bold text-stone-700">Bài đọc:</div>
+                  <div class="text-stone-900 mt-0.5">{{ activeDateDetail.wordOfGodReference }}</div>
                 </div>
 
-                <div v-if="activeDateDetail.readings.responsorialPsalm" class="p-2.5 rounded-lg bg-stone-50 border border-stone-100">
-                  <div class="font-bold text-stone-700">Đáp ca:</div>
-                  <div class="text-stone-900 mt-0.5">{{ activeDateDetail.readings.responsorialPsalm }}</div>
-                </div>
-
-                <div v-if="activeDateDetail.readings.secondReading" class="p-2.5 rounded-lg bg-stone-50 border border-stone-100">
-                  <div class="font-bold text-stone-700">Bài đọc 2:</div>
-                  <div class="text-stone-900 mt-0.5">{{ activeDateDetail.readings.secondReading }}</div>
-                </div>
-
-                <div v-if="activeDateDetail.readings.gospel" class="p-2.5 rounded-lg bg-amber-50/70 border border-amber-200">
-                  <div class="font-bold text-[#A8812A]">Tin Mừng:</div>
-                  <div class="text-stone-900 mt-0.5 font-medium">{{ activeDateDetail.readings.gospel }}</div>
+                <div v-if="activeDateDetail.wordOfGodOverride" class="p-2.5 rounded-lg bg-amber-50/70 border border-amber-200">
+                  <div class="font-bold text-[#A8812A]">Lời Chúa:</div>
+                  <div class="text-stone-900 mt-0.5 font-medium whitespace-pre-line">{{ activeDateDetail.wordOfGodOverride }}</div>
                 </div>
               </div>
 
               <div v-else class="text-xs text-stone-500 italic py-3 text-center">
-                Chưa cập nhật chi tiết các bài đọc cho ngày này.
+                Chưa cập nhật Lời Chúa cho ngày này.
               </div>
             </div>
           </div>

@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import { ApiError } from '~/composables/useApi'
+import { liturgicalDisplayColor, type LiturgicalEventDto } from '~/composables/useLiturgical'
 
 definePageMeta({ public: true })
 
@@ -12,14 +13,6 @@ interface Banner {
   imageUrl?: string | null
   linkUrl?: string | null
   order?: number
-}
-
-interface LiturgicalDay {
-  date: string
-  celebrationTitle: string
-  liturgicalColor: 'White' | 'Red' | 'Green' | 'Violet' | 'Rose' | 'Gold'
-  rank: string
-  readingsSummary?: string | null
 }
 
 interface PublicStats {
@@ -47,7 +40,8 @@ interface PublicAnnouncement {
 }
 
 const banners = ref<Banner[]>([])
-const liturgicalToday = ref<LiturgicalDay | null>(null)
+const liturgicalToday = ref<LiturgicalEventDto | null>(null)
+const liturgicalColor = computed(() => liturgicalDisplayColor(liturgicalToday.value?.color))
 const stats = ref<PublicStats | null>(null)
 const newsList = ref<PublicNews[]>([])
 const announcements = ref<PublicAnnouncement[]>([])
@@ -59,7 +53,7 @@ async function loadPortalData() {
   try {
     const [bRes, lRes, sRes, nRes, aRes] = await Promise.allSettled([
       api.get<Banner[]>('/public/banners'),
-      api.get<LiturgicalDay>('/public/liturgical/today'),
+      api.get<LiturgicalEventDto>('/public/liturgical/today'),
       api.get<PublicStats>('/public/stats'),
       api.get<PublicNews[]>('/public/news', { limit: 4 }),
       api.get<PublicAnnouncement[]>('/public/announcements', { limit: 4 })
@@ -110,12 +104,12 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
         <div class="flex items-center gap-2">
           <UIcon name="i-heroicons-sparkles" class="h-4 w-4 text-[#ECC367]" />
           <span class="text-stone-400 font-medium">Phụng vụ hôm nay:</span>
-          <span class="font-bold text-white">{{ liturgicalToday.celebrationTitle }}</span>
+          <span class="font-bold text-white">{{ liturgicalToday.title }}</span>
           <span
             class="rounded px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wider"
-            :class="COLOR_MAP[liturgicalToday.liturgicalColor]?.badge || 'bg-stone-700 text-stone-200'"
+            :class="COLOR_MAP[liturgicalColor]?.badge || 'bg-stone-700 text-stone-200'"
           >
-            Áo lễ {{ COLOR_MAP[liturgicalToday.liturgicalColor]?.label || liturgicalToday.liturgicalColor }}
+            Áo lễ {{ COLOR_MAP[liturgicalColor]?.label || liturgicalColor }}
           </span>
         </div>
         <NuxtLink to="/lich-phung-vu" class="text-[#ECC367] hover:underline flex items-center gap-1 text-[11px]">
