@@ -29,6 +29,25 @@ const sacraments = ref<any[]>([])
 const requirements = ref<any[]>([])
 const certificates = ref<any[]>([])
 
+// Dữ liệu dẫn xuất từ hồ sơ đoàn sinh (API trả về birthDate/gender/area và mảng guardians)
+const guardianByRole = (role: string) =>
+  guardians.value.find((g: any) => String(g.relationship || '').toLowerCase() === role.toLowerCase())
+const primaryGuardian = computed(() =>
+  guardians.value.find((g: any) => g.isPrimary) ?? guardians.value[0] ?? null)
+const studentAge = computed(() => {
+  if (!student.value?.birthDate) return null
+  const birth = new Date(student.value.birthDate)
+  if (Number.isNaN(birth.getTime())) return null
+  const now = new Date()
+  let age = now.getFullYear() - birth.getFullYear()
+  const beforeBirthday = now.getMonth() < birth.getMonth()
+    || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
+  if (beforeBirthday) age--
+  return age >= 0 ? age : null
+})
+const sacramentOf = (type: string) =>
+  sacraments.value.find((s: any) => s.sacramentType === type)
+
 // Notes state
 const newNoteContent = ref('')
 const noteSubmitting = ref(false)
@@ -42,7 +61,7 @@ const statusSubmitting = ref(false)
 const editModalOpen = ref(false)
 const editFullName = ref('')
 const editHolyName = ref('')
-const editGender = ref<'Male' | 'Female'>('Male')
+const editGender = ref<string>('Nam')
 const editDob = ref('')
 const editParishArea = ref('')
 const editAddress = ref('')
@@ -148,7 +167,7 @@ async function handlePhotoUpload(e: Event) {
   photoLoading.value = true
   try {
     const formData = new FormData()
-    formData.append('photo', file)
+    formData.append('file', file)
     await api.post(`/students/${studentId.value}/photo`, formData)
     await loadStudent()
   } catch (err) {
@@ -164,7 +183,7 @@ async function changeStatus() {
   statusSubmitting.value = true
   try {
     await api.post(`/students/${studentId.value}/status`, {
-      status: targetStatus.value,
+      targetStatus: targetStatus.value,
       reason: statusReason.value || null
     })
     statusModalOpen.value = false
@@ -201,9 +220,9 @@ function openEditModal() {
   if (!student.value) return
   editFullName.value = student.value.fullName || ''
   editHolyName.value = student.value.holyName || ''
-  editGender.value = student.value.gender || 'Male'
-  editDob.value = student.value.dateOfBirth ? student.value.dateOfBirth.slice(0, 10) : ''
-  editParishArea.value = student.value.parishArea || ''
+  editGender.value = student.value.gender || 'Nam'
+  editDob.value = student.value.birthDate ? String(student.value.birthDate).slice(0, 10) : ''
+  editParishArea.value = student.value.area || ''
   editAddress.value = student.value.address || ''
   editBloodType.value = student.value.bloodType || ''
   editAllergies.value = student.value.allergies || ''
@@ -218,8 +237,8 @@ async function saveProfile() {
       fullName: editFullName.value.trim(),
       holyName: editHolyName.value.trim() || null,
       gender: editGender.value,
-      dateOfBirth: editDob.value,
-      parishArea: editParishArea.value.trim() || null,
+      birthDate: editDob.value || null,
+      area: editParishArea.value.trim() || null,
       address: editAddress.value.trim() || null,
       bloodType: editBloodType.value.trim() || null,
       allergies: editAllergies.value.trim() || null,
@@ -264,7 +283,7 @@ async function deleteNote(noteId: string) {
 // Sacraments
 async function updateSacrament(type: string, date: string, church: string) {
   try {
-    await api.put(`/students/${studentId.value}/sacraments/${type}`, { date, church })
+    await api.put(`/students/${studentId.value}/sacraments/${type}`, { receivedOn: date || null, place: church || null })
     await loadSacraments()
   } catch (err) {
     error.value = toApiError(err)
@@ -285,7 +304,7 @@ async function removeSacrament(type: string) {
 async function issueCertificate() {
   certSubmitting.value = true
   try {
-    await api.post(`/students/${studentId.value}/certificates`, { sacramentType: certType.value })
+    await api.post(`/students/${studentId.value}/certificates`, { certificateType: certType.value })
     certModalOpen.value = false
     await loadCertificates()
   } catch (err) {
@@ -440,9 +459,11 @@ onMounted(loadStudent)
 
           <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-stone-600 dark:text-stone-400 sm:justify-start">
             <span>Mã: <strong class="font-mono">{{ student.code }}</strong></span>
-            <span>Giới tính: <strong>{{ student.gender === 'Male' ? 'Nam' : 'Nữ' }}</strong></span>
-            <span>Sinh ngày: <strong>{{ student.dateOfBirth }}</strong> ({{ student.age }} tuổi)</span>
-            <span>Giáo họ: <strong>{{ student.parishArea || '–' }}</strong></span>
+            <span>Giới tính: <strong>{{ student.gender || '–' }}</strong></span>
+            <span>
+              Sinh ngày: <strong>{{ student.birthDate ? formatDate(student.birthDate) : '–' }}</strong><template v-if="studentAge !== null"> ({{ studentAge }} tuổi)</template>
+            </span>
+            <span>Giáo họ: <strong>{{ student.area || '–' }}</strong></span>
           </div>
         </div>
       </div>
@@ -509,15 +530,15 @@ onMounted(loadStudent)
           <div class="space-y-3 text-sm">
             <div class="flex justify-between border-b border-stone-100 pb-2 dark:border-stone-800">
               <span class="text-stone-500">Họ tên Cha:</span>
-              <strong>{{ student.fatherName || '–' }}</strong>
+              <strong>{{ guardianByRole('Cha')?.fullName || '–' }}</strong>
             </div>
             <div class="flex justify-between border-b border-stone-100 pb-2 dark:border-stone-800">
               <span class="text-stone-500">Họ tên Mẹ:</span>
-              <strong>{{ student.motherName || '–' }}</strong>
+              <strong>{{ guardianByRole('Mẹ')?.fullName || '–' }}</strong>
             </div>
             <div class="flex justify-between border-b border-stone-100 pb-2 dark:border-stone-800">
               <span class="text-stone-500">Số điện thoại:</span>
-              <MaskedField :value="student.guardianPhone" :permission="PERMISSIONS.Students.ViewContact" placeholder="Đã ẩn SĐT phụ huynh" />
+              <MaskedField :value="primaryGuardian?.phone" :permission="PERMISSIONS.Students.ViewContact" placeholder="Đã ẩn SĐT phụ huynh" />
             </div>
             <div class="flex justify-between">
               <span class="text-stone-500">Địa chỉ nhà:</span>
@@ -603,10 +624,10 @@ onMounted(loadStudent)
                 <span>Rửa Tội</span>
               </h3>
               <p class="mt-2 text-xs text-stone-600 dark:text-stone-400">
-                Ngày: <strong>{{ student.baptismDate || 'Chưa lãnh nhận' }}</strong>
+                Ngày: <strong>{{ sacramentOf('Baptism')?.receivedOn ? formatDate(sacramentOf('Baptism')?.receivedOn) : 'Chưa lãnh nhận' }}</strong>
               </p>
               <p class="text-xs text-stone-500">
-                Giáo xứ: {{ student.baptismChurch || '–' }}
+                Giáo xứ: {{ sacramentOf('Baptism')?.place || '–' }}
               </p>
             </div>
 
@@ -617,10 +638,10 @@ onMounted(loadStudent)
                 <span>Xưng Tội & Rước Lễ Lần Đầu</span>
               </h3>
               <p class="mt-2 text-xs text-stone-600 dark:text-stone-400">
-                Ngày: <strong>{{ student.firstCommunionDate || 'Chưa lãnh nhận' }}</strong>
+                Ngày: <strong>{{ sacramentOf('FirstCommunion')?.receivedOn ? formatDate(sacramentOf('FirstCommunion')?.receivedOn) : 'Chưa lãnh nhận' }}</strong>
               </p>
               <p class="text-xs text-stone-500">
-                Giáo xứ: {{ student.firstCommunionChurch || '–' }}
+                Giáo xứ: {{ sacramentOf('FirstCommunion')?.place || '–' }}
               </p>
             </div>
 
@@ -631,10 +652,10 @@ onMounted(loadStudent)
                 <span>Thêm Sức</span>
               </h3>
               <p class="mt-2 text-xs text-stone-600 dark:text-stone-400">
-                Ngày: <strong>{{ student.confirmationDate || 'Chưa lãnh nhận' }}</strong>
+                Ngày: <strong>{{ sacramentOf('Confirmation')?.receivedOn ? formatDate(sacramentOf('Confirmation')?.receivedOn) : 'Chưa lãnh nhận' }}</strong>
               </p>
               <p class="text-xs text-stone-500">
-                Giáo xứ: {{ student.confirmationChurch || '–' }}
+                Giáo xứ: {{ sacramentOf('Confirmation')?.place || '–' }}
               </p>
             </div>
           </div>
@@ -671,19 +692,19 @@ onMounted(loadStudent)
               <div class="flex items-start justify-between">
                 <div>
                   <span class="font-mono text-xs font-bold text-vatican-600 dark:text-vatican-400">
-                    {{ cert.code }}
+                    {{ cert.verificationCode }}
                   </span>
                   <h3 class="font-bold text-base text-stone-900 dark:text-white mt-1">
-                    Chứng Chỉ {{ cert.sacramentType }}
+                    Chứng Chỉ {{ cert.certificateTypeName || cert.certificateType }}
                   </h3>
                 </div>
                 <StatusChip domain="certificate" :value="cert.status" />
               </div>
               <p class="mt-2 text-xs text-stone-500">
-                Ngày cấp: {{ cert.issuedDate }} · Người cấp: {{ cert.issuedBy || 'Ban Giáo Lý' }}
+                Ngày cấp: {{ cert.issuedAt ? formatDate(cert.issuedAt) : '–' }} · Người cấp: {{ cert.issuedByName || 'Ban Giáo Lý' }}
               </p>
-              <p v-if="cert.revokedReason" class="mt-1 text-xs text-red-600">
-                Lý do thu hồi: {{ cert.revokedReason }}
+              <p v-if="cert.revokeReason" class="mt-1 text-xs text-red-600">
+                Lý do thu hồi: {{ cert.revokeReason }}
               </p>
             </div>
 
@@ -692,7 +713,7 @@ onMounted(loadStudent)
                 size="xs"
                 variant="outline"
                 icon="i-lucide-printer"
-                @click="downloadCertPdf(cert.id, cert.code)"
+                @click="downloadCertPdf(cert.id, cert.verificationCode)"
               >
                 In / Tải PDF
               </UButton>
@@ -731,10 +752,10 @@ onMounted(loadStudent)
               </tr>
               <tr v-for="e in enrollments" :key="e.id">
                 <td class="px-4 py-3 font-medium">{{ e.academicYearName }}</td>
-                <td class="px-4 py-3">{{ e.className }}</td>
+                <td class="px-4 py-3">{{ e.classRoomName }}</td>
                 <td class="px-4 py-3 text-xs">
-                  <span v-if="e.finalGpa !== undefined">ĐTB: <strong>{{ e.finalGpa }}</strong></span>
-                  <span v-else class="text-stone-400">Đang học</span>
+                  <span v-if="e.note" class="text-stone-500">{{ e.note }}</span>
+                  <span v-else class="text-stone-400">–</span>
                 </td>
                 <td class="px-4 py-3">
                   <StatusChip domain="enrollment" :value="e.status" />
@@ -803,6 +824,51 @@ onMounted(loadStudent)
         </div>
       </div>
     </div>
+
+    <!-- MODAL CHỈNH SỬA HỒ SƠ -->
+    <UModal v-model:open="editModalOpen" title="Chỉnh sửa hồ sơ đoàn sinh" :ui="{ content: 'max-w-2xl' }">
+      <template #body>
+        <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+          <UFormField label="Họ và tên" name="fullName" required>
+            <UInput v-model="editFullName" class="w-full" />
+          </UFormField>
+          <UFormField label="Tên thánh" name="holyName">
+            <UInput v-model="editHolyName" class="w-full" />
+          </UFormField>
+          <UFormField label="Giới tính" name="gender">
+            <select
+              v-model="editGender"
+              class="w-full rounded-md border border-stone-300 bg-white p-2 text-sm dark:border-stone-700 dark:bg-stone-900 dark:text-white"
+            >
+              <option value="Nam">Nam</option>
+              <option value="Nữ">Nữ</option>
+            </select>
+          </UFormField>
+          <UFormField label="Ngày sinh" name="birthDate">
+            <UInput v-model="editDob" type="date" class="w-full" />
+          </UFormField>
+          <UFormField label="Giáo họ" name="area">
+            <UInput v-model="editParishArea" class="w-full" />
+          </UFormField>
+          <UFormField label="Địa chỉ" name="address">
+            <UInput v-model="editAddress" class="w-full" />
+          </UFormField>
+          <UFormField label="Nhóm máu" name="bloodType">
+            <UInput v-model="editBloodType" class="w-full" />
+          </UFormField>
+          <UFormField label="Dị ứng" name="allergies">
+            <UInput v-model="editAllergies" class="w-full" />
+          </UFormField>
+          <UFormField label="Ghi chú sức khỏe" name="healthNotes" class="sm:col-span-2">
+            <UInput v-model="editHealthNotes" class="w-full" />
+          </UFormField>
+        </div>
+        <div class="mt-4 flex justify-end gap-2">
+          <UButton variant="ghost" color="neutral" @click="editModalOpen = false">Hủy</UButton>
+          <UButton color="primary" :loading="editSubmitting" @click="saveProfile">Lưu thay đổi</UButton>
+        </div>
+      </template>
+    </UModal>
 
     <!-- MODAL ĐỔI TRẠNG THÁI -->
     <UModal v-model:open="statusModalOpen" title="Đổi trạng thái đoàn sinh">
