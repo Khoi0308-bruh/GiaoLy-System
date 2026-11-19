@@ -37,7 +37,7 @@ public class AuthController : ControllerBase
 
     [HttpPost("refresh")]
     [AllowAnonymous]
-    [EnableRateLimiting(RateLimiterExtensions.PolicyLogin)]
+    [EnableRateLimiting(RateLimiterExtensions.PolicyRefresh)]
     public async Task<IActionResult> Refresh([FromBody] RefreshRequest? request, CancellationToken ct)
     {
         // Get refresh token from cookie or body

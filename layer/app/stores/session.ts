@@ -85,9 +85,16 @@ export const useSessionStore = defineStore('session', () => {
         })
         accessToken.value = res.accessToken
         return true
-      } catch {
-        accessToken.value = null
-        return false
+      } catch (e) {
+        // Chỉ 401 mới là mất phiên thật. 429 (rate limit), 5xx hay lỗi mạng là
+        // tạm thời — xoá phiên ở đây sẽ đá người dùng về trang đăng nhập oan.
+        const status = (e as { status?: number, statusCode?: number } | null)?.status
+          ?? (e as { statusCode?: number } | null)?.statusCode
+        if (status === 401) {
+          accessToken.value = null
+          return false
+        }
+        throw e
       } finally {
         refreshing = null
       }
@@ -105,10 +112,15 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   async function bootstrap() {
-    if (await refresh()) {
-      try { await loadMe() } catch { me.value = null }
+    try {
+      if (await refresh()) {
+        try { await loadMe() } catch { me.value = null }
+      }
+    } catch {
+      // Lỗi tạm thời khi refresh: giữ nguyên phiên đang có trong bộ nhớ.
+    } finally {
+      ready.value = true
     }
-    ready.value = true
   }
 
   async function login(username: string, password: string) {

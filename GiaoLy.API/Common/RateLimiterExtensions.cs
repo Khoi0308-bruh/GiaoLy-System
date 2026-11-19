@@ -10,6 +10,7 @@ namespace GiaoLy.API.Common;
 public static class RateLimiterExtensions
 {
     public const string PolicyLogin = "login";
+    public const string PolicyRefresh = "refresh";
     public const string PolicyVerify = "verify";
     public const string PolicyPublic = "public";
     public const string PolicyUpload = "upload";
@@ -91,6 +92,21 @@ public static class RateLimiterExtensions
                     _ => new FixedWindowRateLimiterOptions
                     {
                         PermitLimit = 10,
+                        Window = TimeSpan.FromMinutes(1),
+                        QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
+                        QueueLimit = 0
+                    }));
+
+            // Refresh policy: 60 req/min per IP.
+            // Mỗi lần mở hoặc tải lại trang, client đều gọi /auth/refresh để lấy access token
+            // mới. Dùng chung hạn mức 10/phút với login sẽ khiến người dùng đang đăng nhập
+            // bị 429 và bị đá về trang đăng nhập, nên policy này phải rộng hơn hẳn.
+            options.AddPolicy(PolicyRefresh, httpContext =>
+                RateLimitPartition.GetFixedWindowLimiter(
+                    httpContext.Connection.RemoteIpAddress?.ToString() ?? "unknown",
+                    _ => new FixedWindowRateLimiterOptions
+                    {
+                        PermitLimit = 60,
                         Window = TimeSpan.FromMinutes(1),
                         QueueProcessingOrder = QueueProcessingOrder.OldestFirst,
                         QueueLimit = 0
