@@ -138,7 +138,20 @@ public class ImportExportService : IImportExportService
             return Result.Conflict<ImportJobDetailResponse>("Tệp này đã được nhập và áp dụng vào cơ sở dữ liệu trước đó. Để đảm bảo an toàn, hệ thống không cho phép áp dụng hai lần cùng một tệp.");
         }
 
-        using var workbook = new XLWorkbook(fileStream);
+        XLWorkbook workbook;
+        try
+        {
+            workbook = new XLWorkbook(fileStream);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            _logger.LogWarning(ex, "Tệp tải lên không phải Excel hợp lệ: {FileName}", fileName);
+            return Result.Validation<ImportJobDetailResponse>(
+                "Tệp tải lên không phải là tệp Excel (.xlsx) hợp lệ hoặc đã bị hỏng. Vui lòng kiểm tra lại tệp.",
+                "File");
+        }
+
+        using var workbookScope = workbook;
         var ws = workbook.Worksheets.FirstOrDefault();
         if (ws == null)
         {
