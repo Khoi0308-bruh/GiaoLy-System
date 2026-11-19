@@ -2,6 +2,12 @@ namespace GiaoLy.Domain.Entities;
 
 public class AuditLog
 {
+    /// <summary>
+    /// Độ dài tối đa của cột EntityId. Khoá chính ghép (ví dụ StudentGuardian) được ghi
+    /// dưới dạng "StudentId=…;GuardianId=…" nên phải rộng hơn một GUID đơn.
+    /// </summary>
+    public const int EntityIdMaxLength = 400;
+
     public long Id { get; set; }
     public DateTime OccurredAt { get; set; } = DateTime.UtcNow;
     public Guid? UserId { get; set; }

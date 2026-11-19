@@ -570,7 +570,7 @@ public class AppDbContext : DbContext
             b.Property(a => a.OccurredAt).IsRequired();
             b.Property(a => a.Action).IsRequired().HasMaxLength(60);
             b.Property(a => a.EntityType).IsRequired().HasMaxLength(60);
-            b.Property(a => a.EntityId).HasMaxLength(64);
+            b.Property(a => a.EntityId).HasMaxLength(AuditLog.EntityIdMaxLength);
             b.Property(a => a.UserName).HasMaxLength(50);
             b.Property(a => a.IpAddress).HasMaxLength(45);
             b.Property(a => a.UserAgent).HasMaxLength(300);

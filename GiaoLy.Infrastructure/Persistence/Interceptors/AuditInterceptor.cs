@@ -145,14 +145,17 @@ public class AuditInterceptor : SaveChangesInterceptor
     private static string? GetPrimaryKeyValue(EntityEntry entry)
     {
         var keyProps = entry.Properties.Where(p => p.Metadata.IsPrimaryKey()).ToList();
-        if (keyProps.Count == 1)
+        var value = keyProps.Count switch
         {
-            return keyProps[0].CurrentValue?.ToString();
-        }
-        if (keyProps.Count > 1)
-        {
-            return string.Join(";", keyProps.Select(p => $"{p.Metadata.Name}={p.CurrentValue}"));
-        }
-        return null;
+            1 => keyProps[0].CurrentValue?.ToString(),
+            > 1 => string.Join(";", keyProps.Select(p => $"{p.Metadata.Name}={p.CurrentValue}")),
+            _ => null
+        };
+
+        // Cột EntityId có giới hạn độ dài: cắt bớt thay vì để SQL Server ném lỗi 2628
+        // và làm hỏng toàn bộ giao dịch nghiệp vụ (tạo đoàn sinh kèm phụ huynh).
+        return value is { Length: > AuditLog.EntityIdMaxLength }
+            ? value[..AuditLog.EntityIdMaxLength]
+            : value;
     }
 }

@@ -195,8 +195,8 @@ namespace GiaoLy.Domain.Migrations
                         .HasColumnType("nvarchar(64)");
 
                     b.Property<string>("EntityId")
-                        .HasMaxLength(64)
-                        .HasColumnType("nvarchar(64)");
+                        .HasMaxLength(400)
+                        .HasColumnType("nvarchar(400)");
 
                     b.Property<string>("EntityType")
                         .IsRequired()
