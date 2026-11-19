@@ -147,7 +147,7 @@ function toggleExpand(id: string) {
                   Đối tượng: {{ a.targetAudience }}
                 </span>
                 <span class="text-xs text-stone-400">
-                  Ngày đăng: {{ a.publishedAt }}
+                  Ngày đăng: {{ formatDate(a.publishedAt) }}
                 </span>
               </div>
 

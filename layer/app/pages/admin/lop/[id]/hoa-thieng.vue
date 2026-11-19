@@ -231,17 +231,17 @@ const top3 = computed(() => leaderboard.value.slice(0, 3))
     <!-- Thống kê tổng quan -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <StatCard
-        title="Tổng số hoa thiêng đã dâng"
+        label="Tổng số hoa thiêng đã dâng"
         :value="totalBouquetCount"
         icon="i-lucide-flower-2"
       />
       <StatCard
-        title="Tổng điểm hoa thiêng"
+        label="Tổng điểm hoa thiêng"
         :value="totalPointsAll"
         icon="i-lucide-sparkles"
       />
       <StatCard
-        title="Đoàn sinh tham gia"
+        label="Đoàn sinh tham gia"
         :value="leaderboard.length"
         icon="i-lucide-users"
       />

@@ -281,23 +281,23 @@ const stats = computed(() => {
     <!-- Thống kê -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
       <StatCard
-        title="Tổng số tài liệu"
+        label="Tổng số tài liệu"
         :value="stats.total"
         icon="i-lucide-files"
       />
       <StatCard
-        title="Tổng dung lượng"
+        label="Tổng dung lượng"
         :value="formatBytes(stats.totalSize)"
         icon="i-lucide-hard-drive"
       />
       <StatCard
-        title="Tài liệu công khai"
+        label="Tài liệu công khai"
         :value="stats.publicCount"
         icon="i-lucide-globe"
         class="text-emerald-600"
       />
       <StatCard
-        title="Lưu hành nội bộ"
+        label="Lưu hành nội bộ"
         :value="stats.internalCount"
         icon="i-lucide-lock"
         class="text-amber-600"

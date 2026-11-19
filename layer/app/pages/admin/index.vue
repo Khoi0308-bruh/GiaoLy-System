@@ -328,7 +328,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
                 </p>
               </div>
               <div class="text-right text-[11px] text-stone-400 whitespace-nowrap">
-                {{ a.publishedAt }}
+                {{ formatDate(a.publishedAt) }}
               </div>
             </div>
           </div>

@@ -258,7 +258,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
               </span>
             </div>
             <div class="p-4 space-y-2">
-              <div class="text-[11px] text-stone-400">{{ item.publishedAt }}</div>
+              <div class="text-[11px] text-stone-400">{{ formatDate(item.publishedAt) }}</div>
               <h3 class="font-serif text-sm font-bold text-stone-900 group-hover:text-[#1D3A73] transition-colors line-clamp-2">
                 {{ item.title }}
               </h3>
@@ -320,7 +320,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
                     </p>
                   </div>
                   <div class="text-[11px] text-stone-400 whitespace-nowrap">
-                    {{ a.publishedAt }}
+                    {{ formatDate(a.publishedAt) }}
                   </div>
                 </div>
               </NuxtLink>

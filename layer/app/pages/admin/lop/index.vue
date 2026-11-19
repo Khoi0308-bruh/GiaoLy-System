@@ -205,22 +205,22 @@ onMounted(initData)
     <!-- Thống kê nhanh -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
       <StatCard
-        title="Tổng số lớp"
+        label="Tổng số lớp"
         :value="stats.totalClasses"
         icon="i-lucide-school"
       />
       <StatCard
-        title="Tổng số đoàn sinh"
+        label="Tổng số đoàn sinh"
         :value="stats.totalStudents"
         icon="i-lucide-users"
       />
       <StatCard
-        title="Đã có GLV Chủ nhiệm"
+        label="Đã có GLV Chủ nhiệm"
         :value="stats.withLead"
         icon="i-lucide-user-check"
       />
       <StatCard
-        title="Chưa có GLV CN"
+        label="Chưa có GLV CN"
         :value="stats.missingLead"
         icon="i-lucide-user-x"
         :class="stats.missingLead > 0 ? 'text-amber-600 dark:text-amber-400' : ''"

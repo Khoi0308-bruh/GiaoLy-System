@@ -23,11 +23,20 @@ interface StudentRow {
   allergies?: string | null
 }
 
+/** Số liệu hiển thị trên 4 thẻ đầu trang. */
 interface StudentStats {
   total: number
   active: number
   paused: number
   unassigned: number
+}
+
+/** Hợp đồng thật của GET /students/stats. */
+interface StudentStatsRaw {
+  totalActive: number
+  totalPaused: number
+  totalLeft: number
+  totalGraduated: number
 }
 
 interface Paged<T> { items: T[], page: number, pageSize: number, totalCount: number }
@@ -57,7 +66,16 @@ const error = ref<ApiError | null>(null)
 
 async function loadStats() {
   try {
-    stats.value = await api.get<StudentStats>('/students/stats')
+    const [raw, unassigned] = await Promise.all([
+      api.get<StudentStatsRaw>('/students/stats'),
+      api.get<StudentRow[]>('/students/unassigned')
+    ])
+    stats.value = {
+      total: raw.totalActive + raw.totalPaused + raw.totalLeft + raw.totalGraduated,
+      active: raw.totalActive,
+      paused: raw.totalPaused,
+      unassigned: Array.isArray(unassigned) ? unassigned.length : 0
+    }
   } catch {
     // Stats are supplementary
   }

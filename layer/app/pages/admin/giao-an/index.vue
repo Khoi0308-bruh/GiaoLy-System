@@ -243,18 +243,18 @@ const stats = computed(() => {
     <!-- Thống kê nhanh -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <StatCard
-        title="Tổng số bài giảng"
+        label="Tổng số bài giảng"
         :value="stats.total"
         icon="i-lucide-book-open"
       />
       <StatCard
-        title="Giáo án của tôi"
+        label="Giáo án của tôi"
         :value="stats.myPlans"
         icon="i-lucide-user"
         class="text-marian-600"
       />
       <StatCard
-        title="Chia sẻ toàn xứ"
+        label="Chia sẻ toàn xứ"
         :value="stats.publicPlans"
         icon="i-lucide-share-2"
         class="text-emerald-600"

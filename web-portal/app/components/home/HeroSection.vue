@@ -27,19 +27,9 @@ const fallbackBanners: BannerItem[] = [
     subtitle: 'Năm học Giáo lý mới với chủ đề "Cầu Nguyện • Rước Lễ • Hy Sinh • Làm Tông Đồ"',
     tag: '✨ NĂM HỌC MỚI',
     tagColor: 'warning',
-    imageUrl: 'https://images.unsplash.com/photo-1519817650390-64a93db51149?q=80&w=2000&auto=format&fit=crop',
-    link: '/news',
-    ctaText: 'Khám Phá Ngay'
-  },
-  {
-    id: '2',
-    title: 'Đại Hội Huynh Trưởng & Đoàn Sinh Xứ Đoàn',
-    subtitle: 'Tổng kết phong trào Thiếu Nhi Thánh Thể và tuyên hứa Ban Điều Hành nhiệm kỳ mới.',
-    tag: '✝ SỰ KIỆN NỔI BẬT',
-    tagColor: 'error',
     imageUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=2071&auto=format&fit=crop',
-    link: '/thong-bao',
-    ctaText: 'Xem Chương Trình'
+    link: '/tin-tuc',
+    ctaText: 'Khám Phá Ngay'
   }
 ]
 
@@ -91,9 +81,11 @@ const quickStats = computed(() => [
       <UCarousel
         :items="bannerList"
         :ui="{
-          root: 'relative overflow-hidden w-full h-[520px] sm:h-[620px] md:h-[680px] lg:h-[740px]',
+          root: 'relative overflow-hidden w-full',
           container: 'h-full w-full',
-          item: 'w-full basis-full h-full relative select-none'
+          // Slide phải có chiều cao xác định: nếu chỉ dựa vào h-full, khung ảnh co giãn
+          // theo tỉ lệ ảnh gốc và phần chữ (absolute inset-0) bị đẩy ra ngoài khung.
+          item: 'relative w-full basis-full ps-0 select-none h-[520px] sm:h-[620px] md:h-[680px] lg:h-[740px]'
         }"
         indicators
         arrows

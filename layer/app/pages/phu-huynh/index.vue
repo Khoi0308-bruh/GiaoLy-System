@@ -138,7 +138,7 @@ onMounted(() => {
                 {{ ann.title }}
               </h3>
               <span class="text-[11px] text-stone-500 whitespace-nowrap">
-                {{ ann.publishedAt }}
+                {{ formatDate(ann.publishedAt) }}
               </span>
             </div>
             <!-- Sanitize HTML -->

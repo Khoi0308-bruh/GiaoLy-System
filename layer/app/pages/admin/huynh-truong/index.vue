@@ -221,18 +221,18 @@ const stats = computed(() => {
     <!-- Thống kê -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <StatCard
-        title="Tổng số Huynh trưởng"
+        label="Tổng số Huynh trưởng"
         :value="stats.total"
         icon="i-lucide-users"
       />
       <StatCard
-        title="Đang đương nhiệm"
+        label="Đang đương nhiệm"
         :value="stats.active"
         icon="i-lucide-user-check"
         class="text-emerald-600"
       />
       <StatCard
-        title="Cựu huynh trưởng"
+        label="Cựu huynh trưởng"
         :value="stats.retired"
         icon="i-lucide-clock"
         class="text-stone-500"

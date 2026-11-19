@@ -281,17 +281,17 @@ async function handleExportReport() {
     <div v-else-if="activeTab === 'branch' && branchReport" class="space-y-6">
       <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <StatCard
-          title="Tổng đoàn sinh toàn xứ"
+          label="Tổng đoàn sinh toàn xứ"
           :value="branchReport.grandTotal"
           icon="i-lucide-users"
         />
         <StatCard
-          title="Số ngành sinh hoạt"
+          label="Số ngành sinh hoạt"
           :value="branchReport.branches.length"
           icon="i-lucide-layers"
         />
         <StatCard
-          title="Niên khóa báo cáo"
+          label="Niên khóa báo cáo"
           :value="branchReport.academicYearName"
           icon="i-lucide-calendar"
         />
@@ -359,23 +359,23 @@ async function handleExportReport() {
     <div v-else-if="activeTab === 'grades' && gradesReport" class="space-y-6">
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
-          title="Đoàn sinh được xếp loại"
+          label="Đoàn sinh được xếp loại"
           :value="gradesReport.totalStudents"
           icon="i-lucide-users"
         />
         <StatCard
-          title="Điểm trung bình chung"
+          label="Điểm trung bình chung"
           :value="gradesReport.averageGpa.toFixed(2)"
           icon="i-lucide-award"
           class="text-marian-600"
         />
         <StatCard
-          title="Biên độ ĐTB (Min - Max)"
+          label="Biên độ ĐTB (Min - Max)"
           :value="`${gradesReport.minGpa.toFixed(1)} - ${gradesReport.maxGpa.toFixed(1)}`"
           icon="i-lucide-bar-chart-2"
         />
         <StatCard
-          title="Dưới ngưỡng (Cần phụ đạo)"
+          label="Dưới ngưỡng (Cần phụ đạo)"
           :value="gradesReport.belowThresholdCount"
           icon="i-lucide-alert-triangle"
           :class="gradesReport.belowThresholdCount > 0 ? 'text-red-600 font-bold' : ''"
@@ -443,24 +443,24 @@ async function handleExportReport() {
     <div v-else-if="activeTab === 'promotion' && promotionReport" class="space-y-6">
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
         <StatCard
-          title="Tổng đoàn sinh xét"
+          label="Tổng đoàn sinh xét"
           :value="promotionReport.totalStudents"
           icon="i-lucide-users"
         />
         <StatCard
-          title="Được lên lớp"
+          label="Được lên lớp"
           :value="promotionReport.promotedCount"
           icon="i-lucide-arrow-up-circle"
           class="text-emerald-600"
         />
         <StatCard
-          title="Ở lại lớp (Học lại)"
+          label="Ở lại lớp (Học lại)"
           :value="promotionReport.retainedCount"
           icon="i-lucide-rotate-ccw"
           class="text-amber-600"
         />
         <StatCard
-          title="Tốt nghiệp / Mãn khóa"
+          label="Tốt nghiệp / Mãn khóa"
           :value="promotionReport.graduatedCount"
           icon="i-lucide-graduation-cap"
           class="text-marian-600"

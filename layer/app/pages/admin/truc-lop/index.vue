@@ -216,17 +216,17 @@ const stats = computed(() => {
     <!-- Thống kê nhanh -->
     <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
       <StatCard
-        title="Tổng lượt phân công"
+        label="Tổng lượt phân công"
         :value="stats.total"
         icon="i-lucide-calendar-days"
       />
       <StatCard
-        title="Giáo lý viên tham gia"
+        label="Giáo lý viên tham gia"
         :value="stats.uniqueTeachers"
         icon="i-lucide-users"
       />
       <StatCard
-        title="Số ngày có lịch trực"
+        label="Số ngày có lịch trực"
         :value="stats.uniqueDates"
         icon="i-lucide-clock"
       />

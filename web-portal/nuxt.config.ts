@@ -26,7 +26,15 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: true }
+    '/': { prerender: true },
+    // Các khu vực cần đăng nhập phải dựng ở client: khi render ở server, middleware
+    // không có cookie phiên nên luôn coi là chưa đăng nhập và đá về /dang-nhap
+    // (F5 hay mở thẳng link /admin đều bị đẩy ra).
+    '/admin/**': { ssr: false },
+    '/phu-huynh': { ssr: false },
+    '/phu-huynh/**': { ssr: false },
+    '/ban-huynh-truong': { ssr: false },
+    '/doi-mat-khau-lan-dau': { ssr: false }
   },
 
   compatibilityDate: '2026-06-30',

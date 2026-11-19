@@ -144,24 +144,24 @@ const stats = computed(() => {
     <!-- Thống kê nhanh -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
       <StatCard
-        title="Tổng số đợt xét"
+        label="Tổng số đợt xét"
         :value="stats.total"
         icon="i-lucide-layers"
       />
       <StatCard
-        title="Đang xét (Dự thảo)"
+        label="Đang xét (Dự thảo)"
         :value="stats.draft"
         icon="i-lucide-clock"
         :class="stats.draft > 0 ? 'text-amber-600 dark:text-amber-400' : ''"
       />
       <StatCard
-        title="Đã áp dụng hoàn tất"
+        label="Đã áp dụng hoàn tất"
         :value="stats.applied"
         icon="i-lucide-check-circle-2"
         class="text-emerald-600 dark:text-emerald-400"
       />
       <StatCard
-        title="Tổng lượt đoàn sinh"
+        label="Tổng lượt đoàn sinh"
         :value="stats.totalStudents"
         icon="i-lucide-users"
       />

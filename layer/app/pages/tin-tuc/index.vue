@@ -163,7 +163,7 @@ function openArticle(article: NewsArticle) {
 
             <div class="p-5 space-y-2">
               <div class="flex items-center justify-between text-[11px] text-stone-400">
-                <span>{{ item.publishedAt }}</span>
+                <span>{{ formatDate(item.publishedAt) }}</span>
                 <span v-if="item.sourceName" class="font-medium text-stone-600">{{ item.sourceName }}</span>
               </div>
               <h2 class="font-serif text-base font-bold text-stone-900 group-hover:text-[#1D3A73] transition-colors line-clamp-2">
@@ -197,7 +197,7 @@ function openArticle(article: NewsArticle) {
                 {{ selectedArticle.title }}
               </h3>
               <div class="text-xs text-stone-500 mt-1 flex items-center gap-3">
-                <span>Ngày đăng: {{ selectedArticle.publishedAt }}</span>
+                <span>Ngày đăng: {{ formatDateTime(selectedArticle.publishedAt) }}</span>
                 <span v-if="selectedArticle.sourceName">• Nguồn: {{ selectedArticle.sourceName }}</span>
               </div>
             </div>

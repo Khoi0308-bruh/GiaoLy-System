@@ -151,7 +151,6 @@ const props = defineProps({
 
 const emit = defineEmits(['imported'])
 const toast = useToast()
-const auth = useAuthStore()
 const config = useRuntimeConfig()
 
 const fileInputRef = ref(null)

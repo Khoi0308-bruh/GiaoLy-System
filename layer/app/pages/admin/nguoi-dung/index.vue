@@ -308,24 +308,24 @@ const stats = computed(() => {
     <!-- Thống kê nhanh -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
       <StatCard
-        title="Tổng người dùng"
+        label="Tổng người dùng"
         :value="stats.total"
         icon="i-lucide-users"
       />
       <StatCard
-        title="Đang hoạt động"
+        label="Đang hoạt động"
         :value="stats.active"
         icon="i-lucide-user-check"
         class="text-emerald-600"
       />
       <StatCard
-        title="Bị vô hiệu hóa"
+        label="Bị vô hiệu hóa"
         :value="stats.deactivated"
         icon="i-lucide-user-x"
         :class="stats.deactivated > 0 ? 'text-red-500' : ''"
       />
       <StatCard
-        title="Chờ đổi MK lần đầu"
+        label="Chờ đổi MK lần đầu"
         :value="stats.mustChange"
         icon="i-lucide-key-round"
         class="text-amber-600"

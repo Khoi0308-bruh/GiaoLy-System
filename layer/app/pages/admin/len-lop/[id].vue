@@ -349,30 +349,30 @@ function getOutcomeLabel(outcome: string) {
       <!-- Thống kê tiến độ đợt xét -->
       <div class="grid grid-cols-2 gap-4 sm:grid-cols-5">
         <StatCard
-          title="Tổng đoàn sinh"
+          label="Tổng đoàn sinh"
           :value="batch.totalStudents"
           icon="i-lucide-users"
         />
         <StatCard
-          title="Chờ duyệt"
+          label="Chờ duyệt"
           :value="batch.pendingCount"
           icon="i-lucide-clock"
           :class="batch.pendingCount > 0 ? 'text-amber-600' : ''"
         />
         <StatCard
-          title="Đã duyệt"
+          label="Đã duyệt"
           :value="batch.approvedCount"
           icon="i-lucide-check-circle"
           class="text-emerald-600"
         />
         <StatCard
-          title="Từ chối"
+          label="Từ chối"
           :value="batch.rejectedCount"
           icon="i-lucide-x-circle"
           :class="batch.rejectedCount > 0 ? 'text-red-500' : ''"
         />
         <StatCard
-          title="Trạng thái đợt"
+          label="Trạng thái đợt"
           :value="batch.status === 'Draft' ? 'Đang xét' : batch.status === 'Applied' ? 'Đã áp dụng' : 'Đã hủy'"
           icon="i-lucide-tag"
           :class="batch.status === 'Applied' ? 'text-primary-600' : ''"

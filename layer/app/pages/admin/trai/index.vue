@@ -234,23 +234,23 @@ async function handleDeleteCamp() {
     <!-- Thống kê nhanh -->
     <div class="grid grid-cols-2 gap-4 sm:grid-cols-4">
       <StatCard
-        title="Tổng số sự kiện"
+        label="Tổng số sự kiện"
         :value="stats.total"
         icon="i-lucide-tent"
       />
       <StatCard
-        title="Đang mở đăng ký"
+        label="Đang mở đăng ký"
         :value="stats.openReg"
         icon="i-lucide-calendar-check"
         class="text-emerald-600"
       />
       <StatCard
-        title="Lượt đoàn sinh đăng ký"
+        label="Lượt đoàn sinh đăng ký"
         :value="stats.totalReg"
         icon="i-lucide-users"
       />
       <StatCard
-        title="Tổng lệ phí đã thu"
+        label="Tổng lệ phí đã thu"
         :value="formatCurrency(stats.totalFee)"
         icon="i-lucide-wallet"
         class="text-vatican-800 dark:text-vatican-300"

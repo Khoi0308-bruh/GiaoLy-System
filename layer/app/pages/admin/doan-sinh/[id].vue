@@ -788,7 +788,7 @@ onMounted(loadStudent)
                 {{ n.content }}
               </p>
               <div class="mt-2 text-xs text-stone-400">
-                Người viết: <strong>{{ n.authorName || 'Giáo lý viên' }}</strong> · {{ n.createdAt }}
+                Người viết: <strong>{{ n.authorName || 'Giáo lý viên' }}</strong> · {{ formatDateTime(n.createdAt) }}
               </div>
             </div>
             <UButton
