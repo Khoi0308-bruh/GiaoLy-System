@@ -14,6 +14,10 @@ export default defineNuxtRouteMiddleware(async (to) => {
     return navigateTo('/admin')
   }
 
+  // Route không khớp trang nào: để Nuxt tự trả 404 (kèm mã trạng thái 404)
+  // thay vì kéo người dùng về trang đăng nhập như một trang bảo vệ.
+  if (to.matched.length === 0 || to.name === '404' || to.name === 'not-found') return
+
   if (to.meta.public) return
 
   if (!session.me) {
