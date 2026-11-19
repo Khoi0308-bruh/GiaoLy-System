@@ -592,8 +592,8 @@ namespace GiaoLy.Domain.Migrations
 
                     b.Property<string>("VerificationCode")
                         .IsRequired()
-                        .HasMaxLength(24)
-                        .HasColumnType("nvarchar(24)");
+                        .HasMaxLength(32)
+                        .HasColumnType("nvarchar(32)");
 
                     b.HasKey("Id");
 

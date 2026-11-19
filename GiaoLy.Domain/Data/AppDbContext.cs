@@ -527,7 +527,7 @@ public class AppDbContext : DbContext
             b.ToTable("Certificates");
             b.HasKey(c => c.Id);
             b.Property(c => c.CertificateType).IsRequired().HasMaxLength(20);
-            b.Property(c => c.VerificationCode).IsRequired().HasMaxLength(24);
+            b.Property(c => c.VerificationCode).IsRequired().HasMaxLength(32);
             b.Property(c => c.Snapshot).IsRequired();
             b.Property(c => c.SignedBy).HasMaxLength(120);
             b.Property(c => c.Status).IsRequired().HasMaxLength(10);
