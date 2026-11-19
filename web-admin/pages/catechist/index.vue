@@ -27,10 +27,6 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({
-  middleware: 'auth'
-})
-
 const tools = [
   {
     title: 'Sổ Hoa Thiêng',
