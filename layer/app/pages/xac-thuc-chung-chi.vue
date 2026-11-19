@@ -4,9 +4,10 @@ import { ApiError } from '~/composables/useApi'
 definePageMeta({ public: true })
 
 interface VerifyResult {
-  maskedName: string
+  maskedFullName: string
   certificateType: string
-  sacramentDate: string
+  certificateTypeName?: string
+  receivedOn?: string | null
   place?: string | null
   status: 'Issued' | 'Revoked'
   issuedAt: string
@@ -56,15 +57,15 @@ async function verify() {
     <UCard v-if="result" class="mt-4">
       <div class="mb-3 flex items-center justify-between">
         <h2 class="text-xl">
-          {{ TYPE_LABEL[result.certificateType] ?? result.certificateType }}
+          {{ result.certificateTypeName ?? TYPE_LABEL[result.certificateType] ?? result.certificateType }}
         </h2>
         <StatusChip domain="certificate" :value="result.status" />
       </div>
       <dl class="grid grid-cols-[130px_1fr] gap-y-2 text-sm">
         <dt class="text-stone-500">Họ tên</dt>
-        <dd>{{ result.maskedName }}</dd>
+        <dd>{{ result.maskedFullName }}</dd>
         <dt class="text-stone-500">Ngày lãnh</dt>
-        <dd>{{ new Date(result.sacramentDate).toLocaleDateString('vi-VN') }}</dd>
+        <dd>{{ result.receivedOn ? formatDate(result.receivedOn) : '–' }}</dd>
         <dt class="text-stone-500">Nơi lãnh</dt>
         <dd>{{ result.place || '–' }}</dd>
       </dl>
