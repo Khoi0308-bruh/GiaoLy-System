@@ -1,11 +1,3 @@
-export interface LiturgicalDay {
-  eventDate: string
-  title: string
-  color: string
-  level?: string
-  description?: string
-}
-
 /**
  * Hợp đồng thật của API `/public/liturgical/*` (BE: LiturgicalEventDto).
  * Các trang phải đọc đúng các trường này, không dùng tên tự đặt như
@@ -23,6 +15,9 @@ export interface LiturgicalEventDto {
   wordOfGodOverride?: string | null
   wordOfGodReference?: string | null
 }
+
+/** Dải màu phụng vụ (LiturgicalStrip) chỉ cần một phần của hợp đồng trên. */
+export type LiturgicalDay = Pick<LiturgicalEventDto, 'eventDate' | 'title' | 'color' | 'level' | 'description'>
 
 export type LiturgicalDisplayColor = 'White' | 'Red' | 'Green' | 'Violet' | 'Rose' | 'Gold'
 

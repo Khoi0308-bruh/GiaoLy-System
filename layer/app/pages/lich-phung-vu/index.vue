@@ -11,7 +11,6 @@ interface LiturgicalDaySummary {
   dayOfMonth: number
   celebrationTitle: string
   liturgicalColor: LiturgicalDisplayColor
-  rank: string
   isSunday?: boolean
 }
 
@@ -50,7 +49,6 @@ function mapSummary(e: LiturgicalEventDto): LiturgicalDaySummary {
     dayOfMonth: Number(e.eventDate.slice(8, 10)) || 1,
     celebrationTitle: e.title,
     liturgicalColor: liturgicalDisplayColor(e.color),
-    rank: e.level,
     isSunday: new Date(`${e.eventDate}T00:00:00`).getDay() === 0
   }
 }
@@ -62,7 +60,6 @@ const todayLiturgical = ref<LiturgicalDayDetail | null>(null)
 const monthDays = ref<LiturgicalDaySummary[]>([])
 const activeDateDetail = ref<LiturgicalDayDetail | null>(null)
 
-const loadingToday = ref(false)
 const loadingMonth = ref(false)
 const loadingDetail = ref(false)
 
@@ -80,7 +77,6 @@ const COLOR_MAP: Record<string, { label: string, bg: string, text: string, borde
 }
 
 async function fetchToday() {
-  loadingToday.value = true
   errorToday.value = null
   try {
     todayLiturgical.value = mapDay(await api.get<LiturgicalEventDto>('/public/liturgical/today'))
@@ -89,8 +85,6 @@ async function fetchToday() {
     }
   } catch (e) {
     errorToday.value = e as ApiError
-  } finally {
-    loadingToday.value = false
   }
 }
 
@@ -189,6 +183,8 @@ onMounted(() => {
           </UButton>
         </div>
       </div>
+
+      <ErrorState v-if="errorToday" :error="errorToday" />
 
       <!-- Phụng vụ hôm nay Banner -->
       <div

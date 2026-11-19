@@ -48,7 +48,16 @@ export function useApi() {
     } catch (raw) {
       const error = toApiError(raw)
       if (error.status === 401 && !retried && !path.startsWith('/auth/')) {
-        if (await session.refresh()) {
+        let refreshed = false
+        try {
+          refreshed = await session.refresh()
+        } catch (refreshError) {
+          // Refresh hỏng vì lý do tạm thời (429, 5xx, mạng): giữ nguyên phiên và trả
+          // lỗi thật cho trang, không xoá token rồi đá người dùng về đăng nhập.
+          throw toApiError(refreshError)
+        }
+
+        if (refreshed) {
           // Refresh chỉ trả access token mới; nếu phiên chưa có hồ sơ (ví dụ vừa bị clear)
           // thì nạp lại để quyền và mustChangePassword đúng với token mới.
           if (!session.me) {
