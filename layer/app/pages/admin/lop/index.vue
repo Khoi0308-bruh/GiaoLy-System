@@ -238,7 +238,7 @@ onMounted(initData)
             class="h-9 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium text-stone-800 focus:border-marian-600 focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
           >
             <option v-for="y in years" :key="y.id" :value="y.id">
-              {{ y.name }} {{ y.status === 'Active' ? ' (Đang diễn ra)' : `(${y.status})` }}
+              {{ y.name }} ({{ { Active: 'Đang diễn ra', Closing: 'Đang chốt', Planned: 'Dự kiến', Archived: 'Lưu trữ' }[y.status] ?? y.status }})
             </option>
           </select>
         </div>
