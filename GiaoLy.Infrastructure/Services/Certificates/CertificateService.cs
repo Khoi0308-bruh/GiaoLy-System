@@ -225,7 +225,7 @@ public class CertificateService : ICertificateService
             return Result.BadRequest<ExportFileResult>("Không thể đọc dữ liệu ảnh chụp của chứng chỉ.");
         }
 
-        var pdfBytes = GeneratePdfFromSnapshot(snapshot, certificate.VerificationCode, certificate.IssuedAt, certificate.SignedBy ?? "Cha Chánh Xứ");
+        var pdfBytes = GeneratePdfFromSnapshot(snapshot, certificate.VerificationCode, certificate.IssuedAt, certificate.SignedBy ?? "Cha Chánh Xứ", certificate.Status, certificate.RevokedAt);
         var fileName = $"ChungChi_{certificate.CertificateType}_{certificate.VerificationCode}.pdf";
 
         var result = new ExportFileResult(pdfBytes, "application/pdf", fileName);
@@ -292,7 +292,7 @@ public class CertificateService : ICertificateService
             return Result.BadRequest<ExportFileResult>("Không thể đọc dữ liệu ảnh chụp của chứng chỉ.");
         }
 
-        var pdfBytes = GeneratePdfFromSnapshot(snapshot, certificate.VerificationCode, certificate.IssuedAt, certificate.SignedBy ?? "Cha Chánh Xứ");
+        var pdfBytes = GeneratePdfFromSnapshot(snapshot, certificate.VerificationCode, certificate.IssuedAt, certificate.SignedBy ?? "Cha Chánh Xứ", certificate.Status, certificate.RevokedAt);
         var fileName = $"ChungChi_{certificate.CertificateType}_{certificate.VerificationCode}.pdf";
 
         var result = new ExportFileResult(pdfBytes, "application/pdf", fileName);
@@ -303,7 +303,9 @@ public class CertificateService : ICertificateService
         CertificateRules.CertificateSnapshot snapshot,
         string verificationCode,
         DateTime issuedAt,
-        string signedBy)
+        string signedBy,
+        string? status = null,
+        DateTime? revokedAt = null)
     {
         var typeNameVi = CertificateRules.GetTypeNameVi(snapshot.SacramentType).ToUpperInvariant();
 
@@ -324,6 +326,18 @@ public class CertificateService : ICertificateService
 
                     // Tên chứng thư
                     col.Item().PaddingTop(15).AlignCenter().Text($"CHỨNG THƯ BÍ TÍCH {typeNameVi}").FontSize(32).Bold().FontColor("#800000");
+
+                    // Đánh dấu rõ chứng chỉ đã bị thu hồi để bản in không còn giá trị sử dụng
+                    if (string.Equals(status, CertificateRules.Statuses.Revoked, StringComparison.OrdinalIgnoreCase))
+                    {
+                        var revokedLabel = revokedAt.HasValue
+                            ? $"CHỨNG CHỈ ĐÃ BỊ THU HỒI NGÀY {revokedAt.Value:dd/MM/yyyy} — KHÔNG CÒN GIÁ TRỊ"
+                            : "CHỨNG CHỈ ĐÃ BỊ THU HỒI — KHÔNG CÒN GIÁ TRỊ";
+
+                        col.Item().PaddingTop(10).AlignCenter()
+                            .Background("#FDECEC").Border(2).BorderColor("#B00020").PaddingVertical(8).PaddingHorizontal(14)
+                            .Text(revokedLabel).FontSize(16).Bold().FontColor("#B00020");
+                    }
 
                     // Chứng nhận
                     col.Item().PaddingTop(15).AlignCenter().Text("Hân hoan chứng nhận:").FontSize(13).Italic();
@@ -362,6 +376,10 @@ public class CertificateService : ICertificateService
                         row.RelativeItem(2).AlignLeft().Column(c =>
                         {
                             c.Item().Text($"Mã xác thực: {verificationCode}").FontSize(11).Bold().FontColor("#0A2540");
+                            if (string.Equals(status, CertificateRules.Statuses.Revoked, StringComparison.OrdinalIgnoreCase))
+                            {
+                                c.Item().Text("Tình trạng: Đã thu hồi").FontSize(11).Bold().FontColor("#B00020");
+                            }
                             c.Item().Text($"Tra cứu trực tuyến tại cổng thông tin xác thực giáo xứ.").FontSize(9).FontColor(Colors.Grey.Darken2);
                             c.Item().Text($"Ngày cấp chứng chỉ: {issuedAt:dd/MM/yyyy}").FontSize(9).FontColor(Colors.Grey.Darken2);
                         });
