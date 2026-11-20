@@ -16,12 +16,23 @@ interface ClassroomRef {
 }
 
 interface DuplicateCheckResult {
-  isDuplicate: boolean
-  matches?: { id: string, code: string, holyName: string, fullName: string, dateOfBirth: string }[]
+  level: 'None' | 'Probable' | 'Exact'
+  message?: string | null
+  existingStudentId?: string | null
+  existingStudentCode?: string | null
+  existingStudentFullName?: string | null
+}
+
+interface GuardianInput {
+  fullName: string
+  phone: string
+  relationship: string
+  isPrimary: boolean
 }
 
 const api = useApi()
 const permissions = usePermissions()
+const toast = useToast()
 
 // Form fields
 const holyName = ref('')
@@ -40,8 +51,9 @@ const confirmationChurch = ref('')
 
 // Guardians
 const fatherName = ref('')
+const fatherPhone = ref('')
 const motherName = ref('')
-const guardianPhone = ref('')
+const motherPhone = ref('')
 const address = ref('')
 
 // Health
@@ -59,6 +71,7 @@ const loading = ref(false)
 const checkingDuplicates = ref(false)
 const duplicateWarning = ref<DuplicateCheckResult | null>(null)
 const error = ref<ApiError | null>(null)
+const formError = ref<string | null>(null)
 
 // Tải danh sách lớp học nếu có niên khóa đang hoạt động
 async function loadClassrooms() {
@@ -83,48 +96,130 @@ async function checkDuplicate() {
   try {
     const res = await api.post<DuplicateCheckResult>('/students/duplicates/check', {
       fullName: fullName.value.trim(),
-      dateOfBirth: dateOfBirth.value,
-      baptismDate: baptismDate.value || null
+      birthDate: dateOfBirth.value,
+      guardianPhones: [fatherPhone.value.trim(), motherPhone.value.trim()].filter(Boolean)
     })
-    if (res?.isDuplicate && res.matches?.length) {
+    if (res?.level && res.level !== 'None') {
       duplicateWarning.value = res
     }
   } catch {
-    // Ignore duplicate check failure
+    // Bỏ qua lỗi kiểm tra trùng lặp, API tạo mới vẫn chặn trùng ở bước sau
   } finally {
     checkingDuplicates.value = false
   }
 }
 
+const SACRAMENT_LABELS: Record<string, string> = {
+  Baptism: 'Rửa Tội',
+  FirstCommunion: 'Rước Lễ Lần Đầu',
+  Confirmation: 'Thêm Sức'
+}
+
+// Dựng danh sách phụ huynh đúng GuardianDto: mỗi người cần họ tên và số điện thoại
+// vì API dùng số điện thoại làm khóa nhận diện phụ huynh.
+function buildGuardians(): GuardianInput[] {
+  const guardians: GuardianInput[] = []
+  if (fatherName.value.trim() && fatherPhone.value.trim()) {
+    guardians.push({
+      fullName: fatherName.value.trim(),
+      phone: fatherPhone.value.trim(),
+      relationship: 'Cha',
+      isPrimary: true
+    })
+  }
+  if (motherName.value.trim() && motherPhone.value.trim()) {
+    guardians.push({
+      fullName: motherName.value.trim(),
+      phone: motherPhone.value.trim(),
+      relationship: 'Mẹ',
+      isPrimary: guardians.length === 0
+    })
+  }
+  return guardians
+}
+
+function validateGuardians(): string | null {
+  if (fatherName.value.trim() && !fatherPhone.value.trim()) {
+    return 'Vui lòng nhập số điện thoại của Cha, hoặc để trống cả họ tên Cha.'
+  }
+  if (fatherPhone.value.trim() && !fatherName.value.trim()) {
+    return 'Vui lòng nhập họ tên của Cha.'
+  }
+  if (motherName.value.trim() && !motherPhone.value.trim()) {
+    return 'Vui lòng nhập số điện thoại của Mẹ, hoặc để trống cả họ tên Mẹ.'
+  }
+  if (motherPhone.value.trim() && !motherName.value.trim()) {
+    return 'Vui lòng nhập họ tên của Mẹ.'
+  }
+  return null
+}
+
+// API tạo mới không nhận thông tin bí tích, phải ghi từng bí tích sau khi hồ sơ đã có Id
+async function saveSacraments(studentId: string): Promise<string[]> {
+  const items = [
+    { type: 'Baptism', date: baptismDate.value, place: baptismChurch.value },
+    { type: 'FirstCommunion', date: firstCommunionDate.value, place: firstCommunionChurch.value },
+    { type: 'Confirmation', date: confirmationDate.value, place: confirmationChurch.value }
+  ].filter(item => !!item.date)
+
+  const failed: string[] = []
+  for (const item of items) {
+    try {
+      await api.put(`/students/${studentId}/sacraments/${item.type}`, {
+        receivedOn: item.date,
+        place: item.place.trim() || null
+      })
+    } catch {
+      failed.push(SACRAMENT_LABELS[item.type] ?? item.type)
+    }
+  }
+  return failed
+}
+
 async function submit() {
-  loading.value = true
   error.value = null
+  formError.value = null
+
+  const guardianMessage = validateGuardians()
+  if (guardianMessage) {
+    formError.value = guardianMessage
+    return
+  }
+
+  if (duplicateWarning.value?.level === 'Exact') {
+    formError.value = `Hồ sơ trùng hoàn toàn với đoàn sinh ${duplicateWarning.value.existingStudentCode ?? ''} (${duplicateWarning.value.existingStudentFullName ?? ''}). Vui lòng mở hồ sơ đó thay vì tạo mới.`
+    return
+  }
+
+  loading.value = true
 
   try {
-    const payload = {
+    const created = await api.post<{ id: string }>('/students', {
       holyName: holyName.value.trim() || null,
       fullName: fullName.value.trim(),
+      birthDate: dateOfBirth.value,
       gender: gender.value,
-      dateOfBirth: dateOfBirth.value,
-      parishArea: parishArea.value.trim() || null,
+      area: parishArea.value.trim() || null,
       address: address.value.trim() || null,
-      fatherName: fatherName.value.trim() || null,
-      motherName: motherName.value.trim() || null,
-      guardianPhone: guardianPhone.value.trim() || null,
-      baptismDate: baptismDate.value || null,
-      baptismChurch: baptismChurch.value.trim() || null,
-      firstCommunionDate: firstCommunionDate.value || null,
-      firstCommunionChurch: firstCommunionChurch.value.trim() || null,
-      confirmationDate: confirmationDate.value || null,
-      confirmationChurch: confirmationChurch.value.trim() || null,
       bloodType: bloodType.value.trim() || null,
       allergies: allergies.value.trim() || null,
       healthNotes: healthNotes.value.trim() || null,
-      initialClassroomId: selectedClassroomId.value || null
+      classRoomId: selectedClassroomId.value || null,
+      guardians: buildGuardians(),
+      hasPhotoConsent: false,
+      confirmWarning: duplicateWarning.value?.level === 'Probable'
+    })
+
+    const failedSacraments = await saveSacraments(created.id)
+    if (failedSacraments.length) {
+      toast.add({
+        title: 'Chưa ghi nhận được một số bí tích',
+        description: `Hồ sơ đã được tạo nhưng chưa lưu: ${failedSacraments.join(', ')}. Vui lòng bổ sung ở trang chi tiết (kiểm tra thứ tự ngày).`,
+        color: 'warning'
+      })
     }
 
-    const created = await api.post<{ id: string }>('/students', payload)
-    await navigateTo(created?.id ? `/admin/doan-sinh/${created.id}` : '/admin/doan-sinh')
+    await navigateTo(`/admin/doan-sinh/${created.id}`)
   } catch (e) {
     error.value = toApiError(e)
   } finally {
@@ -150,6 +245,14 @@ onMounted(loadClassrooms)
 
     <ErrorState :error="error" />
 
+    <UAlert
+      v-if="formError"
+      color="error"
+      variant="subtle"
+      icon="i-lucide-alert-circle"
+      :title="formError"
+    />
+
     <!-- Cảnh báo nếu phát hiện trùng lặp -->
     <UAlert
       v-if="duplicateWarning"
@@ -161,16 +264,22 @@ onMounted(loadClassrooms)
     >
       <template #description>
         <p class="text-xs">
-          Tìm thấy {{ duplicateWarning.matches?.length }} đoàn sinh có họ tên và ngày sinh tương tự:
+          {{ duplicateWarning.message || 'Có đoàn sinh khớp họ tên và ngày sinh.' }}
         </p>
-        <ul class="mt-1 list-inside list-disc text-xs space-y-0.5">
-          <li v-for="m in duplicateWarning.matches" :key="m.id">
-            <strong>{{ m.holyName }} {{ m.fullName }}</strong> (Mã: {{ m.code }} · Sinh: {{ m.dateOfBirth }})
-            <NuxtLink :to="`/admin/doan-sinh/${m.id}`" target="_blank" class="text-marian-600 underline ml-1">
-              Xem hồ sơ →
-            </NuxtLink>
-          </li>
-        </ul>
+        <p v-if="duplicateWarning.existingStudentId" class="mt-1 text-xs">
+          <strong>{{ duplicateWarning.existingStudentFullName }}</strong>
+          <template v-if="duplicateWarning.existingStudentCode"> · Mã: {{ duplicateWarning.existingStudentCode }}</template>
+          <NuxtLink
+            :to="`/admin/doan-sinh/${duplicateWarning.existingStudentId}`"
+            target="_blank"
+            class="text-marian-600 underline ml-1"
+          >
+            Xem hồ sơ →
+          </NuxtLink>
+        </p>
+        <p v-if="duplicateWarning.level === 'Probable'" class="mt-1 text-xs">
+          Nếu chắc chắn đây là đoàn sinh khác, bấm "Lưu hồ sơ đoàn sinh" để tiếp tục.
+        </p>
       </template>
     </UAlert>
 
@@ -268,11 +377,15 @@ onMounted(loadClassrooms)
             <UInput v-model="motherName" placeholder="Tên thánh & họ tên mẹ..." class="w-full" />
           </UFormField>
 
-          <UFormField label="Số điện thoại phụ huynh" name="guardianPhone">
-            <UInput v-model="guardianPhone" placeholder="SĐT liên hệ khẩn cấp..." class="w-full" />
+          <UFormField label="Số điện thoại Cha" name="fatherPhone">
+            <UInput v-model="fatherPhone" placeholder="SĐT liên hệ của Cha..." class="w-full" />
           </UFormField>
 
-          <UFormField label="Địa chỉ gia đình" name="address" class="sm:col-span-3">
+          <UFormField label="Số điện thoại Mẹ" name="motherPhone">
+            <UInput v-model="motherPhone" placeholder="SĐT liên hệ của Mẹ..." class="w-full" />
+          </UFormField>
+
+          <UFormField label="Địa chỉ gia đình" name="address" class="sm:col-span-2">
             <UInput v-model="address" placeholder="Địa chỉ thường trú..." class="w-full" />
           </UFormField>
         </div>
