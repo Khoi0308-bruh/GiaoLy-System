@@ -73,6 +73,8 @@ export const useSessionStore = defineStore('session', () => {
   const permissions = computed(() => new Set(me.value?.permissions ?? []))
   const can = (code: PermissionCode | string) => permissions.value.has(code)
   const canAny = (codes: (PermissionCode | string)[]) => codes.some(c => permissions.value.has(c))
+  /** Trang đích mặc định theo vai trò: phụ huynh vào cổng phụ huynh, các vai trò khác vào trang quản trị. */
+  const homePath = computed(() => me.value?.role.scopeType === 'Guardian' ? '/phu-huynh' : '/admin')
 
   async function refresh(): Promise<boolean> {
     if (refreshing) return refreshing
@@ -153,5 +155,5 @@ export const useSessionStore = defineStore('session', () => {
     me.value = null
   }
 
-  return { accessToken, me, ready, permissions, can, canAny, refresh, loadMe, bootstrap, login, logout, clear }
+  return { accessToken, me, ready, permissions, can, canAny, homePath, refresh, loadMe, bootstrap, login, logout, clear }
 })

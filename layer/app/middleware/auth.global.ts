@@ -6,12 +6,12 @@ export default defineNuxtRouteMiddleware(async (to) => {
 
   // Nếu đã đăng nhập mà truy cập trang đăng nhập -> chuyển thẳng vào /admin
   if (session.me && to.path === '/dang-nhap') {
-    return navigateTo('/admin')
+    return navigateTo(session.homePath)
   }
 
   // Nếu không cần đổi mật khẩu mà vào /doi-mat-khau-lan-dau -> chuyển vào /admin
   if (session.me && !session.me.mustChangePassword && to.path === '/doi-mat-khau-lan-dau') {
-    return navigateTo('/admin')
+    return navigateTo(session.homePath)
   }
 
   // Route không khớp trang nào: để Nuxt tự trả 404 (kèm mã trạng thái 404)

@@ -107,7 +107,11 @@ async function changePassword() {
     currentPassword.value = ''
     newPassword.value = ''
     confirmPassword.value = ''
-    setTimeout(() => { passwordSuccess.value = false }, 3000)
+    // Đổi mật khẩu thu hồi phiên hiện tại, nên đăng nhập lại để nhận token mới.
+    setTimeout(async () => {
+      session.clear()
+      await navigateTo('/dang-nhap?doi_mat_khau=1')
+    }, 1500)
   } catch (e) {
     passwordError.value = toApiError(e)
   } finally {

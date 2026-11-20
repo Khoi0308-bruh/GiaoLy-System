@@ -26,7 +26,7 @@ async function submit() {
     } else if (back && back.startsWith('/') && !back.startsWith('/dang-nhap')) {
       await navigateTo(back)
     } else {
-      await navigateTo('/admin')
+      await navigateTo(session.homePath)
     }
   } catch (e) {
     error.value = toApiError(e)
@@ -116,6 +116,15 @@ async function submit() {
               </button>
             </div>
           </UFormField>
+
+          <UAlert
+            v-if="route.query.doi_mat_khau === '1'"
+            color="success"
+            variant="subtle"
+            icon="i-lucide-check-circle"
+            title="Đã cập nhật mật khẩu"
+            description="Vì lý do bảo mật, vui lòng đăng nhập lại bằng mật khẩu mới."
+          />
 
           <ErrorState :error="error" />
 

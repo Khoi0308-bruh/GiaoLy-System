@@ -57,8 +57,11 @@ async function submit() {
     }
 
     success.value = true
+    // Đổi mật khẩu thu hồi toàn bộ phiên (SecurityStamp + refresh token), nên phải
+    // đăng nhập lại bằng mật khẩu mới thay vì tiếp tục dùng token cũ.
     setTimeout(async () => {
-      await navigateTo('/admin')
+      session.clear()
+      await navigateTo('/dang-nhap?doi_mat_khau=1')
     }, 1500)
   } catch (e) {
     error.value = toApiError(e)
