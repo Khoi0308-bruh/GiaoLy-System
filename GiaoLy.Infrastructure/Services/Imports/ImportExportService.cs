@@ -654,6 +654,9 @@ public class ImportExportService : IImportExportService
                     });
                 }
 
+                // Excel chỉ có cột ngày bí tích, còn việc cấp chứng chỉ đọc từ StudentSacraments
+                await SyncImportedSacramentsAsync(student, row, ct);
+
                 // Process Guardian
                 if (!string.IsNullOrWhiteSpace(row.GuardianPhone) && !string.IsNullOrWhiteSpace(row.GuardianName))
                 {
@@ -866,6 +869,61 @@ public class ImportExportService : IImportExportService
         _logger.LogInformation("Đã xuất danh sách {Count} đoàn sinh ra tệp Excel (Người xuất: {UserId})", students.Count, _currentUser.UserId);
 
         return Result.Ok(result);
+    }
+
+    /// <summary>
+    /// Ghi nhận bí tích nhập từ Excel vào bảng chuẩn StudentSacraments — nơi dịch vụ cấp
+    /// chứng chỉ đọc dữ liệu. Bản ghi đã được xác minh thì giữ nguyên, không ghi đè.
+    /// </summary>
+    private async Task SyncImportedSacramentsAsync(Student student, ParsedRowData row, CancellationToken ct)
+    {
+        var entries = new (string Type, DateOnly? ReceivedOn, string? Place)[]
+        {
+            (SacramentRules.Baptism, row.BaptismDate, row.BaptismPlace),
+            (SacramentRules.FirstCommunion, row.CommunionDate, null),
+            (SacramentRules.Confirmation, row.ConfirmationDate, null)
+        };
+
+        if (entries.All(e => !e.ReceivedOn.HasValue && string.IsNullOrWhiteSpace(e.Place)))
+        {
+            return;
+        }
+
+        var existing = await _db.StudentSacraments
+            .Where(ss => ss.StudentId == student.Id)
+            .ToListAsync(ct);
+
+        foreach (var entry in entries)
+        {
+            if (!entry.ReceivedOn.HasValue && string.IsNullOrWhiteSpace(entry.Place)) continue;
+
+            var sacrament = existing.FirstOrDefault(ss => ss.SacramentType == entry.Type)
+                ?? _db.StudentSacraments.Local.FirstOrDefault(ss => ss.StudentId == student.Id && ss.SacramentType == entry.Type);
+
+            if (sacrament == null)
+            {
+                sacrament = new StudentSacrament
+                {
+                    Id = Guid.NewGuid(),
+                    StudentId = student.Id,
+                    SacramentType = entry.Type,
+                    CreatedAt = DateTime.UtcNow
+                };
+                _db.StudentSacraments.Add(sacrament);
+                existing.Add(sacrament);
+            }
+            else if (sacrament.VerifiedAt.HasValue)
+            {
+                continue;
+            }
+            else
+            {
+                sacrament.UpdatedAt = DateTime.UtcNow;
+            }
+
+            if (entry.ReceivedOn.HasValue) sacrament.ReceivedOn = entry.ReceivedOn;
+            if (!string.IsNullOrWhiteSpace(entry.Place)) sacrament.Place = entry.Place.Trim();
+        }
     }
 
     private static XLWorkbook? TryOpenWorkbook(Stream stream, out Exception? error)
