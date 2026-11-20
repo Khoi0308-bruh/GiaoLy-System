@@ -619,7 +619,7 @@ dotnet run --project GiaoLy.API
 
 Kiểm chứng thực tế: `GET /api/v1/roles` → admin **200**, `thuky` **403**; `GET /api/v1/users` → `thuky` **403**; bật `MustChangePassword=1` → `students` **403** với cả admin và thuky, `GET /auth/me` **200**; đã trả cờ về 0.
 
-**Ghi chú:** mật khẩu dev của `thuky` đã được đặt lại thành `ThuKy@Dev2026!` để kiểm thử 403.
+**Ghi chú:** mật khẩu dev của `thuky` đã được đặt lại ngày 16/11/2026 (bắt buộc đổi khi đăng nhập lần tới); giá trị không lưu trong tài liệu.
 
 ### Seeder nền tảng — Hoàn tất 15/11/2026
 
