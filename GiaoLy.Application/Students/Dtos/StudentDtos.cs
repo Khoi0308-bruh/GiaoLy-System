@@ -32,6 +32,7 @@ public record StudentSummaryResponse(
     string? BranchName,
     Guid? ClassRoomId,
     string? ClassName,
+    string? Area,
     string? PrimaryGuardianName,
     string? PrimaryGuardianPhone,
     string? PhotoUrl

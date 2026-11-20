@@ -10,15 +10,14 @@ interface StudentRow {
   code: string
   holyName?: string | null
   fullName: string
-  age: number
-  dateOfBirth?: string
+  birthDate?: string
   className?: string | null
   branchId?: number | null
   branchName?: string | null
-  parishArea?: string | null
+  area?: string | null
   status: string
-  guardianName?: string | null
-  guardianPhone?: string | null
+  primaryGuardianName?: string | null
+  primaryGuardianPhone?: string | null
   bloodType?: string | null
   allergies?: string | null
 }
@@ -99,15 +98,21 @@ async function load() {
   error.value = null
   try {
     const path = tab.value === 'unassigned' ? '/students/unassigned' : '/students'
-    const res = await api.get<Paged<StudentRow>>(path, {
+    const res = await api.get<Paged<StudentRow> | StudentRow[]>(path, {
       page: page.value,
       pageSize,
       search: search.value || undefined,
       status: selectedStatus.value || undefined,
       branchId: selectedBranchId.value || undefined
     })
-    rows.value = res.items || []
-    total.value = res.totalCount || 0
+    if (Array.isArray(res)) {
+      // /students/unassigned trả về mảng phẳng (không phân trang).
+      rows.value = res
+      total.value = res.length
+    } else {
+      rows.value = res.items || []
+      total.value = res.totalCount || 0
+    }
   } catch (e) {
     error.value = toApiError(e)
   } finally {
@@ -144,13 +149,26 @@ onMounted(() => {
   loadReferences()
 })
 
+/** Tuổi hiện tại tính từ ngày sinh; trả null khi thiếu ngày sinh hợp lệ. */
+function ageOf(birthDate?: string | null): number | null {
+  if (!birthDate) return null
+  const birth = new Date(birthDate)
+  if (Number.isNaN(birth.getTime()) || birth.getFullYear() < 1900) return null
+  const now = new Date()
+  let age = now.getFullYear() - birth.getFullYear()
+  const beforeBirthday = now.getMonth() < birth.getMonth()
+    || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
+  if (beforeBirthday) age--
+  return age >= 0 ? age : null
+}
+
 const columns = [
   { accessorKey: 'code', header: 'Mã' },
   { accessorKey: 'fullName', header: 'Họ và tên' },
-  { accessorKey: 'age', header: 'Tuổi' },
+  { accessorKey: 'birthDate', header: 'Tuổi' },
   { accessorKey: 'className', header: 'Ngành › Lớp' },
-  { accessorKey: 'parishArea', header: 'Giáo họ' },
-  { accessorKey: 'guardianName', header: 'Phụ huynh' },
+  { accessorKey: 'area', header: 'Giáo họ' },
+  { accessorKey: 'primaryGuardianName', header: 'Phụ huynh' },
   { accessorKey: 'status', header: 'Trạng thái' }
 ]
 </script>
@@ -307,7 +325,7 @@ const columns = [
               <strong class="text-stone-900 dark:text-white">{{ row.fullName }}</strong>
             </td>
             <td class="px-4 py-3 text-center text-xs">
-              {{ row.age || '–' }}
+              {{ ageOf(row.birthDate) ?? '–' }}
             </td>
             <td class="px-4 py-3 text-xs">
               <span v-if="row.className" class="font-medium">
@@ -318,14 +336,14 @@ const columns = [
               </span>
             </td>
             <td class="px-4 py-3 text-xs text-stone-600 dark:text-stone-400">
-              {{ row.parishArea || '–' }}
+              {{ row.area || '–' }}
             </td>
             <td class="px-4 py-3 text-xs">
               <div class="font-medium text-stone-800 dark:text-stone-200">
-                {{ row.guardianName || '–' }}
+                {{ row.primaryGuardianName || '–' }}
               </div>
               <MaskedField
-                :value="row.guardianPhone"
+                :value="row.primaryGuardianPhone"
                 :permission="PERMISSIONS.Students.ViewContact"
                 placeholder="Đã ẩn SĐT"
               />

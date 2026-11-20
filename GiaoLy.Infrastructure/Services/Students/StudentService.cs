@@ -115,6 +115,7 @@ public class StudentService : IStudentService
                     ? s.Enrollments.Where(e => e.AcademicYearId == activeYear.Id && e.Status == "Active")
                         .Select(e => e.ClassRoom != null ? e.ClassRoom.ClassName : null).FirstOrDefault()
                     : null,
+                s.Area,
                 s.Guardians.Where(g => g.IsPrimary).Select(g => g.Guardian != null ? g.Guardian.FullName : null).FirstOrDefault()
                     ?? s.Guardians.Select(g => g.Guardian != null ? g.Guardian.FullName : null).FirstOrDefault(),
                 hasContactPermission

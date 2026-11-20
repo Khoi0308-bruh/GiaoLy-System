@@ -19,9 +19,9 @@ interface AcademicYear {
 
 interface DashboardReport {
   totalStudents: number
-  activeStudents: number
-  totalClassrooms: number
-  totalLeaders: number
+  totalActiveStudents: number
+  totalClassRooms: number
+  totalTeachers: number
   averageAttendanceRate?: number | null
   sacramentsSummary?: {
     baptismCount: number
@@ -239,19 +239,19 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
         />
         <StatCard
           label="Đoàn sinh tích cực"
-          :value="dashboardStats?.activeStudents ?? (loadingStats ? '...' : 0)"
+          :value="dashboardStats?.totalActiveStudents ?? (loadingStats ? '...' : 0)"
           description="Đang tham gia sinh hoạt đều đặn"
           icon="i-heroicons-check-badge"
         />
         <StatCard
           label="Tổng số lớp học"
-          :value="dashboardStats?.totalClassrooms ?? (loadingStats ? '...' : 0)"
+          :value="dashboardStats?.totalClassRooms ?? (loadingStats ? '...' : 0)"
           description="Từ Khai Tâm đến Vào Đời"
           icon="i-heroicons-academic-cap"
         />
         <StatCard
           label="Huynh trưởng & GLV"
-          :value="dashboardStats?.totalLeaders ?? (loadingStats ? '...' : 0)"
+          :value="dashboardStats?.totalTeachers ?? (loadingStats ? '...' : 0)"
           description="Đội ngũ phụ trách & trợ tá"
           icon="i-heroicons-shield-check"
         />
