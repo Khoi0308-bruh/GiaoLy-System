@@ -30,8 +30,29 @@ const requirements = ref<any[]>([])
 const certificates = ref<any[]>([])
 
 // Dữ liệu dẫn xuất từ hồ sơ đoàn sinh (API trả về birthDate/gender/area và mảng guardians)
-const guardianByRole = (role: string) =>
-  guardians.value.find((g: any) => String(g.relationship || '').toLowerCase() === role.toLowerCase())
+const ROLE_ALIASES: Record<'Cha' | 'Mẹ', string[]> = {
+  Cha: ['cha', 'bố', 'ba', 'father'],
+  Mẹ: ['mẹ', 'má', 'mother']
+}
+const guardianByRole = (role: 'Cha' | 'Mẹ') => {
+  const aliases = ROLE_ALIASES[role]
+  return guardians.value.find((g: any) =>
+    aliases.includes(String(g.relationship || '').trim().toLowerCase())) ?? null
+}
+
+// Giới tính có thể được lưu dưới nhiều dạng (Nam/Nữ, Male/Female, M/F) tùy nguồn dữ liệu
+const GENDER_LABEL: Record<string, string> = {
+  nam: 'Nam',
+  nữ: 'Nữ',
+  male: 'Nam',
+  female: 'Nữ',
+  m: 'Nam',
+  f: 'Nữ'
+}
+const genderLabel = (value?: string | null) =>
+  (value ? GENDER_LABEL[value.trim().toLowerCase()] ?? value : '–')
+const normalizeGender = (value?: string | null) =>
+  (value && GENDER_LABEL[value.trim().toLowerCase()] === 'Nữ' ? 'Nữ' : 'Nam')
 const primaryGuardian = computed(() =>
   guardians.value.find((g: any) => g.isPrimary) ?? guardians.value[0] ?? null)
 const studentAge = computed(() => {
@@ -220,7 +241,7 @@ function openEditModal() {
   if (!student.value) return
   editFullName.value = student.value.fullName || ''
   editHolyName.value = student.value.holyName || ''
-  editGender.value = student.value.gender || 'Nam'
+  editGender.value = normalizeGender(student.value.gender)
   editDob.value = student.value.birthDate ? String(student.value.birthDate).slice(0, 10) : ''
   editParishArea.value = student.value.area || ''
   editAddress.value = student.value.address || ''
@@ -242,7 +263,9 @@ async function saveProfile() {
       address: editAddress.value.trim() || null,
       bloodType: editBloodType.value.trim() || null,
       allergies: editAllergies.value.trim() || null,
-      healthNotes: editHealthNotes.value.trim() || null
+      healthNotes: editHealthNotes.value.trim() || null,
+      // Gửi kèm RowVersion để API chặn ghi đè khi hồ sơ đã bị người khác sửa
+      rowVersion: student.value?.rowVersion ?? null
     })
     editModalOpen.value = false
     await loadStudent()
@@ -459,7 +482,7 @@ onMounted(loadStudent)
 
           <div class="flex flex-wrap items-center justify-center gap-x-4 gap-y-1 text-xs text-stone-600 dark:text-stone-400 sm:justify-start">
             <span>Mã: <strong class="font-mono">{{ student.code }}</strong></span>
-            <span>Giới tính: <strong>{{ student.gender || '–' }}</strong></span>
+            <span>Giới tính: <strong>{{ genderLabel(student.gender) }}</strong></span>
             <span>
               Sinh ngày: <strong>{{ student.birthDate ? formatDate(student.birthDate) : '–' }}</strong><template v-if="studentAge !== null"> ({{ studentAge }} tuổi)</template>
             </span>
@@ -740,7 +763,7 @@ onMounted(loadStudent)
               <tr>
                 <th class="px-4 py-3">Niên khóa</th>
                 <th class="px-4 py-3">Lớp học</th>
-                <th class="px-4 py-3">Kết quả</th>
+                <th class="px-4 py-3">Ghi chú</th>
                 <th class="px-4 py-3">Trạng thái</th>
               </tr>
             </thead>

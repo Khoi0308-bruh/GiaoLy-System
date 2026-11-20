@@ -49,6 +49,13 @@ interface ClassLevelItem {
   name: string
 }
 
+const YEAR_STATUS_LABEL: Record<string, string> = {
+  Planned: 'Dự kiến',
+  Active: 'Đang diễn ra',
+  Closing: 'Đang chốt',
+  Archived: 'Lưu trữ'
+}
+
 const api = useApi()
 const toast = useToast()
 const { can } = usePermissions()
@@ -238,7 +245,7 @@ onMounted(initData)
             class="h-9 rounded-lg border border-stone-200 bg-stone-50 px-3 text-sm font-medium text-stone-800 focus:border-marian-600 focus:outline-none dark:border-stone-700 dark:bg-stone-800 dark:text-stone-100"
           >
             <option v-for="y in years" :key="y.id" :value="y.id">
-              {{ y.name }} ({{ { Active: 'Đang diễn ra', Closing: 'Đang chốt', Planned: 'Dự kiến', Archived: 'Lưu trữ' }[y.status] ?? y.status }})
+              {{ y.name }} ({{ YEAR_STATUS_LABEL[y.status] ?? y.status }})
             </option>
           </select>
         </div>

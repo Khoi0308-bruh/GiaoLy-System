@@ -138,14 +138,10 @@ public class ImportExportService : IImportExportService
             return Result.Conflict<ImportJobDetailResponse>("Tệp này đã được nhập và áp dụng vào cơ sở dữ liệu trước đó. Để đảm bảo an toàn, hệ thống không cho phép áp dụng hai lần cùng một tệp.");
         }
 
-        XLWorkbook workbook;
-        try
+        var workbook = TryOpenWorkbook(fileStream, out var openError);
+        if (workbook == null)
         {
-            workbook = new XLWorkbook(fileStream);
-        }
-        catch (Exception ex) when (ex is not OutOfMemoryException)
-        {
-            _logger.LogWarning(ex, "Tệp tải lên không phải Excel hợp lệ: {FileName}", fileName);
+            _logger.LogWarning(openError, "Tệp tải lên không phải Excel hợp lệ: {FileName}", fileName);
             return Result.Validation<ImportJobDetailResponse>(
                 "Tệp tải lên không phải là tệp Excel (.xlsx) hợp lệ hoặc đã bị hỏng. Vui lòng kiểm tra lại tệp.",
                 "File");
@@ -870,6 +866,20 @@ public class ImportExportService : IImportExportService
         _logger.LogInformation("Đã xuất danh sách {Count} đoàn sinh ra tệp Excel (Người xuất: {UserId})", students.Count, _currentUser.UserId);
 
         return Result.Ok(result);
+    }
+
+    private static XLWorkbook? TryOpenWorkbook(Stream stream, out Exception? error)
+    {
+        try
+        {
+            error = null;
+            return new XLWorkbook(stream);
+        }
+        catch (Exception ex) when (ex is not OutOfMemoryException)
+        {
+            error = ex;
+            return null;
+        }
     }
 
     private static DateOnly? ParseDateCell(IXLCell cell)
