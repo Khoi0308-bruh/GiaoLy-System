@@ -34,6 +34,7 @@ interface StudentsByBranchReport {
   academicYearId?: string | null
   academicYearName: string
   grandTotal: number
+  unassignedCount: number
   branches: BranchDetail[]
 }
 
@@ -296,6 +297,11 @@ async function handleExportReport() {
           icon="i-lucide-calendar"
         />
       </div>
+
+      <p v-if="branchReport.unassignedCount > 0" class="text-xs text-stone-500">
+        Trong tổng số trên có <strong>{{ branchReport.unassignedCount }}</strong> hồ sơ chưa gán ngành;
+        tổng theo ngành cộng lại là {{ branchReport.grandTotal - branchReport.unassignedCount }}.
+      </p>
 
       <!-- Danh sách từng ngành -->
       <div

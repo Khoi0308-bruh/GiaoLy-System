@@ -28,6 +28,8 @@ public class StudentsByBranchReportDto
     public Guid? AcademicYearId { get; set; }
     public string AcademicYearName { get; set; } = string.Empty;
     public int GrandTotal { get; set; }
+    /// <summary>Hồ sơ chưa gán ngành — GrandTotal = tổng các ngành + UnassignedCount.</summary>
+    public int UnassignedCount { get; set; }
     public List<BranchDetailDto> Branches { get; set; } = new();
 }
 
@@ -39,6 +41,7 @@ public class BranchDetailDto
     public int ActiveCount { get; set; }
     public int SuspendedCount { get; set; }
     public int DropoutCount { get; set; }
+    public int GraduatedCount { get; set; }
     public int TransferredCount { get; set; }
     public int MaleCount { get; set; }
     public int FemaleCount { get; set; }

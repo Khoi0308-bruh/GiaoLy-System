@@ -29,6 +29,17 @@ public class ReportService : IReportService
         _scopeContext = scopeContext;
     }
 
+    // Dữ liệu thật dùng "Nam"/"Nữ", dữ liệu import cũ dùng "M"/"F" hoặc "Male"/"Female".
+    private static bool IsMale(string? gender) =>
+        string.Equals(gender, "Male", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(gender, "Nam", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(gender, "M", StringComparison.OrdinalIgnoreCase);
+
+    private static bool IsFemale(string? gender) =>
+        string.Equals(gender, "Female", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(gender, "Nữ", StringComparison.OrdinalIgnoreCase) ||
+        string.Equals(gender, "F", StringComparison.OrdinalIgnoreCase);
+
     private async Task<List<Guid>> GetAllowedClassRoomIdsAsync(CancellationToken ct)
     {
         if (_currentUser.ScopeType == "All" || string.IsNullOrEmpty(_currentUser.ScopeType))
@@ -181,6 +192,14 @@ public class ReportService : IReportService
         var allowedClasses = await GetAllowedClassRoomIdsAsync(ct);
         var isScoped = _currentUser.ScopeType != "All" && !string.IsNullOrEmpty(_currentUser.ScopeType);
 
+        // Nguồn số liệu là HỒ SƠ đoàn sinh — cùng định nghĩa với danh sách và dashboard.
+        // Đếm theo ghi danh chỉ ra số em đã xếp lớp của niên khóa nên lệch hẳn với hai màn hình kia.
+        var students = await _scopeContext.Students(
+                _context.Students.AsNoTracking().Where(s => s.DeletedAt == null))
+            .Select(s => new { s.BranchId, s.Status, s.Gender })
+            .ToListAsync(ct);
+
+        // Ghi danh của niên khóa chỉ còn dùng cho bảng chi tiết theo lớp.
         var query = _context.Enrollments
             .AsNoTracking()
             .Include(e => e.Student)
@@ -201,7 +220,8 @@ public class ReportService : IReportService
         {
             AcademicYearId = yearInfo.Id,
             AcademicYearName = yearInfo.Name,
-            GrandTotal = enrollments.Count
+            GrandTotal = students.Count,
+            UnassignedCount = students.Count(s => s.BranchId == null)
         };
 
         foreach (var b in branches)
@@ -209,21 +229,25 @@ public class ReportService : IReportService
             if (_currentUser.ScopeType == "Branch" && _currentUser.BranchId.HasValue && _currentUser.BranchId.Value != b.Id)
                 continue;
 
-            var bEnrollments = enrollments.Where(e => e.ClassRoom?.ClassLevel?.BranchId == b.Id).ToList();
-            if (isScoped && !bEnrollments.Any())
+            var bStudents = students.Where(s => s.BranchId == b.Id).ToList();
+            if (isScoped && bStudents.Count == 0)
                 continue;
+
+            var bEnrollments = enrollments.Where(e => e.ClassRoom?.ClassLevel?.BranchId == b.Id).ToList();
 
             var bDetail = new BranchDetailDto
             {
                 BranchId = b.Id,
                 BranchName = b.Name,
-                TotalStudents = bEnrollments.Count,
-                ActiveCount = bEnrollments.Count(e => e.Status == "Active"),
-                SuspendedCount = bEnrollments.Count(e => e.Status == "Suspended"),
-                DropoutCount = bEnrollments.Count(e => e.Status == "DropOut"),
-                TransferredCount = bEnrollments.Count(e => e.Status == "Transferred"),
-                MaleCount = bEnrollments.Count(e => e.Student != null && string.Equals(e.Student.Gender, "Male", StringComparison.OrdinalIgnoreCase)),
-                FemaleCount = bEnrollments.Count(e => e.Student != null && string.Equals(e.Student.Gender, "Female", StringComparison.OrdinalIgnoreCase))
+                TotalStudents = bStudents.Count,
+                ActiveCount = bStudents.Count(s => s.Status == StudentStateMachine.StatusActive),
+                SuspendedCount = bStudents.Count(s => s.Status == StudentStateMachine.StatusPaused),
+                DropoutCount = bStudents.Count(s => s.Status == StudentStateMachine.StatusLeft),
+                GraduatedCount = bStudents.Count(s => s.Status == StudentStateMachine.StatusGraduated),
+                // Trạng thái "chuyển ngành" không thuộc vòng đời hồ sơ; chuyển lớp được ghi ở Ghi danh.
+                TransferredCount = 0,
+                MaleCount = bStudents.Count(s => IsMale(s.Gender)),
+                FemaleCount = bStudents.Count(s => IsFemale(s.Gender))
             };
 
             var classGroups = bEnrollments
@@ -239,8 +263,8 @@ public class ReportService : IReportService
                     ClassRoomName = cg.Key.ClassName,
                     LevelName = cg.Key.LevelName,
                     TotalStudents = cg.Count(),
-                    MaleCount = cg.Count(e => e.Student != null && string.Equals(e.Student.Gender, "Male", StringComparison.OrdinalIgnoreCase)),
-                    FemaleCount = cg.Count(e => e.Student != null && string.Equals(e.Student.Gender, "Female", StringComparison.OrdinalIgnoreCase))
+                    MaleCount = cg.Count(e => IsMale(e.Student?.Gender)),
+                    FemaleCount = cg.Count(e => IsFemale(e.Student?.Gender))
                 });
             }
 
