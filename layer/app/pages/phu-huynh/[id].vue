@@ -6,59 +6,52 @@ const api = useApi()
 
 const childId = computed(() => route.params.id as string)
 
+interface SacramentItem {
+  sacramentType: string
+  receivedOn?: string | null
+  place?: string | null
+  minister?: string | null
+  sponsor?: string | null
+}
+
 interface ChildDetail {
   id: string
   studentCode: string
   holyName?: string | null
   fullName: string
-  gender: string
-  dateOfBirth: string
-  placeOfBirth?: string | null
-  parish?: string | null
-  currentClassroom?: {
-    id: string
-    name: string
-    academicYearName?: string | null
-    mainTeacherName?: string | null
-    room?: string | null
-  } | null
-  sacraments?: {
-    baptism?: { date: string, place?: string, minister?: string } | null
-    firstCommunion?: { date: string, place?: string } | null
-    confirmation?: { date: string, place?: string, bishop?: string } | null
-  } | null
+  gender?: string | null
+  birthDate?: string | null
+  address?: string | null
+  area?: string | null
+  bloodType?: string | null
+  allergies?: string | null
+  relationship?: string | null
+  currentClassRoom?: string | null
+  currentBranch?: string | null
+  status: string
+  sacraments?: SacramentItem[] | null
 }
 
 interface GradeRecord {
   academicYearName: string
-  className: string
-  oralScore?: number | null
-  quiz15m?: number | null
-  test45m?: number | null
-  semester1Exam?: number | null
-  semester1Average?: number | null
-  semester2Exam?: number | null
-  semester2Average?: number | null
-  yearlyAverage?: number | null
-  rank?: string | null
-  conduct?: string | null
-  attendanceSummary?: {
-    presentCount: number
-    absentWithPermission: number
-    absentWithoutPermission: number
-    bouquetPoints?: number | null
-  } | null
+  classRoomName: string
+  oral?: number | null
+  smallTest?: number | null
+  bigTest?: number | null
+  finalExam?: number | null
+  totalSessions?: number | null
+  absences?: number | null
+  computedGpa?: number | null
+  computedStatus?: string | null
+  remarks?: string | null
 }
 
 interface CertificateItem {
   id: string
-  code: string
-  type: string
-  title: string
-  sacramentDate: string
-  place?: string | null
-  minister?: string | null
+  verificationCode: string
+  certificateType: string
   issuedAt: string
+  status: string
 }
 
 const child = ref<ChildDetail | null>(null)
@@ -74,6 +67,32 @@ const errorChild = ref<ApiError | null>(null)
 const errorGrades = ref<ApiError | null>(null)
 const errorCertificates = ref<ApiError | null>(null)
 const errorDownload = ref<string | null>(null)
+
+/** Ba bí tích khai tâm, khớp mã SacramentType của API. */
+const SACRAMENT_TYPES = [
+  { type: 'Baptism', label: '1. Bí tích Rửa tội' },
+  { type: 'FirstCommunion', label: '2. Xưng tội & Rước lễ lần đầu' },
+  { type: 'Confirmation', label: '3. Bí tích Thêm sức' }
+]
+
+const sacramentCards = computed(() => SACRAMENT_TYPES.map(s => ({
+  label: s.label,
+  item: (child.value?.sacraments ?? []).find(
+    x => (x.sacramentType || '').toLowerCase() === s.type.toLowerCase()
+  ) ?? null
+})))
+
+const CERTIFICATE_LABELS: Record<string, string> = {
+  Baptism: 'Chứng chỉ Rửa tội',
+  FirstCommunion: 'Chứng chỉ Rước lễ lần đầu',
+  Confirmation: 'Chứng chỉ Thêm sức'
+}
+const certificateLabel = (type: string) => CERTIFICATE_LABELS[type] ?? type
+const formatDate = (value?: string | null) => {
+  if (!value) return '–'
+  const d = new Date(value)
+  return Number.isNaN(d.getTime()) ? '–' : d.toLocaleDateString('vi-VN')
+}
 
 async function fetchChildDetail() {
   if (!childId.value) return
@@ -144,7 +163,7 @@ async function downloadCertificatePdf(cert: CertificateItem) {
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `Chung-chi-${cert.code || cert.type}.pdf`
+    a.download = `Chung-chi-${cert.verificationCode || cert.certificateType}.pdf`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
@@ -197,18 +216,18 @@ onMounted(() => {
               <div class="flex flex-wrap items-center gap-3 text-xs text-stone-500 mt-1">
                 <span>Mã đoàn sinh: <strong class="text-stone-800">{{ child.studentCode }}</strong></span>
                 <span>•</span>
-                <span>Ngày sinh: <strong class="text-stone-800">{{ child.dateOfBirth }}</strong></span>
+                <span>Ngày sinh: <strong class="text-stone-800">{{ formatDate(child.birthDate) }}</strong></span>
                 <span>•</span>
                 <span>Giới tính: <strong class="text-stone-800">{{ child.gender === 'Female' ? 'Nữ' : 'Nam' }}</strong></span>
               </div>
             </div>
           </div>
 
-          <div v-if="child.currentClassroom" class="rounded-lg bg-stone-50 border border-stone-200/80 p-3 text-right">
+          <div v-if="child.currentClassRoom || child.currentBranch" class="rounded-lg bg-stone-50 border border-stone-200/80 p-3 text-right">
             <div class="text-xs text-stone-500">Lớp hiện tại</div>
-            <div class="text-base font-bold text-[#1D3A73]">{{ child.currentClassroom.name }}</div>
-            <div v-if="child.currentClassroom.mainTeacherName" class="text-xs text-stone-600 mt-0.5">
-              GLV: {{ child.currentClassroom.mainTeacherName }}
+            <div class="text-base font-bold text-[#1D3A73]">{{ child.currentClassRoom || 'Chưa xếp lớp' }}</div>
+            <div v-if="child.currentBranch" class="text-xs text-stone-600 mt-0.5">
+              {{ child.currentBranch }}
             </div>
           </div>
         </div>
@@ -269,15 +288,15 @@ onMounted(() => {
             <div class="flex flex-wrap items-center justify-between gap-3 border-b border-stone-100 pb-3">
               <div>
                 <h3 class="text-base font-bold text-stone-900">
-                  {{ rec.className }} — Niên khóa: {{ rec.academicYearName }}
+                  {{ rec.classRoomName }} — Niên khóa: {{ rec.academicYearName }}
                 </h3>
               </div>
               <div class="flex items-center gap-2">
-                <span v-if="rec.rank" class="rounded bg-blue-50 text-[#1D3A73] px-2.5 py-1 text-xs font-bold border border-blue-200">
-                  Học lực: {{ rec.rank }}
+                <span v-if="rec.computedGpa != null" class="rounded bg-blue-50 text-[#1D3A73] px-2.5 py-1 text-xs font-bold border border-blue-200">
+                  ĐTB: {{ rec.computedGpa }}
                 </span>
-                <span v-if="rec.conduct" class="rounded bg-emerald-50 text-emerald-800 px-2.5 py-1 text-xs font-bold border border-emerald-200">
-                  Hạnh kiểm: {{ rec.conduct }}
+                <span v-if="rec.computedStatus" class="rounded bg-emerald-50 text-emerald-800 px-2.5 py-1 text-xs font-bold border border-emerald-200">
+                  Xếp loại: {{ rec.computedStatus }}
                 </span>
               </div>
             </div>
@@ -290,36 +309,27 @@ onMounted(() => {
                     <th class="p-2.5 text-center">Miệng</th>
                     <th class="p-2.5 text-center">15 phút</th>
                     <th class="p-2.5 text-center">1 tiết</th>
-                    <th class="p-2.5 text-center">Thi HK1</th>
-                    <th class="p-2.5 text-center bg-blue-50/50 text-[#1D3A73]">ĐTB HK1</th>
-                    <th class="p-2.5 text-center">Thi HK2</th>
-                    <th class="p-2.5 text-center bg-blue-50/50 text-[#1D3A73]">ĐTB HK2</th>
-                    <th class="p-2.5 text-center bg-amber-50 text-[#A8812A] font-bold">Cả năm</th>
+                    <th class="p-2.5 text-center">Thi cuối kỳ</th>
+                    <th class="p-2.5 text-center bg-amber-50 text-[#A8812A] font-bold">ĐTB</th>
                   </tr>
                 </thead>
                 <tbody class="divide-y divide-stone-200 font-medium text-stone-800">
                   <tr class="divide-x divide-stone-200 text-center">
-                    <td class="p-2.5">{{ rec.oralScore ?? '-' }}</td>
-                    <td class="p-2.5">{{ rec.quiz15m ?? '-' }}</td>
-                    <td class="p-2.5">{{ rec.test45m ?? '-' }}</td>
-                    <td class="p-2.5">{{ rec.semester1Exam ?? '-' }}</td>
-                    <td class="p-2.5 bg-blue-50/50 font-bold text-[#1D3A73]">{{ rec.semester1Average ?? '-' }}</td>
-                    <td class="p-2.5">{{ rec.semester2Exam ?? '-' }}</td>
-                    <td class="p-2.5 bg-blue-50/50 font-bold text-[#1D3A73]">{{ rec.semester2Average ?? '-' }}</td>
-                    <td class="p-2.5 bg-amber-50 font-bold text-base text-[#A8812A]">{{ rec.yearlyAverage ?? '-' }}</td>
+                    <td class="p-2.5">{{ rec.oral ?? '-' }}</td>
+                    <td class="p-2.5">{{ rec.smallTest ?? '-' }}</td>
+                    <td class="p-2.5">{{ rec.bigTest ?? '-' }}</td>
+                    <td class="p-2.5">{{ rec.finalExam ?? '-' }}</td>
+                    <td class="p-2.5 bg-amber-50 font-bold text-base text-[#A8812A]">{{ rec.computedGpa ?? '-' }}</td>
                   </tr>
                 </tbody>
               </table>
             </div>
 
             <!-- Tóm tắt chuyên cần & Hoa thiêng -->
-            <div v-if="rec.attendanceSummary" class="flex flex-wrap items-center gap-4 text-xs text-stone-600 bg-stone-50 p-3 rounded-lg">
-              <div>Có mặt: <strong class="text-stone-900">{{ rec.attendanceSummary.presentCount }}</strong> buổi</div>
-              <div>Vắng có phép: <strong class="text-stone-900">{{ rec.attendanceSummary.absentWithPermission }}</strong></div>
-              <div>Vắng không phép: <strong class="text-rose-600">{{ rec.attendanceSummary.absentWithoutPermission }}</strong></div>
-              <div v-if="rec.attendanceSummary.bouquetPoints != null" class="ml-auto font-bold text-[#A8812A]">
-                Điểm Hoa Thiêng: {{ rec.attendanceSummary.bouquetPoints }} bông
-              </div>
+            <div class="flex flex-wrap items-center gap-4 text-xs text-stone-600 bg-stone-50 p-3 rounded-lg">
+              <div v-if="rec.totalSessions != null">Tổng số buổi: <strong class="text-stone-900">{{ rec.totalSessions }}</strong></div>
+              <div v-if="rec.absences != null">Vắng: <strong class="text-rose-600">{{ rec.absences }}</strong></div>
+              <div v-if="rec.remarks" class="flex-1">Nhận xét: <strong class="text-stone-900">{{ rec.remarks }}</strong></div>
             </div>
           </div>
         </div>
@@ -356,17 +366,15 @@ onMounted(() => {
                     <UIcon name="i-heroicons-check-badge" class="h-5 w-5" />
                   </div>
                   <div>
-                    <h4 class="text-sm font-bold text-stone-900">{{ cert.title || cert.type }}</h4>
-                    <p class="text-[11px] font-mono text-stone-500">Mã: {{ cert.code }}</p>
+                    <h4 class="text-sm font-bold text-stone-900">{{ certificateLabel(cert.certificateType) }}</h4>
+                    <p class="text-[11px] font-mono text-stone-500">Mã: {{ cert.verificationCode }}</p>
                   </div>
                 </div>
               </div>
 
               <div class="text-xs space-y-1 text-stone-600 pt-1">
-                <div>Ngày ban bí tích: <strong class="text-stone-800">{{ cert.sacramentDate }}</strong></div>
-                <div v-if="cert.place">Nơi ban: <span class="text-stone-800">{{ cert.place }}</span></div>
-                <div v-if="cert.minister">Người ban: <span class="text-stone-800">{{ cert.minister }}</span></div>
-                <div>Ngày cấp chứng chỉ: <span class="text-stone-500">{{ cert.issuedAt }}</span></div>
+                <div>Ngày cấp: <strong class="text-stone-800">{{ formatDate(cert.issuedAt) }}</strong></div>
+                <div>Trạng thái: <span class="text-stone-800">{{ cert.status }}</span></div>
               </div>
             </div>
 
@@ -402,31 +410,13 @@ onMounted(() => {
           </h3>
 
           <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-            <div class="rounded-lg border border-stone-200 bg-stone-50/60 p-4">
-              <div class="text-xs font-bold text-stone-700 mb-1">1. Bí tích Rửa tội</div>
-              <div v-if="child?.sacraments?.baptism" class="text-xs space-y-1 text-stone-600">
-                <div>Ngày: <strong class="text-stone-900">{{ child.sacraments.baptism.date }}</strong></div>
-                <div v-if="child.sacraments.baptism.place">Nơi nhận: {{ child.sacraments.baptism.place }}</div>
-                <div v-if="child.sacraments.baptism.minister">Chủ tế: {{ child.sacraments.baptism.minister }}</div>
-              </div>
-              <div v-else class="text-xs text-stone-400 italic">Chưa ghi nhận</div>
-            </div>
-
-            <div class="rounded-lg border border-stone-200 bg-stone-50/60 p-4">
-              <div class="text-xs font-bold text-stone-700 mb-1">2. Xưng tội & Rước lễ lần đầu</div>
-              <div v-if="child?.sacraments?.firstCommunion" class="text-xs space-y-1 text-stone-600">
-                <div>Ngày: <strong class="text-stone-900">{{ child.sacraments.firstCommunion.date }}</strong></div>
-                <div v-if="child.sacraments.firstCommunion.place">Nơi nhận: {{ child.sacraments.firstCommunion.place }}</div>
-              </div>
-              <div v-else class="text-xs text-stone-400 italic">Chưa ghi nhận</div>
-            </div>
-
-            <div class="rounded-lg border border-stone-200 bg-stone-50/60 p-4">
-              <div class="text-xs font-bold text-stone-700 mb-1">3. Bí tích Thêm sức</div>
-              <div v-if="child?.sacraments?.confirmation" class="text-xs space-y-1 text-stone-600">
-                <div>Ngày: <strong class="text-stone-900">{{ child.sacraments.confirmation.date }}</strong></div>
-                <div v-if="child.sacraments.confirmation.place">Nơi nhận: {{ child.sacraments.confirmation.place }}</div>
-                <div v-if="child.sacraments.confirmation.bishop">Đức Giám Mục: {{ child.sacraments.confirmation.bishop }}</div>
+            <div v-for="card in sacramentCards" :key="card.label" class="rounded-lg border border-stone-200 bg-stone-50/60 p-4">
+              <div class="text-xs font-bold text-stone-700 mb-1">{{ card.label }}</div>
+              <div v-if="card.item" class="text-xs space-y-1 text-stone-600">
+                <div>Ngày: <strong class="text-stone-900">{{ formatDate(card.item.receivedOn) }}</strong></div>
+                <div v-if="card.item.place">Nơi nhận: {{ card.item.place }}</div>
+                <div v-if="card.item.minister">Chủ tế: {{ card.item.minister }}</div>
+                <div v-if="card.item.sponsor">Người đỡ đầu: {{ card.item.sponsor }}</div>
               </div>
               <div v-else class="text-xs text-stone-400 italic">Chưa ghi nhận</div>
             </div>

@@ -298,6 +298,14 @@ onMounted(() => {
 // Route hiện tại cho breadcrumb
 const route = useRoute()
 const pageLabelMap: Record<string, string> = {
+  '/ban-huynh-truong': 'Ban Điều Hành',
+  '/tin-tuc': 'Tin Tức',
+  '/thu-vien': 'Tài Liệu',
+  '/lich-phung-vu': 'Lịch Phụng Vụ',
+  '/xac-thuc-chung-chi': 'Tra Cứu Chứng Chỉ',
+  '/phu-huynh': 'Phụ Huynh',
+  '/dang-nhap': 'Đăng Nhập',
+  '/doi-mat-khau-lan-dau': 'Đổi Mật Khẩu',
   '/leadership': 'Ban Điều Hành',
   '/thong-bao': 'Thông Báo',
   '/news': 'Tin Tức',
@@ -306,7 +314,12 @@ const pageLabelMap: Record<string, string> = {
   '/verify': 'Tra Cứu',
   '/profile': 'Hồ Sơ Cá Nhân',
 }
-const currentPageLabel = computed(() => pageLabelMap[route.path] || route.path.replace('/', ''))
+// Trang con (vd /phu-huynh/<id>) dùng nhãn của đoạn đường dẫn đầu tiên thay vì in GUID thô.
+const currentPageLabel = computed(() => {
+  const path = route.path.replace(/\/$/, '')
+  const firstSegment = `/${path.split('/')[1] ?? ''}`
+  return pageLabelMap[path] ?? pageLabelMap[firstSegment] ?? firstSegment.replace('/', '')
+})
 
 // ── Nav Items (top bar) ──
 interface NavItem { to: string; icon: string; label: string; badge?: string; external?: boolean }
@@ -315,7 +328,7 @@ const navItems: NavItem[] = [
   { to: '/leadership', icon: 'i-heroicons-user-group', label: 'Giới Thiệu' },
   { to: '/thong-bao', icon: 'i-heroicons-bell-alert', label: 'Thông Báo' },
   { to: '/news', icon: 'i-heroicons-newspaper', label: 'Tin Tức' },
-  { to: 'http://localhost:3000', icon: 'i-heroicons-cog-6-tooth', label: 'Quản Lý Đoàn Sinh', external: true },
+  { to: useRuntimeConfig().public.adminBase as string, icon: 'i-heroicons-cog-6-tooth', label: 'Quản Lý Đoàn Sinh', external: true },
   { to: '/library', icon: 'i-heroicons-book-open', label: 'Tài Liệu' },
 ]
 
