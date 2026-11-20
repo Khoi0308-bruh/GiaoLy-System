@@ -1,20 +1,22 @@
 # Báo cáo bí mật còn sót trong mã nguồn — 15/11/2026
 
-> **Cập nhật 20/11/2026 — đã xử lý.** Các bản dump source tự sinh (bản `.md`/`.html` chứa toàn bộ mã nguồn cũ) và bản `.html` trùng của báo cáo tổng hợp đã được xoá khỏi repo ở commit `0cc7ae6f`. Quét lại bằng `node tools/secret-scan.mjs`: **485 file đang track, 3 chỗ nghi chứa bí mật** — cả 3 chỉ là giá trị mẫu trong `docs/BAO_CAO_TONG_HOP_TOAN_DIEN_DU_AN_GIAOLY.md`, không giá trị nào dùng được để đăng nhập hay ký token.
+> **Cập nhật 20/11/2026 — đã xử lý hết.** Các bản dump source tự sinh (bản `.md`/`.html` chứa toàn bộ mã nguồn cũ) và bản `.html` trùng của báo cáo tổng hợp đã được xoá khỏi repo ở commit `0cc7ae6f`; 3 giá trị mẫu còn lại trong tài liệu đã thay bằng `REPLACE_WITH_…` ở commit `e6e97b56`. Quét lại bằng `node tools/secret-scan.mjs`: **485 file đang track, 0 chỗ nghi chứa bí mật**.
 
 Phạm vi lần quét gốc: **500 file đang được git track** (`git ls-files`) trên nhánh `feature/ui-polish`.
 Cách quét: `node tools/secret-scan.mjs` (quét mẫu + loại trừ placeholder; giá trị in ra đã được che).
 Kiểm chứng “còn hiệu lực hay không” bằng cách gọi thật vào API đang chạy ở `http://localhost:5000`.
 
-## 1. Trạng thái hiện tại: 14 chỗ ban đầu → 3 chỗ còn lại (đều là mẫu)
+## 1. Trạng thái hiện tại: 14 chỗ ban đầu → 0 chỗ
 
-| # | File : dòng | Loại | Giá trị (đã che) | Trạng thái |
-|---|---|---|---|---|
-| 1 | `docs/BAO_CAO_TONG_HOP_TOAN_DIEN_DU_AN_GIAOLY.md:576` | Mật khẩu `sa` trong chuỗi kết nối mẫu | `Your…23!` (22) | Mẫu, không phải mật khẩu thật — nên thay bằng `REPLACE_WITH_…` (mục 3) |
-| 2 | `docs/BAO_CAO_TONG_HOP_TOAN_DIEN_DU_AN_GIAOLY.md:579` | Khoá ký JWT mẫu | `Giao…ng!` (60) | Không ký được token (401) — nên thay bằng `REPLACE_WITH_…` (mục 3) |
-| 3 | `docs/BAO_CAO_TONG_HOP_TOAN_DIEN_DU_AN_GIAOLY.md:592` | Mật khẩu admin mẫu | `Admi…26!` (24) | Không đăng nhập được (401) — nên thay bằng `REPLACE_WITH_…` (mục 3) |
+Lần quét 15/11/2026 (500 file track) tìm ra 14 chỗ chứa 6 giá trị nhạy cảm. Sau khi xoá các bản dump, xoay mật khẩu `thuky` và thay 3 giá trị mẫu bằng placeholder, quét lại ngày 20/11/2026 (485 file track):
 
-11 chỗ còn lại của lần quét 15/11/2026 đã được xử lý xong, xem mục 2.
+```
+File đang track: 485
+Chỗ nghi chứa bí mật: 0
+Theo loại: {}
+```
+
+Cả 14 chỗ đều đã xử lý — chi tiết theo mục 2.
 
 ## 2. Đã xử lý
 
@@ -37,17 +39,24 @@ Cấu hình đang chạy lấy khoá từ biến môi trường (`Jwt__Key`), kh
 
 ### 2.3. Dọn file
 - Các bản dump source tự sinh và bản `.html` trùng của báo cáo tổng hợp đã bị xoá khỏi repo cùng script sinh dump ở commit `0cc7ae6f` (nhánh `feature/ui-polish`), nên nội dung cũ không còn được track và không còn xuất hiện khi quét lại.
-- Bản `.md` của báo cáo tổng hợp vẫn giữ (đã chuyển vào `docs/`) vì là tài liệu do người viết; các giá trị mẫu trong đó xử lý theo mục 3.
+- Bản `.md` của báo cáo tổng hợp vẫn giữ (đã chuyển vào `docs/`) vì là tài liệu do người viết; 3 giá trị mẫu trong đó đã thay bằng placeholder ở commit `e6e97b56` — xem mục 3.
 - Nếu cần đối chiếu lại nội dung cũ, lấy từ lịch sử git tại commit trước `0cc7ae6f` — không khôi phục lại vào working tree.
 
 ### 2.4. Việc còn lại ở hệ thống khác: mật khẩu admin dự án AnhEmMotor
 - Giá trị này nằm trong một E2E test copy từ dự án `AnhEmMotor-Store`; với GiaoLy **không** đăng nhập được (401), nhưng trên hệ thống AnhEmMotor thì đây là mật khẩu thật → phải đổi ở đó nếu hệ thống còn chạy.
 - Việc xoá khỏi repo GiaoLy đã xong (2.3); đổi mật khẩu bên AnhEmMotor nằm ngoài phạm vi repo này.
 
-## 3. Việc còn lại: thay 3 giá trị mẫu trong báo cáo tổng hợp
+## 3. Đã thay placeholder: 3 giá trị mẫu trong báo cáo tổng hợp (xử lý 20/11/2026)
 
-`docs/BAO_CAO_TONG_HOP_TOAN_DIEN_DU_AN_GIAOLY.md` (dòng 576, 579, 592) còn ví dụ `Your…23!` (`sa`), `Giao…ng!` (JWT), `Admi…26!` (admin).
-Không giá trị nào đăng nhập/ký token được (401 đã đo) → **không cần xoay**, nhưng nên thay bằng `REPLACE_WITH_…` để người sau không copy nhầm vào cấu hình thật.
+Ba ví dụ trong `docs/BAO_CAO_TONG_HOP_TOAN_DIEN_DU_AN_GIAOLY.md` đã được thay ở commit `e6e97b56`:
+
+| Dòng | Trước | Sau |
+|---|---|---|
+| 576 | mật khẩu `sa` mẫu (`Your…23!`) | `REPLACE_WITH_DB_PASSWORD` |
+| 579 | khoá JWT mẫu (`Giao…ng!`) | `REPLACE_WITH_JWT_SIGNING_KEY_AT_LEAST_32_BYTES` |
+| 592 | mật khẩu admin mẫu (`Admi…26!`) | `REPLACE_WITH_ADMIN_PASSWORD` |
+
+Các giá trị cũ không đăng nhập/ký token được (401 đã đo) nên **không cần xoay vòng**; việc thay placeholder chỉ để người sau không copy nhầm vào cấu hình thật.
 
 ## 4. Đã kiểm và KHÔNG phải bí mật (không cần xoay)
 
