@@ -106,9 +106,16 @@ async function load() {
       branchId: selectedBranchId.value || undefined
     })
     if (Array.isArray(res)) {
-      // /students/unassigned trả về mảng phẳng (không phân trang).
-      rows.value = res
+      // /students/unassigned trả về mảng phẳng (không phân trang) nên tự cắt trang.
       total.value = res.length
+      const maxPage = Math.max(1, Math.ceil(res.length / pageSize))
+      if (page.value > maxPage) {
+        // Đổi bộ lọc làm số trang co lại: đưa về trang cuối rồi để watcher tải lại.
+        page.value = maxPage
+        return
+      }
+      const start = (page.value - 1) * pageSize
+      rows.value = res.slice(start, start + pageSize)
     } else {
       rows.value = res.items || []
       total.value = res.totalCount || 0
@@ -152,13 +159,13 @@ onMounted(() => {
 /** Tuổi hiện tại tính từ ngày sinh; trả null khi thiếu ngày sinh hợp lệ. */
 function ageOf(birthDate?: string | null): number | null {
   if (!birthDate) return null
-  const birth = new Date(birthDate)
-  if (Number.isNaN(birth.getTime()) || birth.getFullYear() < 1900) return null
+  // API trả "YYYY-MM-DD"; new Date("YYYY-MM-DD") hiểu là UTC nên ở múi giờ âm
+  // có thể lệch một ngày. Tách phần ngày rồi so sánh theo lịch địa phương.
+  const [year, month, day] = birthDate.slice(0, 10).split('-').map(Number)
+  if (!year || !month || !day || year < 1900) return null
   const now = new Date()
-  let age = now.getFullYear() - birth.getFullYear()
-  const beforeBirthday = now.getMonth() < birth.getMonth()
-    || (now.getMonth() === birth.getMonth() && now.getDate() < birth.getDate())
-  if (beforeBirthday) age--
+  let age = now.getFullYear() - year
+  if (now.getMonth() + 1 < month || (now.getMonth() + 1 === month && now.getDate() < day)) age--
   return age >= 0 ? age : null
 }
 
