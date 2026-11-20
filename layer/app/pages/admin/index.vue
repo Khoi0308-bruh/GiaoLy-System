@@ -234,13 +234,13 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
         <StatCard
           label="Tổng số đoàn sinh"
           :value="dashboardStats?.totalStudents ?? (loadingStats ? '...' : 0)"
-          description="Đoàn sinh đang theo học giáo lý"
+          description="Hồ sơ đoàn sinh trong phạm vi quản lý"
           icon="i-heroicons-user-group"
         />
         <StatCard
-          label="Đoàn sinh tích cực"
+          label="Đang theo học"
           :value="dashboardStats?.totalActiveStudents ?? (loadingStats ? '...' : 0)"
-          description="Đang tham gia sinh hoạt đều đặn"
+          description="Đoàn sinh đang theo học giáo lý"
           icon="i-heroicons-check-badge"
         />
         <StatCard

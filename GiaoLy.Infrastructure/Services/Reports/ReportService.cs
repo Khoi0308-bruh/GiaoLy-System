@@ -20,11 +20,13 @@ public class ReportService : IReportService
 {
     private readonly AppDbContext _context;
     private readonly ICurrentUser _currentUser;
+    private readonly IScopeContext _scopeContext;
 
-    public ReportService(AppDbContext context, ICurrentUser currentUser)
+    public ReportService(AppDbContext context, ICurrentUser currentUser, IScopeContext scopeContext)
     {
         _context = context;
         _currentUser = currentUser;
+        _scopeContext = scopeContext;
     }
 
     private async Task<List<Guid>> GetAllowedClassRoomIdsAsync(CancellationToken ct)
@@ -82,22 +84,6 @@ public class ReportService : IReportService
         var allowedClasses = await GetAllowedClassRoomIdsAsync(ct);
         var isScoped = _currentUser.ScopeType != "All" && !string.IsNullOrEmpty(_currentUser.ScopeType);
 
-        var enrollmentsQuery = _context.Enrollments
-            .AsNoTracking()
-            .Where(e => e.AcademicYearId == yearInfo.Id);
-
-        if (isScoped)
-        {
-            enrollmentsQuery = enrollmentsQuery.Where(e => allowedClasses.Contains(e.ClassRoomId));
-        }
-
-        var activeEnrollments = await enrollmentsQuery
-            .Select(e => new { e.StudentId, e.ClassRoomId, e.Status })
-            .ToListAsync(ct);
-
-        var studentIds = activeEnrollments.Select(e => e.StudentId).Distinct().ToList();
-        var totalActive = activeEnrollments.Count(e => e.Status == "Active");
-
         var classQuery = _context.ClassRooms
             .AsNoTracking()
             .Include(c => c.ClassLevel)
@@ -135,12 +121,17 @@ public class ReportService : IReportService
             attendanceAvg = Math.Round(rates.Average(), 1);
         }
 
+        // Số liệu đoàn sinh lấy từ bảng Students (cùng nguồn và cách lọc phạm vi với
+        // GET /students, /students/stats) để bảng điều khiển và danh sách không lệch nhau.
+        var students = await _scopeContext.Students(_context.Students.AsNoTracking())
+            .Select(s => new { s.Status, s.BranchId, s.FatherPhone, s.MotherPhone })
+            .ToListAsync(ct);
+
+        var totalStudents = students.Count;
+        var totalActive = students.Count(s => s.Status == StudentStateMachine.StatusActive);
+
         // Missing contacts
-        var missingContactCount = await _context.Students
-            .AsNoTracking()
-            .Where(s => studentIds.Contains(s.Id) && s.DeletedAt == null)
-            .Where(s => string.IsNullOrEmpty(s.FatherPhone) && string.IsNullOrEmpty(s.MotherPhone))
-            .CountAsync(ct);
+        var missingContactCount = students.Count(s => string.IsNullOrEmpty(s.FatherPhone) && string.IsNullOrEmpty(s.MotherPhone));
 
         // Pending promotion count
         var pendingPromotion = await _context.PromotionDrafts
@@ -158,7 +149,7 @@ public class ReportService : IReportService
                 continue;
 
             var bClassIds = classes.Where(c => c.BranchId == branch.Id).Select(c => c.Id).ToList();
-            var bStudents = activeEnrollments.Count(e => bClassIds.Contains(e.ClassRoomId));
+            var bStudents = students.Count(s => s.BranchId == branch.Id);
 
             branchStats.Add(new BranchStatDto
             {
@@ -171,7 +162,7 @@ public class ReportService : IReportService
 
         var dto = new DashboardReportDto
         {
-            TotalStudents = studentIds.Count,
+            TotalStudents = totalStudents,
             TotalActiveStudents = totalActive,
             TotalClassRooms = classes.Count,
             TotalTeachers = totalTeachers,
