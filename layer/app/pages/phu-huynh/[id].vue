@@ -88,10 +88,23 @@ const CERTIFICATE_LABELS: Record<string, string> = {
   Confirmation: 'Chứng chỉ Thêm sức'
 }
 const certificateLabel = (type: string) => CERTIFICATE_LABELS[type] ?? type
+
+const CERTIFICATE_STATUS: Record<string, string> = {
+  Issued: 'Đã cấp',
+  Revoked: 'Đã thu hồi',
+  Draft: 'Bản nháp'
+}
+const certificateStatus = (status: string) => CERTIFICATE_STATUS[status] ?? status
+
 const formatDate = (value?: string | null) => {
   if (!value) return '–'
-  const d = new Date(value)
-  return Number.isNaN(d.getTime()) ? '–' : d.toLocaleDateString('vi-VN')
+  // "YYYY-MM-DD" (và ISO có giờ) tách phần ngày để không lệch múi giờ.
+  const [year, month, day] = value.slice(0, 10).split('-').map(Number)
+  if (year && month && day) {
+    return `${String(day).padStart(2, '0')}/${String(month).padStart(2, '0')}/${year}`
+  }
+  const parsed = new Date(value)
+  return Number.isNaN(parsed.getTime()) ? '–' : parsed.toLocaleDateString('vi-VN')
 }
 
 async function fetchChildDetail() {
@@ -374,7 +387,7 @@ onMounted(() => {
 
               <div class="text-xs space-y-1 text-stone-600 pt-1">
                 <div>Ngày cấp: <strong class="text-stone-800">{{ formatDate(cert.issuedAt) }}</strong></div>
-                <div>Trạng thái: <span class="text-stone-800">{{ cert.status }}</span></div>
+                <div>Trạng thái: <span class="text-stone-800">{{ certificateStatus(cert.status) }}</span></div>
               </div>
             </div>
 
