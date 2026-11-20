@@ -52,10 +52,6 @@ async function submit() {
       newPassword: newPassword.value
     })
 
-    if (session.me) {
-      session.me.mustChangePassword = false
-    }
-
     success.value = true
     // Đổi mật khẩu thu hồi toàn bộ phiên (SecurityStamp + refresh token), nên phải
     // đăng nhập lại bằng mật khẩu mới thay vì tiếp tục dùng token cũ.

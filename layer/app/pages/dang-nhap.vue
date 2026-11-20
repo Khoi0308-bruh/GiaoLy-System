@@ -20,14 +20,18 @@ async function submit() {
 
   try {
     await session.login(username.value, password.value)
-    const back = typeof route.query.quay_lai === 'string' ? route.query.quay_lai : null
     if (session.me?.mustChangePassword) {
       await navigateTo('/doi-mat-khau-lan-dau')
-    } else if (back && back.startsWith('/') && !back.startsWith('/dang-nhap')) {
-      await navigateTo(back)
-    } else {
-      await navigateTo(session.homePath)
+      return
     }
+
+    const back = typeof route.query.quay_lai === 'string' ? route.query.quay_lai : null
+    // Phụ huynh không có quyền vào khu quản trị, nên bỏ qua "quay_lai" trỏ tới /admin.
+    const backAllowed = !!back
+      && back.startsWith('/')
+      && !back.startsWith('/dang-nhap')
+      && !(session.homePath === '/phu-huynh' && back.startsWith('/admin'))
+    await navigateTo(backAllowed ? back : session.homePath)
   } catch (e) {
     error.value = toApiError(e)
   } finally {
