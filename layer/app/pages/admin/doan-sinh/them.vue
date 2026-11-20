@@ -16,7 +16,7 @@ interface ClassroomRef {
 }
 
 interface DuplicateCheckResult {
-  level: 'None' | 'Probable' | 'Exact'
+  level: 'None' | 'Possible' | 'Probable' | 'Exact'
   message?: string | null
   existingStudentId?: string | null
   existingStudentCode?: string | null
@@ -70,6 +70,7 @@ const selectedClassroomId = ref<string>('')
 const loading = ref(false)
 const checkingDuplicates = ref(false)
 const duplicateWarning = ref<DuplicateCheckResult | null>(null)
+const duplicateAcknowledged = ref(false)
 const error = ref<ApiError | null>(null)
 const formError = ref<string | null>(null)
 
@@ -88,9 +89,16 @@ async function loadClassrooms() {
   }
 }
 
-// Kiểm tra trùng lặp
-async function checkDuplicate() {
-  if (!fullName.value.trim() || !dateOfBirth.value) return
+// Kiểm tra trùng lặp. Dùng số thứ tự yêu cầu để kết quả cũ không ghi đè kết quả mới
+// khi người dùng sửa họ tên/ngày sinh trong lúc request trước còn đang chạy.
+let duplicateRequestSeq = 0
+async function checkDuplicate(): Promise<DuplicateCheckResult | null> {
+  if (!fullName.value.trim() || !dateOfBirth.value) {
+    duplicateWarning.value = null
+    return null
+  }
+
+  const requestSeq = ++duplicateRequestSeq
   checkingDuplicates.value = true
   duplicateWarning.value = null
   try {
@@ -99,15 +107,26 @@ async function checkDuplicate() {
       birthDate: dateOfBirth.value,
       guardianPhones: [fatherPhone.value.trim(), motherPhone.value.trim()].filter(Boolean)
     })
-    if (res?.level && res.level !== 'None') {
-      duplicateWarning.value = res
-    }
+    if (requestSeq !== duplicateRequestSeq) return null
+
+    duplicateWarning.value = res?.level && res.level !== 'None' ? res : null
+    return duplicateWarning.value
   } catch {
     // Bỏ qua lỗi kiểm tra trùng lặp, API tạo mới vẫn chặn trùng ở bước sau
+    return null
   } finally {
-    checkingDuplicates.value = false
+    if (requestSeq === duplicateRequestSeq) checkingDuplicates.value = false
   }
 }
+
+// Họ tên, ngày sinh hay SĐT phụ huynh đổi thì cảnh báo trùng lặp cũ không còn đúng
+watch([fullName, dateOfBirth, fatherPhone, motherPhone], () => {
+  duplicateRequestSeq++
+  checkingDuplicates.value = false
+  duplicateWarning.value = null
+  duplicateAcknowledged.value = false
+  formError.value = null
+})
 
 const SACRAMENT_LABELS: Record<string, string> = {
   Baptism: 'Rửa Tội',
@@ -160,7 +179,7 @@ async function saveSacraments(studentId: string): Promise<string[]> {
     { type: 'Baptism', date: baptismDate.value, place: baptismChurch.value },
     { type: 'FirstCommunion', date: firstCommunionDate.value, place: firstCommunionChurch.value },
     { type: 'Confirmation', date: confirmationDate.value, place: confirmationChurch.value }
-  ].filter(item => !!item.date)
+  ].filter(item => !!item.date || !!item.place.trim())
 
   const failed: string[] = []
   for (const item of items) {
@@ -186,8 +205,15 @@ async function submit() {
     return
   }
 
-  if (duplicateWarning.value?.level === 'Exact') {
-    formError.value = `Hồ sơ trùng hoàn toàn với đoàn sinh ${duplicateWarning.value.existingStudentCode ?? ''} (${duplicateWarning.value.existingStudentFullName ?? ''}). Vui lòng mở hồ sơ đó thay vì tạo mới.`
+  // Kiểm tra lại ngay lúc gửi: cảnh báo lúc blur có thể đã cũ sau khi sửa họ tên/ngày sinh
+  const duplicate = await checkDuplicate()
+  if (duplicate?.level === 'Exact') {
+    formError.value = `Hồ sơ trùng hoàn toàn với đoàn sinh ${duplicate.existingStudentCode ?? ''} (${duplicate.existingStudentFullName ?? ''}). Vui lòng mở hồ sơ đó thay vì tạo mới.`
+    return
+  }
+  if (duplicate?.level === 'Probable' && !duplicateAcknowledged.value) {
+    duplicateAcknowledged.value = true
+    formError.value = 'Hồ sơ có thể trùng với đoàn sinh đã có. Nếu chắc chắn đây là đoàn sinh khác, bấm "Lưu hồ sơ đoàn sinh" lần nữa để tiếp tục.'
     return
   }
 
@@ -207,7 +233,7 @@ async function submit() {
       classRoomId: selectedClassroomId.value || null,
       guardians: buildGuardians(),
       hasPhotoConsent: false,
-      confirmWarning: duplicateWarning.value?.level === 'Probable'
+      confirmWarning: duplicateAcknowledged.value
     })
 
     const failedSacraments = await saveSacraments(created.id)
@@ -256,10 +282,12 @@ onMounted(loadClassrooms)
     <!-- Cảnh báo nếu phát hiện trùng lặp -->
     <UAlert
       v-if="duplicateWarning"
-      color="warning"
+      :color="duplicateWarning.level === 'Exact' ? 'error' : 'warning'"
       variant="subtle"
       icon="i-lucide-alert-triangle"
-      title="Cảnh báo: Có thể trùng lặp đoàn sinh trong hệ thống"
+      :title="duplicateWarning.level === 'Exact'
+        ? 'Hồ sơ trùng hoàn toàn với đoàn sinh đã có'
+        : 'Cảnh báo: Có thể trùng lặp đoàn sinh trong hệ thống'"
       class="mb-4"
     >
       <template #description>
@@ -277,7 +305,7 @@ onMounted(loadClassrooms)
             Xem hồ sơ →
           </NuxtLink>
         </p>
-        <p v-if="duplicateWarning.level === 'Probable'" class="mt-1 text-xs">
+        <p v-if="duplicateWarning.level === 'Probable' && !duplicateAcknowledged" class="mt-1 text-xs">
           Nếu chắc chắn đây là đoàn sinh khác, bấm "Lưu hồ sơ đoàn sinh" để tiếp tục.
         </p>
       </template>
@@ -339,7 +367,7 @@ onMounted(loadClassrooms)
         <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
           <!-- Rửa tội -->
           <UFormField label="Ngày Rửa Tội" name="baptismDate">
-            <UInput v-model="baptismDate" type="date" class="w-full" @blur="checkDuplicate" />
+            <UInput v-model="baptismDate" type="date" class="w-full" />
           </UFormField>
           <UFormField label="Nơi Rửa Tội (Giáo xứ)" name="baptismChurch">
             <UInput v-model="baptismChurch" placeholder="Ví dụ: Giáo xứ Thánh Gia..." class="w-full" />
@@ -439,6 +467,7 @@ onMounted(loadClassrooms)
           size="lg"
           icon="i-lucide-check"
           :loading="loading"
+          :disabled="checkingDuplicates"
         >
           Lưu hồ sơ đoàn sinh
         </UButton>
