@@ -75,7 +75,7 @@ async function main() {
 
   const change = await call('POST', '/api/v1/auth/change-password', {
     token: firstToken,
-    body: { oldPassword: INITIAL_PASSWORD, newPassword: NEW_PASSWORD }
+    body: { currentPassword: INITIAL_PASSWORD, newPassword: NEW_PASSWORD }
   });
   expect('2b. Đổi mật khẩu lần đầu', change, [204, 200]);
   log('2b. POST /auth/change-password', `HTTP ${change.status}`);
