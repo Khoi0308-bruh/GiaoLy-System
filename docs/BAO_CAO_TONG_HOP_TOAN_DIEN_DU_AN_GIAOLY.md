@@ -573,10 +573,10 @@ Tệp `DbSeeder.cs` được tích hợp sẵn vào vòng đời khởi động 
 ```json
 {
   "ConnectionStrings": {
-    "DefaultConnection": "Server=localhost;Database=GiaoLyDb;User Id=sa;Password=YourSecurePassword123!;TrustServerCertificate=True;"
+    "DefaultConnection": "Server=localhost;Database=GiaoLyDb;User Id=sa;Password=REPLACE_WITH_DB_PASSWORD;TrustServerCertificate=True;"
   },
   "Jwt": {
-    "Key": "GiaoLySuperSecretKeyForJwtToken2026MustBeAtLeast32BytesLong!",
+    "Key": "REPLACE_WITH_JWT_SIGNING_KEY_AT_LEAST_32_BYTES",
     "Issuer": "GiaoLyAPI",
     "Audience": "GiaoLyClients"
   },
@@ -589,7 +589,7 @@ Tệp `DbSeeder.cs` được tích hợp sẵn vào vòng đời khởi động 
     ]
   },
   "App": {
-    "DefaultPassword": "AdminSecurePassword2026!"
+    "DefaultPassword": "REPLACE_WITH_ADMIN_PASSWORD"
   }
 }
 ```
