@@ -249,7 +249,7 @@ public class AuthService : IAuthService
             return Result.NotFound("Không tìm thấy tài khoản người dùng.");
         }
 
-        var isOldPasswordValid = BCrypt.Net.BCrypt.Verify(request.OldPassword, user.PasswordHash);
+        var isOldPasswordValid = BCrypt.Net.BCrypt.Verify(request.CurrentPassword, user.PasswordHash);
         if (!isOldPasswordValid)
         {
             return Result.BadRequest(ErrorCodes.AuthInvalidCredentials, "Mật khẩu hiện tại không chính xác.");
@@ -316,7 +316,8 @@ public class AuthService : IAuthService
             roleName,
             scopeType,
             user.BranchId,
-            permissions
+            permissions,
+            user.MustChangePassword
         );
 
         return Result.Ok(profile);

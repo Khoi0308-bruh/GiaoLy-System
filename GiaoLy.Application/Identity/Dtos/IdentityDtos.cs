@@ -1,10 +1,12 @@
+using System.Text.Json.Serialization;
+
 namespace GiaoLy.Application.Identity.Dtos;
 
 public record LoginRequest(string Username, string Password);
 
 public record AuthResponse(
     string AccessToken,
-    string RefreshToken,
+    [property: JsonIgnore] string RefreshToken,
     DateTime ExpiresAt,
     UserSummaryResponse User
 );
@@ -21,7 +23,7 @@ public record UserSummaryResponse(
     bool MustChangePassword
 );
 
-public record ChangePasswordRequest(string OldPassword, string NewPassword);
+public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
 public record UserProfileResponse(
     Guid Id,
@@ -38,7 +40,8 @@ public record UserProfileResponse(
     string RoleName,
     string ScopeType,
     int? BranchId,
-    IReadOnlySet<string> Permissions
+    IReadOnlySet<string> Permissions,
+    bool MustChangePassword
 );
 
 public record UpdateProfileRequest(
