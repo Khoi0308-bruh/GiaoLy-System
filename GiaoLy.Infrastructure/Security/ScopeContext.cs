@@ -69,15 +69,10 @@ public class ScopeContext : IScopeContext
             var branchId = _currentUser.BranchId;
             if (branchId is null) return query.Where(_ => false);
 
-            var activeClassIds = _db.ClassRooms
-                .Where(c => c.Branch == branchId.Value)
-                .Select(c => c.Id);
-
-            var studentIds = _db.Enrollments
-                .Where(e => e.Status == "Active" && activeClassIds.Contains(e.ClassRoomId))
-                .Select(e => e.StudentId);
-
-            return query.Where(s => studentIds.Contains(s.Id));
+            // Phạm vi ngành phải theo ngành ghi trên hồ sơ (Student.BranchId) — cùng định nghĩa
+            // với danh sách đoàn sinh và dashboard. Lọc theo ghi danh sẽ làm mất toàn bộ hồ sơ
+            // chưa xếp lớp và kéo cả hồ sơ của ngành khác đang học trong lớp của ngành này.
+            return query.Where(s => s.BranchId == branchId.Value);
         }
 
         if (scope == "Classroom")
