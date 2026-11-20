@@ -196,7 +196,7 @@ public class ReportService : IReportService
         // Đếm theo ghi danh chỉ ra số em đã xếp lớp của niên khóa nên lệch hẳn với hai màn hình kia.
         var students = await _scopeContext.Students(
                 _context.Students.AsNoTracking().Where(s => s.DeletedAt == null))
-            .Select(s => new { s.BranchId, s.Status, s.Gender })
+            .Select(s => new { s.Id, s.BranchId, s.Status, s.Gender })
             .ToListAsync(ct);
 
         // Ghi danh của niên khóa chỉ còn dùng cho bảng chi tiết theo lớp.
@@ -220,20 +220,22 @@ public class ReportService : IReportService
         {
             AcademicYearId = yearInfo.Id,
             AcademicYearName = yearInfo.Name,
-            GrandTotal = students.Count,
-            UnassignedCount = students.Count(s => s.BranchId == null)
+            GrandTotal = students.Count
         };
 
         foreach (var b in branches)
         {
-            if (_currentUser.ScopeType == "Branch" && _currentUser.BranchId.HasValue && _currentUser.BranchId.Value != b.Id)
-                continue;
-
             var bStudents = students.Where(s => s.BranchId == b.Id).ToList();
             if (isScoped && bStudents.Count == 0)
                 continue;
 
-            var bEnrollments = enrollments.Where(e => e.ClassRoom?.ClassLevel?.BranchId == b.Id).ToList();
+            var bStudentIds = bStudents.Select(s => s.Id).ToHashSet();
+
+            // Bảng lớp là phần chia nhỏ của số hồ sơ của chính ngành: lớp có thể nhận cả học sinh
+            // chưa gán ngành hoặc ngành khác, tính cả những em đó sẽ vượt tổng của ngành.
+            var bEnrollments = enrollments
+                .Where(e => e.ClassRoom?.ClassLevel?.BranchId == b.Id && bStudentIds.Contains(e.StudentId))
+                .ToList();
 
             var bDetail = new BranchDetailDto
             {
@@ -244,8 +246,6 @@ public class ReportService : IReportService
                 SuspendedCount = bStudents.Count(s => s.Status == StudentStateMachine.StatusPaused),
                 DropoutCount = bStudents.Count(s => s.Status == StudentStateMachine.StatusLeft),
                 GraduatedCount = bStudents.Count(s => s.Status == StudentStateMachine.StatusGraduated),
-                // Trạng thái "chuyển ngành" không thuộc vòng đời hồ sơ; chuyển lớp được ghi ở Ghi danh.
-                TransferredCount = 0,
                 MaleCount = bStudents.Count(s => IsMale(s.Gender)),
                 FemaleCount = bStudents.Count(s => IsFemale(s.Gender))
             };
@@ -270,6 +270,10 @@ public class ReportService : IReportService
 
             result.Branches.Add(bDetail);
         }
+
+        // Phần dư = hồ sơ chưa gán ngành (hoặc trỏ tới ngành không có trong danh mục), để
+        // tổng các ngành + phần dư luôn bằng GrandTotal.
+        result.UnassignedCount = result.GrandTotal - result.Branches.Sum(b => b.TotalStudents);
 
         return Result.Ok(result);
     }

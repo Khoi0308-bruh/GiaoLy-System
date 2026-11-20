@@ -42,7 +42,6 @@ public class BranchDetailDto
     public int SuspendedCount { get; set; }
     public int DropoutCount { get; set; }
     public int GraduatedCount { get; set; }
-    public int TransferredCount { get; set; }
     public int MaleCount { get; set; }
     public int FemaleCount { get; set; }
     public List<ClassRoomStudentStatDto> Classes { get; set; } = new();

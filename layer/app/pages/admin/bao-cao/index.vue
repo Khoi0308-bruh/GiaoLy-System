@@ -17,7 +17,7 @@ interface BranchDetail {
   activeCount: number
   suspendedCount: number
   dropoutCount: number
-  transferredCount: number
+  graduatedCount: number
   maleCount: number
   femaleCount: number
   classes: {
@@ -36,6 +36,11 @@ interface StudentsByBranchReport {
   grandTotal: number
   unassignedCount: number
   branches: BranchDetail[]
+}
+
+// Số hồ sơ của ngành chưa có ghi danh lớp trong niên khóa đang báo cáo.
+function unassignedInClass(b: BranchDetail): number {
+  return Math.max(0, b.totalStudents - b.classes.reduce((sum, c) => sum + c.totalStudents, 0))
 }
 
 interface MissingDataReport {
@@ -316,6 +321,9 @@ async function handleExportReport() {
             </h4>
             <p class="text-xs text-stone-500">
               Tổng số: <strong>{{ b.totalStudents }}</strong> em (Nam: {{ b.maleCount }} | Nữ: {{ b.femaleCount }})
+              <span v-if="unassignedInClass(b) > 0" class="text-stone-400">
+                · chưa xếp lớp: {{ unassignedInClass(b) }}
+              </span>
             </p>
           </div>
           <div class="flex items-center gap-2 text-xs">
@@ -328,6 +336,9 @@ async function handleExportReport() {
             <span v-if="b.dropoutCount > 0" class="rounded bg-red-100 px-2 py-0.5 text-red-800 font-semibold">
               Nghỉ hẳn: {{ b.dropoutCount }}
             </span>
+            <span v-if="b.graduatedCount > 0" class="rounded bg-sky-100 px-2 py-0.5 text-sky-800 font-semibold">
+              Tốt nghiệp: {{ b.graduatedCount }}
+            </span>
           </div>
         </div>
 
@@ -338,7 +349,7 @@ async function handleExportReport() {
               <tr>
                 <th class="p-3">Lớp học</th>
                 <th class="p-3">Cấp lớp</th>
-                <th class="p-3 text-center">Tổng sĩ số</th>
+                <th class="p-3 text-center">Học sinh của ngành</th>
                 <th class="p-3 text-center">Nam</th>
                 <th class="p-3 text-center">Nữ</th>
               </tr>
