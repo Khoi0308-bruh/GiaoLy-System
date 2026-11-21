@@ -206,7 +206,7 @@ public class ReportService : IReportService
             .Include(e => e.ClassRoom)
                 .ThenInclude(c => c!.ClassLevel)
                     .ThenInclude(cl => cl!.Branch)
-            .Where(e => e.AcademicYearId == yearInfo.Id);
+            .Where(e => e.AcademicYearId == yearInfo.Id && EnrollmentRules.Statuses.InClass.Contains(e.Status));
 
         if (isScoped)
         {
@@ -233,8 +233,13 @@ public class ReportService : IReportService
 
             // Bảng lớp là phần chia nhỏ của số hồ sơ của chính ngành: lớp có thể nhận cả học sinh
             // chưa gán ngành hoặc ngành khác, tính cả những em đó sẽ vượt tổng của ngành.
+            // Mỗi đoàn sinh chỉ thuộc một lớp trong niên khóa để tổng các lớp không vượt tổng
+            // của ngành: một em có thể vừa Promoted ở lớp cũ vừa Active ở lớp mới, ưu tiên
+            // ghi danh Active.
             var bEnrollments = enrollments
                 .Where(e => e.ClassRoom?.ClassLevel?.BranchId == b.Id && bStudentIds.Contains(e.StudentId))
+                .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
+                .DistinctBy(e => e.StudentId)
                 .ToList();
 
             var bDetail = new BranchDetailDto
@@ -308,7 +313,14 @@ public class ReportService : IReportService
             query = query.Where(e => allowedClasses.Contains(e.ClassRoomId));
         }
 
-        var enrollments = await query.ToListAsync(ct);
+        // Báo cáo tính theo đoàn sinh: một em có nhiều ghi danh còn thuộc lớp trong năm
+        // (ví dụ vừa lên lớp) chỉ nên xuất hiện một dòng, ưu tiên ghi danh Active.
+        var enrollments = (await query.ToListAsync(ct))
+            .Where(e => e.Student != null)
+            .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
+            .GroupBy(e => e.StudentId)
+            .Select(g => g.First())
+            .ToList();
         var result = new MissingDataReportDto();
 
         foreach (var en in enrollments)
