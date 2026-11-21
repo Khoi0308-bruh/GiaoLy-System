@@ -76,14 +76,14 @@
             <div class="w-px bg-stone-200 dark:bg-stone-800 hidden md:block my-2" />
             <USelect
               v-model="selectedCategory"
-              :options="categoryOptions"
+              :items="categoryOptions"
               size="lg"
               variant="none"
               class="w-full md:w-48 bg-stone-100/50 dark:bg-stone-800/50 rounded-2xl border border-stone-200/50 dark:border-stone-700/50"
             />
             <USelect
               v-model="selectedBranch"
-              :options="branchOptions"
+              :items="branchOptions"
               size="lg"
               variant="none"
               class="w-full md:w-48 bg-stone-100/50 dark:bg-stone-800/50 rounded-2xl border border-stone-200/50 dark:border-stone-700/50"
@@ -478,6 +478,7 @@ const getFileTheme = (fileName) => {
 
 const formatSize = (bytes) => {
   if (!bytes) return '0 B'
+  if (bytes < 1024) return `${bytes} B`
   const kb = bytes / 1024
   if (kb < 1024) return `${kb.toFixed(1)} KB`
   return `${(kb / 1024).toFixed(1)} MB`
