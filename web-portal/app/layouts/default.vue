@@ -35,13 +35,10 @@
             </div>
             <!-- Tên -->
             <div class="hidden sm:flex flex-col leading-tight">
-              <span class="font-black text-[15px] tracking-wider text-navy dark:text-white transition-colors"
-                style="color: var(--color-navy, #1a3a6b);"
-                :class="scrolled ? '' : 'dark:text-white'"
-              >Thiếu Nhi</span>
-              <span class="font-bold text-[13px] tracking-wider"
-                style="color: #c9a96e;"
-              >Thánh Thể</span>
+              <!-- Màu dùng qua class, không dùng style inline: style sẽ thắng dark:text-white
+                   và làm chữ navy chìm trên nền tối. -->
+              <span class="font-black text-[15px] tracking-wider text-[#1a3a6b] dark:text-white transition-colors">Thiếu Nhi</span>
+              <span class="font-bold text-[13px] tracking-wider text-[#a07840] dark:text-[#e8c98a]">Thánh Thể</span>
             </div>
           </NuxtLink>
         </div>
@@ -164,12 +161,8 @@
               <span class="text-white font-black text-xl">✝</span>
             </div>
             <div class="flex flex-col">
-              <span class="font-black text-navy dark:text-white text-base"
-                style="color: #1a3a6b;"
-              >Thiếu Nhi Thánh Thể</span>
-              <span class="text-xs font-medium"
-                style="color: #c9a96e;"
-              >Cầu Nguyện • Rước Lễ • Hy Sinh</span>
+              <span class="font-black text-base text-[#1a3a6b] dark:text-white">Thiếu Nhi Thánh Thể</span>
+              <span class="text-xs font-medium text-[#a07840] dark:text-[#e8c98a]">Cầu Nguyện • Rước Lễ • Hy Sinh</span>
             </div>
           </div>
           <UButton

@@ -351,6 +351,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
             color="primary"
             icon="i-heroicons-user-group"
             class="justify-start"
+            :ui="{ base: 'text-[#1D3A73]' }"
           >
             Danh sách đoàn sinh
           </UButton>
@@ -362,6 +363,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
             color="primary"
             icon="i-heroicons-user-plus"
             class="justify-start"
+            :ui="{ base: 'text-[#1D3A73]' }"
           >
             Tiếp nhận đoàn sinh mới
           </UButton>
@@ -373,6 +375,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
             color="primary"
             icon="i-heroicons-rectangle-group"
             class="justify-start"
+            :ui="{ base: 'text-[#1D3A73]' }"
           >
             Danh sách lớp giáo lý
           </UButton>
@@ -384,6 +387,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
             color="primary"
             icon="i-heroicons-arrow-trending-up"
             class="justify-start"
+            :ui="{ base: 'text-[#1D3A73]' }"
           >
             Xét duyệt lên lớp
           </UButton>
@@ -395,6 +399,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
             color="primary"
             icon="i-heroicons-flag"
             class="justify-start"
+            :ui="{ base: 'text-[#1D3A73]' }"
           >
             Sự kiện & Trại huấn luyện
           </UButton>
@@ -406,6 +411,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
             color="primary"
             icon="i-heroicons-heart"
             class="justify-start"
+            :ui="{ base: 'text-[#1D3A73]' }"
           >
             Chuẩn bị bí tích
           </UButton>

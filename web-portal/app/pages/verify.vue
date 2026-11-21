@@ -48,6 +48,7 @@
             :loading="loading"
             color="warning"
             class="font-bold px-6"
+            :ui="{ base: 'text-stone-900' }"
           >
             Tìm kiếm
           </UButton>

@@ -47,7 +47,7 @@ const quickLinks = [
               <span class="text-[11px] font-black uppercase tracking-[0.25em]" style="color: #a07840;">
                 Phong Trào Giới Trẻ
               </span>
-              <h2 class="text-2xl font-black font-serif leading-tight uppercase" style="color: #1a3a6b;">
+              <h2 class="text-2xl font-black font-serif leading-tight uppercase text-[#1a3a6b] dark:text-[#e8c98a]">
                 Thiếu Nhi Thánh Thể
               </h2>
             </div>
@@ -72,7 +72,7 @@ const quickLinks = [
 
         <!-- Cột 2: Liên Kết Nhanh (3 cột) -->
         <div class="lg:col-span-3">
-          <h3 class="text-xs font-black uppercase tracking-[0.2em] mb-6" style="color: #1a3a6b;">
+          <h3 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-[#1a3a6b] dark:text-[#e8c98a]">
             Liên Kết Nhanh
           </h3>
           <ul class="flex flex-col gap-3.5">
@@ -98,7 +98,7 @@ const quickLinks = [
 
         <!-- Cột 3: Liên hệ (4 cột) -->
         <div class="lg:col-span-4">
-          <h3 class="text-xs font-black uppercase tracking-[0.2em] mb-6" style="color: #1a3a6b;">
+          <h3 class="text-xs font-black uppercase tracking-[0.2em] mb-6 text-[#1a3a6b] dark:text-[#e8c98a]">
             Văn Phòng Xứ Đoàn
           </h3>
           <ul class="flex flex-col gap-4 text-sm text-stone-600 dark:text-stone-400">
@@ -131,8 +131,7 @@ const quickLinks = [
               </div>
               <a
                 href="mailto:contact@xudoan.org"
-                class="hover:underline transition-colors"
-                style="color: #1a3a6b;"
+                class="hover:underline transition-colors text-[#1a3a6b] dark:text-stone-300"
               >
                 contact@xudoan.org
               </a>
