@@ -1,6 +1,7 @@
 using GiaoLy.Application.Common.Interfaces;
 using GiaoLy.Domain.Data;
 using GiaoLy.Domain.Entities;
+using GiaoLy.Domain.Rules;
 using Microsoft.EntityFrameworkCore;
 
 namespace GiaoLy.Infrastructure.Security;
@@ -44,7 +45,12 @@ public class ScopeContext : IScopeContext
                 return query.Where(_ => false);
             }
 
-            return query.Where(c => c.LeaderId == userId);
+            // Giáo lý viên chủ nhiệm được ghi ở ClassRoomTeachers (IsLead = 1) — đúng nơi
+            // màn hình phân công giáo lý viên ghi vào. Cột LeaderId chỉ là dữ liệu cũ,
+            // chỉ dựa vào nó thì trưởng lớp vừa được phân công sẽ không thấy lớp nào.
+            return query.Where(c =>
+                c.LeaderId == userId ||
+                c.Teachers.Any(t => t.IsLead && t.UserId == userId));
         }
 
         if (scope == "Guardian")
@@ -80,12 +86,20 @@ public class ScopeContext : IScopeContext
             var userId = _currentUser.UserId;
             if (userId is null) return query.Where(_ => false);
 
-            var activeClassIds = _db.ClassRooms
-                .Where(c => c.LeaderId == userId)
+            var leaderClassIds = _db.ClassRooms
+                .Where(c =>
+                    c.LeaderId == userId ||
+                    c.Teachers.Any(t => t.IsLead && t.UserId == userId))
                 .Select(c => c.Id);
 
+            // Chỉ loại ghi danh đã rời lớp (chuyển đi, bỏ học). Ghi danh Promoted, Repeated
+            // hay Graduated vẫn là học sinh của lớp trong niên khóa đó; nếu chỉ lấy "Active"
+            // thì sau khi chạy đợt lên lớp, trưởng lớp sẽ thấy 0 đoàn sinh.
             var studentIds = _db.Enrollments
-                .Where(e => e.Status == "Active" && activeClassIds.Contains(e.ClassRoomId))
+                .Where(e =>
+                    e.Status != EnrollmentRules.Statuses.Transferred &&
+                    e.Status != EnrollmentRules.Statuses.DropOut &&
+                    leaderClassIds.Contains(e.ClassRoomId))
                 .Select(e => e.StudentId);
 
             return query.Where(s => studentIds.Contains(s.Id));
@@ -121,7 +135,9 @@ public class ScopeContext : IScopeContext
             var userId = _currentUser.UserId;
             if (userId is null) return query.Where(_ => false);
 
-            return query.Where(e => e.ClassRoom != null && e.ClassRoom.LeaderId == userId);
+            return query.Where(e => e.ClassRoom != null &&
+                (e.ClassRoom.LeaderId == userId ||
+                 e.ClassRoom.Teachers.Any(t => t.IsLead && t.UserId == userId)));
         }
 
         return query.Where(_ => false);
