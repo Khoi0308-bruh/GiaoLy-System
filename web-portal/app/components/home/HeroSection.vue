@@ -251,10 +251,8 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
           <div class="text-[11px] font-black uppercase tracking-[0.15em]" style="color: #a07840;">
             {{ branch.branchName }}
           </div>
-          <div class="mt-1 text-sm text-stone-500 dark:text-stone-300">
-            <span class="font-black text-stone-800 dark:text-stone-100">{{ branch.studentCount }}</span> đoàn sinh
-            <span class="mx-1 opacity-50">·</span>
-            <span class="font-black text-stone-800 dark:text-stone-100">{{ branch.classCount }}</span> lớp
+          <div class="mt-1 text-sm font-semibold text-stone-600 dark:text-stone-300">
+            {{ branch.studentCount }} đoàn sinh · {{ branch.classCount }} lớp
           </div>
         </div>
       </div>
