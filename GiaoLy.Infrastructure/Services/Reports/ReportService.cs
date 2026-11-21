@@ -40,6 +40,16 @@ public class ReportService : IReportService
         string.Equals(gender, "Nữ", StringComparison.OrdinalIgnoreCase) ||
         string.Equals(gender, "F", StringComparison.OrdinalIgnoreCase);
 
+    // Một em có thể có nhiều ghi danh còn thuộc lớp trong cùng niên khóa (vừa Promoted ở lớp
+    // cũ vừa Repeated/Active ở lớp mới). Thứ tự chọn ghi danh đại diện phải xác định: Active
+    // trước, rồi ghi danh mới nhất, cuối cùng theo ClassRoomId để không phụ thuộc thứ tự
+    // truy vấn trả về.
+    private static IOrderedEnumerable<Enrollment> PrioritizeInClass(IEnumerable<Enrollment> enrollments) =>
+        enrollments
+            .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
+            .ThenByDescending(e => e.StartDate)
+            .ThenBy(e => e.ClassRoomId);
+
     private async Task<List<Guid>> GetAllowedClassRoomIdsAsync(CancellationToken ct)
     {
         if (_currentUser.ScopeType == "All" || string.IsNullOrEmpty(_currentUser.ScopeType))
@@ -236,9 +246,8 @@ public class ReportService : IReportService
             // Mỗi đoàn sinh chỉ thuộc một lớp trong niên khóa để tổng các lớp không vượt tổng
             // của ngành: một em có thể vừa Promoted ở lớp cũ vừa Active ở lớp mới, ưu tiên
             // ghi danh Active.
-            var bEnrollments = enrollments
-                .Where(e => e.ClassRoom?.ClassLevel?.BranchId == b.Id && bStudentIds.Contains(e.StudentId))
-                .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
+            var bEnrollments = PrioritizeInClass(enrollments
+                    .Where(e => e.ClassRoom?.ClassLevel?.BranchId == b.Id && bStudentIds.Contains(e.StudentId)))
                 .DistinctBy(e => e.StudentId)
                 .ToList();
 
@@ -315,9 +324,7 @@ public class ReportService : IReportService
 
         // Báo cáo tính theo đoàn sinh: một em có nhiều ghi danh còn thuộc lớp trong năm
         // (ví dụ vừa lên lớp) chỉ nên xuất hiện một dòng, ưu tiên ghi danh Active.
-        var enrollments = (await query.ToListAsync(ct))
-            .Where(e => e.Student != null)
-            .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
+        var enrollments = PrioritizeInClass((await query.ToListAsync(ct)).Where(e => e.Student != null))
             .GroupBy(e => e.StudentId)
             .Select(g => g.First())
             .ToList();
