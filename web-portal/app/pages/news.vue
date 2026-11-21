@@ -102,7 +102,7 @@
           <!-- Content -->
           <div class="p-4">
             <p class="text-[11px] text-stone-400 mb-1.5">
-              {{ formatDate(article.publishedDate) }}
+              {{ formatDate(article.publishedAt) }}
             </p>
             <h2 class="font-bold text-sm text-stone-800 dark:text-white leading-snug line-clamp-3 group-hover:text-tntt-blue-600 dark:group-hover:text-tntt-blue-400 transition-colors">
               {{ article.title }}
@@ -149,7 +149,7 @@ interface Article {
   imageUrl: string
   sourceName: string
   category: string
-  publishedDate: string
+  publishedAt: string
 }
 
 const loading = ref(true)
