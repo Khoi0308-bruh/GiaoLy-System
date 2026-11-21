@@ -9,10 +9,11 @@ interface PublicLeader {
   id: string
   holyName?: string | null
   fullName: string
-  roleTitle: string
-  division?: string | null
-  rank?: string | null
-  avatarUrl?: string | null
+  position: string
+  level?: number
+  term?: string | null
+  branchId?: number | null
+  branchName?: string | null
 }
 
 const leaders = ref<PublicLeader[]>([])
@@ -48,14 +49,14 @@ onMounted(() => {
 const divisions = computed(() => {
   const set = new Set<string>()
   leaders.value.forEach(l => {
-    if (l.division) set.add(l.division)
+    if (l.branchName) set.add(l.branchName)
   })
   return ['all', ...Array.from(set)]
 })
 
 const filteredLeaders = computed(() => {
   if (selectedDivision.value === 'all') return leaders.value
-  return leaders.value.filter(l => l.division === selectedDivision.value)
+  return leaders.value.filter(l => l.branchName === selectedDivision.value)
 })
 </script>
 
@@ -113,13 +114,7 @@ const filteredLeaders = computed(() => {
           <div class="space-y-3 flex flex-col items-center">
             <!-- Avatar -->
             <div class="h-20 w-20 rounded-full overflow-hidden bg-stone-100 border-2 border-amber-200/80 shadow-xs flex items-center justify-center">
-              <img
-                v-if="leader.avatarUrl"
-                :src="leader.avatarUrl"
-                :alt="leader.fullName"
-                class="h-full w-full object-cover"
-              >
-              <div v-else class="font-serif font-bold text-xl text-[#1D3A73]">
+              <div class="font-serif font-bold text-xl text-[#1D3A73]">
                 {{ leader.fullName.charAt(0) }}
               </div>
             </div>
@@ -132,17 +127,17 @@ const filteredLeaders = computed(() => {
                 {{ leader.fullName }}
               </h2>
               <div class="text-xs font-medium text-[#1D3A73]">
-                {{ leader.roleTitle }}
+                {{ leader.position }}
               </div>
             </div>
           </div>
 
           <div class="mt-4 pt-3 border-t border-stone-100 w-full flex items-center justify-center gap-2">
-            <span v-if="leader.division" class="rounded bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">
-              {{ leader.division }}
+            <span v-if="leader.branchName" class="rounded bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">
+              {{ leader.branchName }}
             </span>
-            <span v-if="leader.rank" class="rounded bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-[#A8812A]">
-              {{ leader.rank }}
+            <span v-if="leader.term" class="rounded bg-amber-50 px-2 py-0.5 text-[10px] font-semibold text-[#A8812A]">
+              {{ leader.term }}
             </span>
           </div>
         </div>
