@@ -1,4 +1,5 @@
 @import "tailwindcss";
+@import "@nuxt/ui";
 
 /* ════════════════════════════════════════════════════════════════════
    THIẾU NHI THÁNH THỂ — Web Portal
@@ -19,6 +20,69 @@
   --color-catholic-red: #8b1a1a;  /* Đỏ Công Giáo */
   --color-catholic-red-light: #b02a2a;
   --color-catholic-gold: #c9a96e; /* Vàng Vatican */
+
+  /* ── TNTT (token dùng cho hero, badge ngành, header trang) ──
+     Trước đây các lớp tntt-blue-*, tntt-gold-*... không có token nên trình duyệt
+     bỏ qua: header/hero thành chữ trắng trên nền trắng. */
+  --color-tntt-blue-50:  #eef3fb;
+  --color-tntt-blue-100: #d9e4f5;
+  --color-tntt-blue-200: #b6c9ea;
+  --color-tntt-blue-300: #8aa6da;
+  --color-tntt-blue-400: #5a7fc4;
+  --color-tntt-blue-500: #2c4f96;
+  --color-tntt-blue-600: #1a3a6b;
+  --color-tntt-blue-700: #152f57;
+  --color-tntt-blue-800: #0f2347;
+  --color-tntt-blue-900: #0b1a35;
+  --color-tntt-blue-950: #061024;
+
+  --color-tntt-green-50:  #eef6f1;
+  --color-tntt-green-100: #d7ebe0;
+  --color-tntt-green-200: #aed6c1;
+  --color-tntt-green-300: #7dbb9b;
+  --color-tntt-green-400: #4f9e78;
+  --color-tntt-green-500: #38825d;
+  --color-tntt-green-600: #2f6b4f;
+  --color-tntt-green-700: #26553f;
+  --color-tntt-green-800: #1d4231;
+  --color-tntt-green-900: #163326;
+  --color-tntt-green-950: #0b1f17;
+
+  --color-tntt-gold-50:  #fbf7ee;
+  --color-tntt-gold-100: #f5ecd7;
+  --color-tntt-gold-200: #ead7ab;
+  --color-tntt-gold-300: #dfc186;
+  --color-tntt-gold-400: #d4b477;
+  --color-tntt-gold-500: #c9a96e;
+  --color-tntt-gold-600: #b08e4e;
+  --color-tntt-gold-700: #8a6d38;
+  --color-tntt-gold-800: #664f28;
+  --color-tntt-gold-900: #43331a;
+  --color-tntt-gold-950: #241b0d;
+
+  --color-tntt-pink-50:  #fdf2f8;
+  --color-tntt-pink-100: #fce7f3;
+  --color-tntt-pink-200: #fbcfe8;
+  --color-tntt-pink-300: #f9a8d4;
+  --color-tntt-pink-400: #f472b6;
+  --color-tntt-pink-500: #ec4899;
+  --color-tntt-pink-600: #db2777;
+  --color-tntt-pink-700: #be185d;
+  --color-tntt-pink-800: #9d174d;
+  --color-tntt-pink-900: #831843;
+  --color-tntt-pink-950: #500724;
+
+  --color-tntt-brown-50:  #fdf8f3;
+  --color-tntt-brown-100: #faeddc;
+  --color-tntt-brown-200: #f2d6b3;
+  --color-tntt-brown-300: #e5b782;
+  --color-tntt-brown-400: #d2924f;
+  --color-tntt-brown-500: #b9742c;
+  --color-tntt-brown-600: #92400e;
+  --color-tntt-brown-700: #75330c;
+  --color-tntt-brown-800: #59270a;
+  --color-tntt-brown-900: #402007;
+  --color-tntt-brown-950: #261204;
 
   /* ── Typography ── */
   --font-sans:  "Outfit", "sans-serif";
