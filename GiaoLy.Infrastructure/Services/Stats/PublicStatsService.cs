@@ -15,7 +15,7 @@ namespace GiaoLy.Infrastructure.Services.Stats;
 
 public class PublicStatsService : IPublicStatsService
 {
-    private const string CacheKey = "PublicHomePageStats_V4";
+    private const string CacheKey = "PublicHomePageStats_V5";
 
     private readonly AppDbContext _context;
     private readonly IMemoryCache _cache;
@@ -67,9 +67,24 @@ public class PublicStatsService : IPublicStatsService
             .AsNoTracking()
             .CountAsync(l => l.IsActive && l.DeletedAt == null, ct);
 
-        var totalClasses = await _context.ClassRooms
-            .AsNoTracking()
-            .CountAsync(c => c.DeletedAt == null, ct);
+        // Số lớp cũng tính theo niên khóa đang chạy để cùng phạm vi với số đoàn sinh:
+        // số lớp của mọi niên khóa cộng lại sẽ mâu thuẫn với số đoàn sinh chỉ của năm nay.
+        var classCountByBranch = new Dictionary<int, int>();
+        if (year != null)
+        {
+            var yearId = year.Id;
+            var classBranchIds = await _context.ClassRooms
+                .AsNoTracking()
+                .Where(c => c.AcademicYearId == yearId && c.DeletedAt == null && c.ClassLevel != null)
+                .Select(c => c.ClassLevel!.BranchId)
+                .ToListAsync(ct);
+
+            classCountByBranch = classBranchIds
+                .GroupBy(branchId => branchId)
+                .ToDictionary(g => g.Key, g => g.Count());
+        }
+
+        var totalClasses = classCountByBranch.Values.Sum();
 
         var activeYears = await _context.AcademicYears
             .AsNoTracking()
@@ -88,15 +103,11 @@ public class PublicStatsService : IPublicStatsService
 
         foreach (var b in branches)
         {
-            var classCount = await _context.ClassRooms
-                .AsNoTracking()
-                .CountAsync(c => c.DeletedAt == null && c.ClassLevel != null && c.ClassLevel.BranchId == b.Id, ct);
-
             branchSummaries.Add(new PublicBranchSummaryDto
             {
                 BranchId = b.Id,
                 BranchName = b.Name,
-                ClassCount = classCount,
+                ClassCount = classCountByBranch.GetValueOrDefault(b.Id),
                 StudentCount = studentsByBranch.GetValueOrDefault(b.Id)
             });
         }
