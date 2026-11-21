@@ -92,13 +92,20 @@ public class ScopeContext : IScopeContext
                     c.Teachers.Any(t => t.IsLead && t.UserId == userId))
                 .Select(c => c.Id);
 
-            // Chỉ loại ghi danh đã rời lớp (chuyển đi, bỏ học). Ghi danh Promoted, Repeated
-            // hay Graduated vẫn là học sinh của lớp trong niên khóa đó; nếu chỉ lấy "Active"
-            // thì sau khi chạy đợt lên lớp, trưởng lớp sẽ thấy 0 đoàn sinh.
+            // Danh sách cho phép thay vì loại trừ: chỉ ghi danh còn thuộc lớp trong niên khóa
+            // đó mới cấp quyền xem. Trạng thái mới thêm sau này mặc định không được xem; hồ sơ
+            // đã tốt nghiệp (Graduated) cũng không còn thuộc lớp. Chỉ lấy "Active" thì sau đợt
+            // lên lớp, trưởng lớp sẽ thấy 0 đoàn sinh.
+            var viewableStatuses = new[]
+            {
+                EnrollmentRules.Statuses.Active,
+                EnrollmentRules.Statuses.Promoted,
+                EnrollmentRules.Statuses.Repeated
+            };
+
             var studentIds = _db.Enrollments
                 .Where(e =>
-                    e.Status != EnrollmentRules.Statuses.Transferred &&
-                    e.Status != EnrollmentRules.Statuses.DropOut &&
+                    viewableStatuses.Contains(e.Status) &&
                     leaderClassIds.Contains(e.ClassRoomId))
                 .Select(e => e.StudentId);
 
