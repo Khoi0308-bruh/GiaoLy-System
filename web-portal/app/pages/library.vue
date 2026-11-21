@@ -116,12 +116,12 @@
         <div :class="[previewDoc ? 'lg:col-span-2' : 'lg:col-span-3', 'space-y-4 transition-all duration-500']">
           <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-5">
             <UCard
-              v-for="doc in documents"
+              v-for="doc in pagedDocuments"
               :key="doc.id"
               :class="[
                 'group relative overflow-hidden transition-all duration-300 cursor-pointer rounded-[2rem] border border-white/40 dark:border-stone-800/50 shadow-md hover:shadow-xl hover:-translate-y-1',
                 doc.id === previewDoc?.id ? 'bg-marian-blue-50/80 dark:bg-marian-blue-900/20 border-marian-blue-300/50 dark:border-marian-blue-700/50 ring-2 ring-marian-blue-500/30' : 'bg-white/70 dark:bg-stone-900/70 backdrop-blur-xl',
-                doc.branch === auth.user?.branch ? 'border-b-4 border-b-marian-blue-500' : ''
+                doc.branchId === auth.user?.branchId ? 'border-b-4 border-b-marian-blue-500' : ''
               ]"
               @click="selectPreview(doc)"
             >
@@ -145,11 +145,11 @@
                     </UBadge>
                     <UBadge
                       size="xs"
-                      :color="getBranchColor(doc.branch)"
+                      :color="getBranchColor(doc.branchId)"
                       variant="soft"
                       class="font-bold tracking-wider rounded-lg"
                     >
-                      {{ getBranchName(doc.branch) }}
+                      {{ getBranchName(doc.branchId) }}
                     </UBadge>
                   </div>
                 </div>
@@ -166,7 +166,7 @@
                     <span class="flex items-center gap-1"><UIcon
                       name="i-heroicons-user"
                       class="w-3.5 h-3.5"
-                    /> {{ doc.uploadedBy || 'Ban Giáo Lý' }}</span>
+                    /> {{ doc.uploadedByName || 'Ban Giáo Lý' }}</span>
                     <span>•</span>
                     <span class="flex items-center gap-1"><UIcon
                       name="i-heroicons-circle-stack"
@@ -277,7 +277,7 @@
             <div class="flex-1 w-full bg-stone-200/50 dark:bg-stone-950/50 overflow-hidden relative">
               <iframe
                 v-if="isPreviewable(previewDoc.fileName)"
-                :src="getPreviewUrl(previewDoc.filePath)"
+                :src="getPreviewUrl(previewDoc.id)"
                 class="w-full h-full border-none absolute inset-0"
               />
               <div
@@ -341,7 +341,7 @@
           <div class="flex-1 w-full relative overflow-hidden">
             <iframe
               v-if="previewDoc && isPreviewable(previewDoc.fileName)"
-              :src="getPreviewUrl(previewDoc.filePath)"
+              :src="getPreviewUrl(previewDoc.id)"
               class="w-full h-full border-none absolute inset-0"
             />
             <div
@@ -402,15 +402,14 @@ const limit = ref(12)
 const totalCount = useState('libraryTotalCount', () => 0)
 
 // API Fetch parameters
+// /api/v1/public/documents chỉ nhận branchId, category, search và trả về TOÀN BỘ danh sách
+// (không phân trang phía server) nên trang/limit được cắt ở client bên dưới.
 const fetchParams = computed(() => {
-  const params = {
-    page: page.value,
-    limit: limit.value,
+  return {
     search: searchQuery.value || undefined,
     category: selectedCategory.value !== 'Tất cả danh mục' ? selectedCategory.value : undefined,
-    branch: selectedBranch.value !== '0' ? parseInt(selectedBranch.value) : undefined
+    branchId: selectedBranch.value !== '0' ? parseInt(selectedBranch.value) : undefined
   }
-  return params
 })
 
 // Watch filters to reset page to 1
@@ -424,13 +423,16 @@ const { data: documents, pending } = await useFetch('/api/v1/public/documents', 
   query: fetchParams,
   default: () => [],
   onResponse({ response }) {
-    const total = response.headers.get('X-Total-Count')
-    if (total) {
-      totalCount.value = parseInt(total, 10)
-    } else {
-      totalCount.value = Array.isArray(response._data) ? response._data.length : 0
-    }
+    // API không gửi X-Total-Count; tổng số chính là độ dài mảng trả về.
+    totalCount.value = Array.isArray(response._data) ? response._data.length : 0
   }
+})
+
+/** Cắt trang ở client vì API trả một lần toàn bộ tài liệu. */
+const pagedDocuments = computed(() => {
+  const all = documents.value ?? []
+  const start = (page.value - 1) * limit.value
+  return all.slice(start, start + limit.value)
 })
 
 // Helpers
@@ -486,8 +488,8 @@ const isPreviewable = (name) => {
   return ['pdf', 'png', 'jpg', 'jpeg', 'txt'].includes(ext)
 }
 
-const getPreviewUrl = (path) => {
-  return `${config.public.apiBase.replace('/api', '')}${path}`
+const getPreviewUrl = (id) => {
+  return `${config.public.apiBase}/api/v1/public/documents/${id}/download`
 }
 
 const selectPreview = (doc) => {
@@ -505,7 +507,7 @@ const closeMobilePreview = () => {
 }
 
 const downloadFile = (doc) => {
-  window.open(`${config.public.apiBase}/Document/download/${doc.id}`, '_blank')
+  window.open(`${config.public.apiBase}/api/v1/public/documents/${doc.id}/download`, '_blank')
 }
 </script>
 
