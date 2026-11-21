@@ -169,8 +169,11 @@ const quickStats = computed(() => [
 
     <!-- ══════════════════════════════════════════════════════════════
          FLOATING SEARCH BAR — Glassmorphism nép chân banner
+         Đặt theo luồng (relative + margin âm) thay vì absolute: absolute neo vào
+         đáy cả khối wrapper (banner + thanh thống kê) nên thanh tra cứu trùm lên
+         nhãn của 4 ô thống kê.
     ══════════════════════════════════════════════════════════════════ -->
-    <div class="absolute -bottom-7 left-1/2 -translate-x-1/2 w-[92%] max-w-2xl z-30">
+    <div class="relative -mt-7 mx-auto w-[92%] max-w-2xl z-30">
       <form
         class="relative p-2 rounded-2xl flex items-center gap-2 transition-all duration-500 focus-within:shadow-[0_15px_50px_rgba(201,169,110,0.3)]"
         style="
