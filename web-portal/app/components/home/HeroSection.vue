@@ -63,14 +63,17 @@ interface PublicStats {
 }
 
 const { data: publicStats } = await useFetch<PublicStats>('/api/v1/public/stats', {
-  baseURL: config.public.apiBase
+  baseURL: config.public.apiBase,
+  // Trang chủ là route prerender: nếu fetch cả ở server thì số liệu bị đóng băng vào
+  // HTML/payload lúc build. Chỉ lấy ở client để mỗi lượt truy cập thấy số hiện tại.
+  server: false
 })
 
 const quickStats = computed(() => [
-  { label: 'Đoàn Sinh', value: publicStats.value?.totalStudents ?? 0, icon: 'i-heroicons-users' },
-  { label: 'Huynh Trưởng', value: publicStats.value?.totalCatechists ?? 0, icon: 'i-heroicons-academic-cap' },
-  { label: 'Lớp Học', value: publicStats.value?.totalClasses ?? 0, icon: 'i-heroicons-building-library' },
-  { label: 'Niên Khóa', value: publicStats.value?.totalActiveAcademicYears ?? 0, icon: 'i-heroicons-star' },
+  { label: 'Đoàn Sinh', value: publicStats.value?.totalStudents, icon: 'i-heroicons-users' },
+  { label: 'Huynh Trưởng', value: publicStats.value?.totalCatechists, icon: 'i-heroicons-academic-cap' },
+  { label: 'Lớp Học', value: publicStats.value?.totalClasses, icon: 'i-heroicons-building-library' },
+  { label: 'Niên Khóa', value: publicStats.value?.totalActiveAcademicYears, icon: 'i-heroicons-star' },
 ])
 
 // Số đoàn sinh và số lớp theo từng ngành, cùng nguồn /api/v1/public/stats.
@@ -233,7 +236,7 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
           >
             <UIcon :name="stat.icon" class="w-5 h-5" style="color: #c9a96e;" />
           </div>
-          <div class="font-black text-2xl font-serif" style="color: #1a3a6b;">{{ stat.value }}</div>
+          <div class="font-black text-2xl font-serif" style="color: #1a3a6b;">{{ stat.value ?? '—' }}</div>
           <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 mt-0.5 tracking-wide uppercase">{{ stat.label }}</div>
         </div>
       </div>
