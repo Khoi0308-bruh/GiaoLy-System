@@ -23,6 +23,17 @@ public static class EnrollmentRules
             DropOut,
             Transferred
         ];
+
+        /// <summary>
+        /// Ghi danh còn thuộc lớp trong niên khóa — dùng chung cho phạm vi trưởng lớp, sĩ số lớp
+        /// và cột "Lớp" của danh sách. Graduated, DropOut, Transferred coi như đã rời lớp.
+        /// </summary>
+        public static readonly string[] InClass =
+        [
+            Active,
+            Promoted,
+            Repeated
+        ];
     }
 
     public static bool IsValidStatus(string status)

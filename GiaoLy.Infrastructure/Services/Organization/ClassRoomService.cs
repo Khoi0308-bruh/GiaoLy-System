@@ -4,6 +4,7 @@ using GiaoLy.Application.Organization.Contracts;
 using GiaoLy.Application.Organization.Dtos;
 using GiaoLy.Domain.Data;
 using GiaoLy.Domain.Entities;
+using GiaoLy.Domain.Rules;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -51,7 +52,7 @@ public class ClassRoomService : IClassRoomService
         var classroomIds = classrooms.Select(c => c.Id).ToList();
         var studentCounts = await _db.Enrollments
             .AsNoTracking()
-            .Where(e => classroomIds.Contains(e.ClassRoomId) && e.Status == "Active")
+            .Where(e => classroomIds.Contains(e.ClassRoomId) && EnrollmentRules.Statuses.InClass.Contains(e.Status))
             .GroupBy(e => e.ClassRoomId)
             .Select(g => new { ClassRoomId = g.Key, Count = g.Count() })
             .ToDictionaryAsync(x => x.ClassRoomId, x => x.Count, ct);
@@ -82,7 +83,7 @@ public class ClassRoomService : IClassRoomService
 
         var studentCount = await _db.Enrollments
             .AsNoTracking()
-            .CountAsync(e => e.ClassRoomId == id && e.Status == "Active", ct);
+            .CountAsync(e => e.ClassRoomId == id && EnrollmentRules.Statuses.InClass.Contains(e.Status), ct);
 
         return Result<ClassRoomResponse>.Ok(MapToResponse(classroom, studentCount));
     }
@@ -283,7 +284,7 @@ public class ClassRoomService : IClassRoomService
         var enrollments = await _db.Enrollments
             .AsNoTracking()
             .Include(e => e.Student)
-            .Where(e => e.ClassRoomId == id && e.Status == "Active")
+            .Where(e => e.ClassRoomId == id && EnrollmentRules.Statuses.InClass.Contains(e.Status))
             .OrderBy(e => e.Student != null ? e.Student.FullName : string.Empty)
             .ToListAsync(ct);
 

@@ -53,7 +53,7 @@ public class StudentService : IStudentService
         {
             var enrolledIds = _db.Enrollments
                 .AsNoTracking()
-                .Where(e => e.ClassRoomId == request.ClassRoomId.Value && e.Status == "Active")
+                .Where(e => e.ClassRoomId == request.ClassRoomId.Value && EnrollmentRules.Statuses.InClass.Contains(e.Status))
                 .Select(e => e.StudentId);
 
             query = query.Where(s => enrolledIds.Contains(s.Id));
@@ -108,11 +108,17 @@ public class StudentService : IStudentService
                 s.BranchId,
                 s.BranchEntity != null ? s.BranchEntity.Name : null,
                 activeYear != null
-                    ? s.Enrollments.Where(e => e.AcademicYearId == activeYear.Id && e.Status == "Active")
+                    ? s.Enrollments
+                        .Where(e => e.AcademicYearId == activeYear.Id &&
+                                    EnrollmentRules.Statuses.InClass.Contains(e.Status))
+                        .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
                         .Select(e => (Guid?)e.ClassRoomId).FirstOrDefault()
                     : null,
                 activeYear != null
-                    ? s.Enrollments.Where(e => e.AcademicYearId == activeYear.Id && e.Status == "Active")
+                    ? s.Enrollments
+                        .Where(e => e.AcademicYearId == activeYear.Id &&
+                                    EnrollmentRules.Statuses.InClass.Contains(e.Status))
+                        .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
                         .Select(e => e.ClassRoom != null ? e.ClassRoom.ClassName : null).FirstOrDefault()
                     : null,
                 s.Area,
@@ -165,7 +171,11 @@ public class StudentService : IStudentService
         var hasHealth = _currentUser.HasPermission(Permissions.Students.ViewHealth);
 
         var activeEnrollment = activeYear != null
-            ? student.Enrollments.FirstOrDefault(e => e.AcademicYearId == activeYear.Id && e.Status == "Active")
+            ? student.Enrollments
+                .Where(e => e.AcademicYearId == activeYear.Id &&
+                            EnrollmentRules.Statuses.InClass.Contains(e.Status))
+                .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
+                .FirstOrDefault()
             : null;
 
         var guardianDtos = student.Guardians.Select(sg => new GuardianDto(
@@ -881,7 +891,7 @@ public class StudentService : IStudentService
         {
             var enrolledIds = _db.Enrollments
                 .AsNoTracking()
-                .Where(e => e.AcademicYearId == activeYear.Id && e.Status == "Active")
+                .Where(e => e.AcademicYearId == activeYear.Id && EnrollmentRules.Statuses.InClass.Contains(e.Status))
                 .Select(e => e.StudentId);
 
             query = query.Where(s => !enrolledIds.Contains(s.Id));
@@ -948,7 +958,7 @@ public class StudentService : IStudentService
 
             var enrollmentCounts = await _db.Enrollments
                 .AsNoTracking()
-                .Where(e => classIds.Contains(e.ClassRoomId) && e.Status == "Active")
+                .Where(e => classIds.Contains(e.ClassRoomId) && EnrollmentRules.Statuses.InClass.Contains(e.Status))
                 .GroupBy(e => e.ClassRoomId)
                 .Select(g => new { ClassRoomId = g.Key, Count = g.Count() })
                 .ToDictionaryAsync(x => x.ClassRoomId, x => x.Count, ct);

@@ -87,19 +87,10 @@ public class ScopeContext : IScopeContext
                 .Select(c => c.Id);
 
             // Danh sách cho phép thay vì loại trừ: chỉ ghi danh còn thuộc lớp trong niên khóa
-            // đó mới cấp quyền xem. Trạng thái mới thêm sau này mặc định không được xem; hồ sơ
-            // đã tốt nghiệp (Graduated) cũng không còn thuộc lớp. Chỉ lấy "Active" thì sau đợt
-            // lên lớp, trưởng lớp sẽ thấy 0 đoàn sinh.
-            var viewableStatuses = new[]
-            {
-                EnrollmentRules.Statuses.Active,
-                EnrollmentRules.Statuses.Promoted,
-                EnrollmentRules.Statuses.Repeated
-            };
-
+            // đó mới cấp quyền xem — trạng thái mới thêm sau này mặc định không được xem.
             var studentIds = _db.Enrollments
                 .Where(e =>
-                    viewableStatuses.Contains(e.Status) &&
+                    EnrollmentRules.Statuses.InClass.Contains(e.Status) &&
                     leaderClassIds.Contains(e.ClassRoomId))
                 .Select(e => e.StudentId);
 
