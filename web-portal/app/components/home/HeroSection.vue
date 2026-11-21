@@ -47,11 +47,19 @@ const handleSearch = () => {
 }
 
 // Thống kê nhanh — lấy từ API công khai, không hard-code.
+interface PublicBranchSummary {
+  branchId: number
+  branchName: string
+  studentCount: number
+  classCount: number
+}
+
 interface PublicStats {
   totalStudents: number
   totalCatechists: number
   totalClasses: number
   totalActiveAcademicYears: number
+  branches: PublicBranchSummary[]
 }
 
 const { data: publicStats } = await useFetch<PublicStats>('/api/v1/public/stats', {
@@ -64,6 +72,9 @@ const quickStats = computed(() => [
   { label: 'Lớp Học', value: publicStats.value?.totalClasses ?? 0, icon: 'i-heroicons-building-library' },
   { label: 'Niên Khóa', value: publicStats.value?.totalActiveAcademicYears ?? 0, icon: 'i-heroicons-star' },
 ])
+
+// Số đoàn sinh và số lớp theo từng ngành, cùng nguồn /api/v1/public/stats.
+const branchStats = computed(() => publicStats.value?.branches ?? [])
 </script>
 
 <template>
@@ -224,6 +235,27 @@ const quickStats = computed(() => [
           </div>
           <div class="font-black text-2xl font-serif" style="color: #1a3a6b;">{{ stat.value }}</div>
           <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 mt-0.5 tracking-wide uppercase">{{ stat.label }}</div>
+        </div>
+      </div>
+
+      <!-- Số đoàn sinh và số lớp theo ngành -->
+      <div
+        v-if="branchStats.length"
+        class="max-w-3xl mx-auto mt-4 grid grid-cols-2 md:grid-cols-4 gap-3"
+      >
+        <div
+          v-for="branch in branchStats"
+          :key="branch.branchId"
+          class="sacred-card px-3 py-2.5 text-center"
+        >
+          <div class="text-[11px] font-black uppercase tracking-[0.15em]" style="color: #a07840;">
+            {{ branch.branchName }}
+          </div>
+          <div class="mt-1 text-sm text-stone-500 dark:text-stone-300">
+            <span class="font-black text-stone-800 dark:text-stone-100">{{ branch.studentCount }}</span> đoàn sinh
+            <span class="mx-1 opacity-50">·</span>
+            <span class="font-black text-stone-800 dark:text-stone-100">{{ branch.classCount }}</span> lớp
+          </div>
         </div>
       </div>
     </div>
