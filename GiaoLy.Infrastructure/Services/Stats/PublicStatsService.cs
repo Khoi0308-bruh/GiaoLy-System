@@ -49,6 +49,9 @@ public class PublicStatsService : IPublicStatsService
                     .AsNoTracking()
                     .Where(e => e.AcademicYearId == yearId &&
                                 EnrollmentRules.Statuses.InClass.Contains(e.Status) &&
+                                // Ghi danh của hồ sơ đã xóa mềm không được tính: trước đây tổng
+                                // đoàn sinh đọc từ Students nên đã loại sẵn những hồ sơ này.
+                                e.Student != null && e.Student.DeletedAt == null &&
                                 e.ClassRoom != null &&
                                 e.ClassRoom.ClassLevel != null)
                     .Select(e => new { e.StudentId, e.ClassRoom!.ClassLevel!.BranchId })
