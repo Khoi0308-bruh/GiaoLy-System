@@ -224,7 +224,7 @@ public class BouquetService : IBouquetService
         var enrollments = await _context.Enrollments
             .AsNoTracking()
             .Include(e => e.Student)
-            .Where(e => e.ClassRoomId == classRoomId && e.Status == "Active")
+            .Where(e => e.ClassRoomId == classRoomId && EnrollmentRules.Statuses.InClass.Contains(e.Status))
             .ToListAsync(ct);
 
         var enrollmentIds = enrollments.Select(e => e.Id).ToList();

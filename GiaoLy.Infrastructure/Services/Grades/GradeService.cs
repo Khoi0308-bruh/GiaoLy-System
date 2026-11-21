@@ -40,7 +40,7 @@ public class GradeService : IGradeService
         var enrollments = await _context.Enrollments.AsNoTracking()
             .Include(e => e.Student)
             .Include(e => e.Grade)
-            .Where(e => e.ClassRoomId == classRoomId && e.Status == EnrollmentRules.Statuses.Active)
+            .Where(e => e.ClassRoomId == classRoomId && EnrollmentRules.Statuses.InClass.Contains(e.Status))
             .OrderBy(e => e.Student != null ? e.Student.FullName : string.Empty)
             .ToListAsync(ct);
 
@@ -90,11 +90,11 @@ public class GradeService : IGradeService
                 lockReason ?? "Sổ điểm lớp học đã bị khóa.");
         }
 
-        // Lấy tất cả ghi danh Active thuộc lớp trong URL
+        // Lấy tất cả ghi danh còn thuộc lớp trong URL — cùng định nghĩa với sổ điểm hiển thị
         var activeEnrollments = await _context.Enrollments
             .Include(e => e.Student)
             .Include(e => e.Grade)
-            .Where(e => e.ClassRoomId == classRoomId && e.Status == EnrollmentRules.Statuses.Active)
+            .Where(e => e.ClassRoomId == classRoomId && EnrollmentRules.Statuses.InClass.Contains(e.Status))
             .ToDictionaryAsync(e => e.Id, ct);
 
         // Đọc cấu hình xét điểm từ SystemSettings
@@ -357,7 +357,7 @@ public class GradeService : IGradeService
         var enrollments = await _context.Enrollments.AsNoTracking()
             .Include(e => e.Student)
             .Include(e => e.Grade)
-            .Where(e => e.ClassRoomId == classRoomId && e.Status == EnrollmentRules.Statuses.Active)
+            .Where(e => e.ClassRoomId == classRoomId && EnrollmentRules.Statuses.InClass.Contains(e.Status))
             .OrderBy(e => e.Student != null ? e.Student.FullName : string.Empty)
             .ToListAsync(ct);
 

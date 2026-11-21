@@ -291,7 +291,7 @@ public class ReportService : IReportService
             .Include(e => e.ClassRoom)
                 .ThenInclude(c => c!.ClassLevel)
                     .ThenInclude(cl => cl!.Branch)
-            .Where(e => e.AcademicYearId == yearInfo.Id && e.Status == "Active");
+            .Where(e => e.AcademicYearId == yearInfo.Id && EnrollmentRules.Statuses.InClass.Contains(e.Status));
 
         if (branchId.HasValue)
         {

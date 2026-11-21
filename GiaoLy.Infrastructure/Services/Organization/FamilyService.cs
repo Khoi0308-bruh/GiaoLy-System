@@ -4,6 +4,7 @@ using GiaoLy.Application.Organization.Contracts;
 using GiaoLy.Application.Organization.Dtos;
 using GiaoLy.Domain.Data;
 using GiaoLy.Domain.Entities;
+using GiaoLy.Domain.Rules;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -223,7 +224,7 @@ public class FamilyService : IFamilyService
         {
             // Verify all students are active members of this classroom
             var enrolledStudentIds = await _db.Enrollments
-                .Where(e => e.ClassRoomId == family.ClassRoomId && e.Status == "Active" && studentIds.Contains(e.StudentId))
+                .Where(e => e.ClassRoomId == family.ClassRoomId && EnrollmentRules.Statuses.InClass.Contains(e.Status) && studentIds.Contains(e.StudentId))
                 .Select(e => e.StudentId)
                 .ToListAsync(ct);
 

@@ -778,7 +778,7 @@ public class ImportExportService : IImportExportService
         {
             var enrolledIds = _db.Enrollments
                 .AsNoTracking()
-                .Where(e => e.ClassRoomId == classRoomId.Value && e.Status == "Active")
+                .Where(e => e.ClassRoomId == classRoomId.Value && EnrollmentRules.Statuses.InClass.Contains(e.Status))
                 .Select(e => e.StudentId);
 
             query = query.Where(s => enrolledIds.Contains(s.Id));
@@ -825,7 +825,11 @@ public class ImportExportService : IImportExportService
         foreach (var s in students)
         {
             var activeEnrollment = activeYear != null
-                ? s.Enrollments.FirstOrDefault(e => e.AcademicYearId == activeYear.Id && e.Status == "Active")
+                ? s.Enrollments
+                    .Where(e => e.AcademicYearId == activeYear.Id &&
+                                EnrollmentRules.Statuses.InClass.Contains(e.Status))
+                    .OrderBy(e => e.Status == EnrollmentRules.Statuses.Active ? 0 : 1)
+                    .FirstOrDefault()
                 : null;
 
             var primaryGuardian = s.Guardians.FirstOrDefault(g => g.IsPrimary) ?? s.Guardians.FirstOrDefault();
