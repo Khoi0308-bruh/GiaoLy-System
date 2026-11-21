@@ -98,7 +98,7 @@ function toggleExpand(id: string) {
             />
             <USelect
               v-model="selectedPriority"
-              :options="[
+              :items="[
                 { label: 'Tất cả mức độ', value: 'all' },
                 { label: 'Khẩn cấp / Quan trọng', value: 'High' },
                 { label: 'Bình thường', value: 'Normal' }

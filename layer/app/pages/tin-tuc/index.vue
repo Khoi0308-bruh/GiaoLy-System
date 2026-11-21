@@ -114,7 +114,7 @@ function openArticle(article: NewsArticle) {
             />
             <USelect
               v-model="selectedCategory"
-              :options="categories.map(c => ({ label: c === 'all' ? 'Tất cả chuyên mục' : c, value: c }))"
+              :items="categories.map(c => ({ label: c === 'all' ? 'Tất cả chuyên mục' : c, value: c }))"
               size="sm"
             />
           </div>

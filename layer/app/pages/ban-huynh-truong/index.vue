@@ -84,7 +84,7 @@ const filteredLeaders = computed(() => {
             <span class="text-xs text-stone-500 font-medium">Phân đoàn:</span>
             <USelect
               v-model="selectedDivision"
-              :options="divisions.map(d => ({ label: d === 'all' ? 'Tất cả các ngành' : d, value: d }))"
+              :items="divisions.map(d => ({ label: d === 'all' ? 'Tất cả các ngành' : d, value: d }))"
               size="sm"
             />
           </div>
