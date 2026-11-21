@@ -386,11 +386,14 @@ interface Leader {
   fullName: string
   position: string
   level: number
-  branch: number
+  /** API trả branchId (có thể null cho Ban Điều Hành); `branch` là tên cũ giữ để tương thích. */
+  branchId?: number | null
+  branchName?: string | null
+  branch?: number
   term?: string
   description?: string
   avatarPath?: string
-  isActive: boolean
+  isActive?: boolean
 }
 
 const viewMode = ref<'chart' | 'grid'>('chart')
@@ -455,7 +458,9 @@ const branchColumns = [
 try {
   const { data } = await useFetch<Leader[]>(`${apiBase}/api/v1/public/leaders`)
   if (data.value && data.value.length) {
-    leaders.value = data.value.filter(l => l.isActive)
+    // API công khai chỉ trả các lãnh đạo đang hoạt động và không có trường isActive,
+    // nên lọc theo isActive làm rỗng toàn bộ trang.
+    leaders.value = data.value
   }
 } catch (e) {
   console.error('Không thể tải danh sách lãnh đạo:', e)
@@ -494,10 +499,13 @@ const bdhLeaders = computed(() => {
   })
 })
 
+/** API trả branchId; dữ liệu cũ dùng branch. */
+const branchOf = (l: Leader) => l.branchId ?? l.branch ?? null
+
 // Lấy danh sách Trưởng Ngành cho từng Ngành
 const getBranchChiefs = (branchId: number) => {
   return leaders.value.filter(l => {
-    return l.branch === branchId && (l.level === 3 || l.position.toLowerCase().includes('trưởng ngành') || l.position.toLowerCase().includes('phó ngành'))
+    return branchOf(l) === branchId && (l.level === 3 || l.position.toLowerCase().includes('trưởng ngành') || l.position.toLowerCase().includes('phó ngành'))
   })
 }
 
@@ -505,7 +513,7 @@ const getBranchChiefs = (branchId: number) => {
 const getBranchTeachers = (branchId: number) => {
   return leaders.value.filter(l => {
     const isChief = l.level === 3 || l.position.toLowerCase().includes('trưởng ngành') || l.position.toLowerCase().includes('phó ngành')
-    return l.branch === branchId && !isChief
+    return branchOf(l) === branchId && !isChief
   })
 }
 </script>
