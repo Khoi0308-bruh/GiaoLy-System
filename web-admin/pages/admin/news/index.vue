@@ -51,9 +51,7 @@
         </div>
         <USelect
           v-model="selectedSource"
-          :options="sourceOptions"
-          value-attribute="value"
-          label-attribute="label"
+          :items="sourceOptions"
           placeholder="Tat ca nguon"
           class="w-full sm:w-56"
           :ui="{ base: 'rounded-xl' }"
@@ -62,9 +60,7 @@
           <span class="text-xs font-bold text-stone-400">Hien thi:</span>
           <USelect
             v-model="perPage"
-            :options="perPageOptions"
-            value-attribute="value"
-            label-attribute="label"
+            :items="perPageOptions"
             class="w-28"
             :ui="{ base: 'rounded-xl' }"
           />
@@ -237,7 +233,8 @@ const apiBase = config.public.apiBase as string
 const session = useSessionStore()
 
 // State
-const selectedSource = ref('')
+// Reka UI không cho SelectItem có value rỗng, nên dùng 'all' làm mốc "tất cả nguồn".
+const selectedSource = ref('all')
 const currentPage = ref(1)
 const perPage = ref(15)
 const syncing = ref(false)
@@ -285,7 +282,7 @@ const requestUrl = computed(() => {
     page: String(currentPage.value),
     pageSize: String(perPage.value),
   })
-  if (selectedSource.value) params.set('sourceId', selectedSource.value)
+  if (selectedSource.value && selectedSource.value !== 'all') params.set('sourceId', selectedSource.value)
   return `${apiBase}/api/v1/news/articles?${params.toString()}`
 })
 
@@ -311,7 +308,7 @@ const rangeEnd = computed(() => Math.min(currentPage.value * perPage.value, tota
 
 // Source filter options
 const sourceOptions = computed(() => [
-  { label: 'Tat Ca Nguon', value: '' },
+  { label: 'Tat Ca Nguon', value: 'all' },
   ...(sources.value ?? []).map(s => ({ label: s.name, value: s.id })),
 ])
 
