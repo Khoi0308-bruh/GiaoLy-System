@@ -25,6 +25,10 @@ public record UserSummaryResponse(
 
 public record ChangePasswordRequest(string CurrentPassword, string NewPassword);
 
+public record BranchSummaryResponse(int Id, string Name);
+
+public record ClassRoomSummaryResponse(Guid Id, string Name);
+
 public record UserProfileResponse(
     Guid Id,
     string Username,
@@ -40,6 +44,8 @@ public record UserProfileResponse(
     string RoleName,
     string ScopeType,
     int? BranchId,
+    BranchSummaryResponse? Branch,
+    IReadOnlyList<ClassRoomSummaryResponse> ClassRooms,
     IReadOnlySet<string> Permissions,
     bool MustChangePassword
 );

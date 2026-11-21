@@ -301,6 +301,32 @@ public class AuthService : IAuthService
 
         var permissions = await _permissionProvider.GetPermissionsForRoleAsync(user.RoleId, ct);
 
+        var branch = user.BranchId.HasValue
+            ? await _db.Branches
+                .AsNoTracking()
+                .Where(b => b.Id == user.BranchId.Value)
+                .Select(b => new BranchSummaryResponse(b.Id, b.Name))
+                .FirstOrDefaultAsync(ct)
+            : null;
+
+        // Lớp do chính người dùng phụ trách, cùng định nghĩa với phạm vi Classroom.
+        var ledClasses = await _db.ClassRooms
+            .AsNoTracking()
+            .Where(c => c.LeaderId == user.Id || c.Teachers.Any(t => t.IsLead && t.UserId == user.Id))
+            .Select(c => new
+            {
+                c.Id,
+                LevelName = c.ClassLevel != null ? c.ClassLevel.Name : string.Empty,
+                c.Section
+            })
+            .ToListAsync(ct);
+
+        var classRooms = ledClasses
+            .Select(c => new ClassRoomSummaryResponse(
+                c.Id,
+                string.IsNullOrWhiteSpace(c.Section) ? c.LevelName : $"{c.LevelName} - {c.Section}"))
+            .ToList();
+
         var profile = new UserProfileResponse(
             user.Id,
             user.Username,
@@ -316,6 +342,8 @@ public class AuthService : IAuthService
             roleName,
             scopeType,
             user.BranchId,
+            branch,
+            classRooms,
             permissions,
             user.MustChangePassword
         );
