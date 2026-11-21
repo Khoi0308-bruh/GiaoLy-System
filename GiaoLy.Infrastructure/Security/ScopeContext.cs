@@ -3,6 +3,7 @@ using GiaoLy.Domain.Data;
 using GiaoLy.Domain.Entities;
 using GiaoLy.Domain.Rules;
 using Microsoft.EntityFrameworkCore;
+using System.Linq.Expressions;
 
 namespace GiaoLy.Infrastructure.Security;
 
@@ -45,12 +46,7 @@ public class ScopeContext : IScopeContext
                 return query.Where(_ => false);
             }
 
-            // Giáo lý viên chủ nhiệm được ghi ở ClassRoomTeachers (IsLead = 1) — đúng nơi
-            // màn hình phân công giáo lý viên ghi vào. Cột LeaderId chỉ là dữ liệu cũ,
-            // chỉ dựa vào nó thì trưởng lớp vừa được phân công sẽ không thấy lớp nào.
-            return query.Where(c =>
-                c.LeaderId == userId ||
-                c.Teachers.Any(t => t.IsLead && t.UserId == userId));
+            return query.Where(LedBy(userId.Value));
         }
 
         if (scope == "Guardian")
@@ -87,9 +83,7 @@ public class ScopeContext : IScopeContext
             if (userId is null) return query.Where(_ => false);
 
             var leaderClassIds = _db.ClassRooms
-                .Where(c =>
-                    c.LeaderId == userId ||
-                    c.Teachers.Any(t => t.IsLead && t.UserId == userId))
+                .Where(LedBy(userId.Value))
                 .Select(c => c.Id);
 
             // Danh sách cho phép thay vì loại trừ: chỉ ghi danh còn thuộc lớp trong niên khóa
@@ -142,12 +136,24 @@ public class ScopeContext : IScopeContext
             var userId = _currentUser.UserId;
             if (userId is null) return query.Where(_ => false);
 
-            return query.Where(e => e.ClassRoom != null &&
-                (e.ClassRoom.LeaderId == userId ||
-                 e.ClassRoom.Teachers.Any(t => t.IsLead && t.UserId == userId)));
+            var leaderClassIds = _db.ClassRooms
+                .Where(LedBy(userId.Value))
+                .Select(c => c.Id);
+
+            return query.Where(e => leaderClassIds.Contains(e.ClassRoomId));
         }
 
         return query.Where(_ => false);
+    }
+
+    /// <summary>
+    /// Giáo lý viên chủ nhiệm được ghi ở ClassRoomTeachers (IsLead = 1) — đúng nơi màn hình
+    /// phân công giáo lý viên ghi vào. Cột LeaderId chỉ là dữ liệu cũ, chỉ dựa vào nó thì
+    /// trưởng lớp vừa được phân công sẽ không thấy lớp nào.
+    /// </summary>
+    private static Expression<Func<ClassRoom, bool>> LedBy(Guid userId)
+    {
+        return c => c.LeaderId == userId || c.Teachers.Any(t => t.IsLead && t.UserId == userId);
     }
 
     public async Task<bool> CanAccessClassRoomAsync(Guid classRoomId, CancellationToken ct = default)
