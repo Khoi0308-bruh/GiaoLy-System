@@ -7,12 +7,12 @@ const api = useApi()
 
 interface PublicDoc {
   id: string
-  title: string
-  description?: string | null
+  fileName: string
   category: string
   fileSize?: number | null
-  fileExtension?: string | null
-  uploadedAt: string
+  contentType?: string | null
+  tags?: string | null
+  createdAt: string
 }
 
 const documents = ref<PublicDoc[]>([])
@@ -48,19 +48,15 @@ async function downloadDocument(doc: PublicDoc) {
   downloadingId.value = doc.id
   downloadError.value = null
   try {
-    const blob = await api.get<Blob>(
-      `/public/documents/${doc.id}/download`,
-      undefined,
-      { responseType: 'blob' }
-    )
+    const blob = await api.download<Blob>(`/public/documents/${doc.id}/download`)
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `${doc.title}.${doc.fileExtension || 'pdf'}`
+    a.download = doc.fileName || `tai-lieu.${extensionOf(doc) || 'pdf'}`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)
-    window.URL.revokeObjectURL(url)
+    setTimeout(() => window.URL.revokeObjectURL(url), 1000)
   } catch (e) {
     downloadError.value = (e as Error).message || 'Không thể tải tài liệu. Vui lòng thử lại sau.'
   } finally {
@@ -83,14 +79,21 @@ const categories = computed(() => {
 const filteredDocuments = computed(() => {
   return documents.value.filter(d => {
     const matchesSearch = !searchQuery.value ||
-      d.title.toLowerCase().includes(searchQuery.value.toLowerCase()) ||
-      (d.description && d.description.toLowerCase().includes(searchQuery.value.toLowerCase()))
+      (d.fileName ?? '').toLowerCase().includes(searchQuery.value.toLowerCase()) ||
+      (d.category ?? '').toLowerCase().includes(searchQuery.value.toLowerCase())
 
     const matchesCat = selectedCategory.value === 'all' || d.category === selectedCategory.value
 
     return matchesSearch && matchesCat
   })
 })
+
+function extensionOf(doc: PublicDoc) {
+  const fromName = doc.fileName?.includes('.') ? doc.fileName.split('.').pop() : null
+  if (fromName) return fromName.toUpperCase()
+  const sub = doc.contentType?.split('/').pop()
+  return sub ? sub.toUpperCase() : null
+}
 
 function formatSize(bytes?: number | null) {
   if (!bytes) return ''
@@ -169,20 +172,16 @@ function formatSize(bytes?: number | null) {
                 <span class="rounded bg-stone-100 px-2 py-0.5 text-[10px] font-semibold text-stone-600">
                   {{ doc.category }}
                 </span>
-                <h2 class="font-serif text-base font-bold text-stone-900 mt-1 leading-snug">
-                  {{ doc.title }}
+                <h2 class="font-serif text-base font-bold text-stone-900 mt-1 leading-snug break-words">
+                  {{ doc.fileName }}
                 </h2>
               </div>
             </div>
 
-            <p v-if="doc.description" class="text-xs text-stone-600 line-clamp-2 leading-relaxed">
-              {{ doc.description }}
-            </p>
-
             <div class="flex items-center gap-3 text-[11px] text-stone-400">
-              <span v-if="doc.fileExtension" class="uppercase font-semibold text-stone-500">{{ doc.fileExtension }}</span>
+              <span v-if="extensionOf(doc)" class="uppercase font-semibold text-stone-500">{{ extensionOf(doc) }}</span>
               <span v-if="doc.fileSize">• {{ formatSize(doc.fileSize) }}</span>
-              <span>• {{ doc.uploadedAt }}</span>
+              <span v-if="doc.createdAt">• {{ formatDate(doc.createdAt) }}</span>
             </div>
           </div>
 
