@@ -1,5 +1,10 @@
 @import "tailwindcss";
 @import "@nuxt/ui";
+/* Token dùng chung của layer (marian-*, vatican-*, ivory, parchment, .arch-frame,
+   .gold-rule, nền body). Nuxt không tự nạp css của layer khi app khai báo css cùng
+   tên, nên phải import tường minh — thiếu nó sidebar mất nền gradient và chữ trắng
+   chìm vào nền trắng. Đặt trước @theme bên dưới để token riêng của admin thắng. */
+@import "../../../layer/app/assets/css/theme.css";
 @plugin "@tailwindcss/typography";
 
 /* ══════════════════════════════════════════════════════════════
