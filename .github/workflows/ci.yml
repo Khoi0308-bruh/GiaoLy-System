@@ -155,6 +155,10 @@ jobs:
           npx playwright install --with-deps chromium
 
       - name: Chờ SQL Server sẵn sàng
+        env:
+          # `job.services.mssql.id` là ID của đúng container service mssql. Nếu vì lý do
+          # nào đó rỗng thì lọc theo cổng 1433 đã publish, không lấy container bất kỳ.
+          MSSQL_CONTAINER: ${{ job.services.mssql.id }}
         run: |
           for i in $(seq 1 60); do
             if (exec 3<>/dev/tcp/127.0.0.1/1433) 2>/dev/null; then
@@ -165,13 +169,18 @@ jobs:
           done
           echo '--- Cổng 1433 không mở. Container đang chạy:'
           docker ps --format '{{.ID}} {{.Names}} {{.Status}} {{.Ports}}' || true
-          echo '--- 60 dòng cuối log container:'
-          cid=$(docker ps -q | head -1 || true)
-          if [ -n "$cid" ]; then docker logs "$cid" 2>&1 | tail -60; fi
+          echo '--- 60 dòng cuối log container mssql:'
+          container="${MSSQL_CONTAINER:-$(docker ps -q --filter publish=1433 | head -1)}"
+          if [ -n "$container" ]; then
+            docker logs "$container" 2>&1 | tail -60
+          else
+            echo '(không xác định được container mssql)'
+          fi
           exit 1
 
       - name: Khởi động API (tự áp migration + seed trên DB trống)
         env:
+          MSSQL_CONTAINER: ${{ job.services.mssql.id }}
           ASPNETCORE_ENVIRONMENT: Development
           ConnectionStrings__DefaultConnection: 'Server=localhost,1433;Database=GiaoLyCI;User Id=sa;Password=${{ env.CI_MSSQL_SA_PASSWORD }};TrustServerCertificate=True;MultipleActiveResultSets=True'
           Admin__InitialPassword: ${{ env.CI_ADMIN_PASSWORD }}
@@ -197,8 +206,12 @@ jobs:
           echo '--- API không sẵn sàng, 100 dòng cuối log:'
           tail -100 "$RUNNER_TEMP/api.log"
           echo '--- 40 dòng cuối log SQL Server:'
-          cid=$(docker ps -q | head -1 || true)
-          if [ -n "$cid" ]; then docker logs "$cid" 2>&1 | tail -40; fi
+          container="${MSSQL_CONTAINER:-$(docker ps -q --filter publish=1433 | head -1)}"
+          if [ -n "$container" ]; then
+            docker logs "$container" 2>&1 | tail -40
+          else
+            echo '(không xác định được container mssql)'
+          fi
           exit 1
 
       - name: Khởi động web-admin
