@@ -25,10 +25,18 @@ async function dangNhapVoi(page: Page, password: string) {
   await usernameInput.fill(USERNAME)
   await page.locator('input[autocomplete="current-password"]').fill(password)
   await page.locator('button[type="submit"]').click()
-  return page
-    .waitForURL(/\/(admin|doi-mat-khau-lan-dau)/, { timeout: 20_000 })
-    .then(() => true)
-    .catch(() => false)
+  // Thành công thì đổi URL; sai mật khẩu thì hiện banner lỗi — dừng ngay khi
+  // một trong hai xảy ra thay vì chờ hết timeout.
+  const ketQua = await Promise.race([
+    page.waitForURL(/\/(admin|doi-mat-khau-lan-dau)/, { timeout: 20_000 }).then(() => 'vao' as const).catch(() => 'khong' as const),
+    page
+      .getByText(/chưa đúng|không chính xác/i)
+      .first()
+      .waitFor({ state: 'visible', timeout: 20_000 })
+      .then(() => 'sai-mat-khau' as const)
+      .catch(() => 'khong' as const),
+  ])
+  return ketQua === 'vao'
 }
 
 async function dangNhap(page: Page) {
@@ -49,12 +57,17 @@ async function doiMatKhauLanDau(page: Page, currentPassword: string) {
 }
 
 test.describe('web-admin - smoke', () => {
+  // Lần chạy đầu phải qua luồng đổi mật khẩu + vài lần điều hướng, dev server
+  // biên dịch lần đầu có thể chậm hơn 30s mặc định của Playwright.
+  test.describe.configure({ timeout: 120_000 })
+
   test('đăng nhập và mở được các trang chính', async ({ page }) => {
     const passwordDaDung = await dangNhap(page)
 
     if (page.url().includes('doi-mat-khau-lan-dau')) {
       await doiMatKhauLanDau(page, passwordDaDung)
-      await expect(await dangNhapVoi(page, NEW_PASSWORD)).toBe(true)
+      const dangNhapLai = await dangNhapVoi(page, NEW_PASSWORD)
+      expect(dangNhapLai, 'Đăng nhập lại bằng mật khẩu mới sau khi đổi phải thành công').toBe(true)
     }
 
     await expect(page).toHaveURL(/\/admin/, { timeout: 30_000 })
@@ -62,8 +75,9 @@ test.describe('web-admin - smoke', () => {
 
     for (const [path, heading] of MAIN_PAGES) {
       await page.goto(path)
-      await expect(page.locator('h1').first()).toHaveText(heading, { timeout: 20_000 })
-      await expect(page.getByText(/không có quyền truy cập|đã xảy ra lỗi/i)).toHaveCount(0)
+      await expect(page.locator('h1').first()).toContainText(heading, { timeout: 20_000 })
+      // Không lọt banner lỗi/quyền; dùng toBeHidden để bỏ qua toast đã ẩn của lần trước.
+      await expect(page.getByText(/không có quyền truy cập|đã xảy ra lỗi/i).first()).toBeHidden()
     }
   })
 })

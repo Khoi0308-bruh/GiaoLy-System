@@ -17,11 +17,19 @@ env:
   NODE_VERSION: '24'
   PNPM_VERSION: '11.13.1'
 
+  # ── Chỉ dùng cho job e2e: database được tạo mới mỗi lần chạy nên đây không
+  # phải bí mật thật. Sửa mật khẩu ở ĐÚNG chỗ này; mọi bước bên dưới đọc lại
+  # qua context `env` (services.*.env và steps.*.env đều hỗ trợ context này).
+  CI_MSSQL_SA_PASSWORD: 'GiaoLy_CI_2026!'
+  CI_ADMIN_PASSWORD: 'GiaoLy@CI2026!'
+  CI_ADMIN_NEW_PASSWORD: 'GiaoLy@CI2026New!'
+
 jobs:
   # ─────────────────────────────── 1. Backend ────────────────────────────────
   backend:
     name: Backend - build .NET
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     steps:
       - uses: actions/checkout@v4
 
@@ -39,6 +47,7 @@ jobs:
   web:
     name: Web - lint & typecheck (${{ matrix.app }})
     runs-on: ubuntu-latest
+    timeout-minutes: 20
     strategy:
       fail-fast: false
       matrix:
@@ -72,6 +81,7 @@ jobs:
   tools:
     name: Tools - check_layer & fe_lint
     runs-on: ubuntu-latest
+    timeout-minutes: 15
     steps:
       - uses: actions/checkout@v4
 
@@ -100,28 +110,22 @@ jobs:
   e2e:
     name: E2E - Playwright (admin)
     runs-on: ubuntu-latest
+    timeout-minutes: 35
     services:
       mssql:
         image: mcr.microsoft.com/mssql/server:2022-latest
         env:
           ACCEPT_EULA: 'Y'
           MSSQL_PID: 'Developer'
-          MSSQL_SA_PASSWORD: 'GiaoLy_CI_2026!'
+          MSSQL_SA_PASSWORD: ${{ env.CI_MSSQL_SA_PASSWORD }}
         ports:
           - 1433:1433
         options: >-
-          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'GiaoLy_CI_2026!' -C -Q 'SELECT 1' -b"
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P \"$MSSQL_SA_PASSWORD\" -C -Q 'SELECT 1' -b"
           --health-interval 10s
           --health-timeout 5s
           --health-retries 30
           --health-start-period 20s
-    env:
-      ASPNETCORE_ENVIRONMENT: Development
-      ConnectionStrings__DefaultConnection: 'Server=localhost,1433;Database=GiaoLyCI;User Id=sa;Password=GiaoLy_CI_2026!;TrustServerCertificate=True;MultipleActiveResultSets=True'
-      # DB CI tạo mới nên seeder cấp mật khẩu tạm này cho admin (không phải bí mật thật).
-      Admin__InitialPassword: 'GiaoLy@CI2026!'
-      App__DefaultPassword: 'GiaoLy@CI2026!'
-      Jwt__Key: 'ci-only-jwt-signing-key-0123456789abcdef'
     steps:
       - uses: actions/checkout@v4
 
@@ -143,22 +147,58 @@ jobs:
         working-directory: web-admin
         run: pnpm install --frozen-lockfile
 
-      - name: Khởi động API (tự áp migration + seed trên DB trống)
+      # Cài test trước khi dựng server để lỗi mạng/npm lộ ra sớm.
+      - name: Cài dependency e2e + trình duyệt
+        working-directory: e2e-tests
         run: |
-          set -o pipefail
-          dotnet run --project GiaoLy.API --urls http://localhost:5000 > "$RUNNER_TEMP/api.log" 2>&1 &
-          for i in $(seq 1 90); do
-            code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
-              -H 'Content-Type: application/json' -d '{}' \
-              http://localhost:5000/api/v1/auth/login || true)
-            if [ -n "$code" ] && [ "$code" != "000" ]; then
-              echo "API sẵn sàng (mã HTTP $code)"
+          npm ci
+          npx playwright install --with-deps chromium
+
+      - name: Chờ SQL Server sẵn sàng
+        run: |
+          for i in $(seq 1 60); do
+            if (exec 3<>/dev/tcp/127.0.0.1/1433) 2>/dev/null; then
+              echo "SQL Server nhận kết nối sau $((i * 2))s"
               exit 0
             fi
             sleep 2
           done
-          echo '--- API không khởi động được, log:'
-          tail -60 "$RUNNER_TEMP/api.log"
+          echo '--- Cổng 1433 không mở. Container đang chạy:'
+          docker ps --format '{{.ID}} {{.Names}} {{.Status}} {{.Ports}}' || true
+          echo '--- 60 dòng cuối log container:'
+          cid=$(docker ps -q | head -1 || true)
+          if [ -n "$cid" ]; then docker logs "$cid" 2>&1 | tail -60; fi
+          exit 1
+
+      - name: Khởi động API (tự áp migration + seed trên DB trống)
+        env:
+          ASPNETCORE_ENVIRONMENT: Development
+          ConnectionStrings__DefaultConnection: 'Server=localhost,1433;Database=GiaoLyCI;User Id=sa;Password=${{ env.CI_MSSQL_SA_PASSWORD }};TrustServerCertificate=True;MultipleActiveResultSets=True'
+          Admin__InitialPassword: ${{ env.CI_ADMIN_PASSWORD }}
+          App__DefaultPassword: ${{ env.CI_ADMIN_PASSWORD }}
+          Jwt__Key: 'ci-only-jwt-signing-key-0123456789abcdef'
+        run: |
+          dotnet run --project GiaoLy.API --urls http://localhost:5000 > "$RUNNER_TEMP/api.log" 2>&1 &
+          api_pid=$!
+          for i in $(seq 1 90); do
+            if ! kill -0 "$api_pid" 2>/dev/null; then
+              echo "API thoát sớm ở giây thứ $((i * 2))"
+              break
+            fi
+            code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+              -H 'Content-Type: application/json' -d '{}' \
+              http://localhost:5000/api/v1/auth/login || true)
+            if [ -n "$code" ] && [ "$code" != "000" ]; then
+              echo "API sẵn sàng (HTTP $code) sau $((i * 2))s"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo '--- API không sẵn sàng, 100 dòng cuối log:'
+          tail -100 "$RUNNER_TEMP/api.log"
+          echo '--- 40 dòng cuối log SQL Server:'
+          cid=$(docker ps -q | head -1 || true)
+          if [ -n "$cid" ]; then docker logs "$cid" 2>&1 | tail -40; fi
           exit 1
 
       - name: Khởi động web-admin
@@ -167,16 +207,21 @@ jobs:
           NUXT_PUBLIC_API_BASE: http://localhost:5000
         run: |
           pnpm dev > "$RUNNER_TEMP/admin.log" 2>&1 &
+          admin_pid=$!
           for i in $(seq 1 90); do
+            if ! kill -0 "$admin_pid" 2>/dev/null; then
+              echo "web-admin thoát sớm ở giây thứ $((i * 2))"
+              break
+            fi
             code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/dang-nhap || true)
             if [ "$code" = "200" ]; then
-              echo 'web-admin sẵn sàng'
+              echo "web-admin sẵn sàng sau $((i * 2))s"
               exit 0
             fi
             sleep 2
           done
-          echo '--- web-admin không khởi động được, log:'
-          tail -60 "$RUNNER_TEMP/admin.log"
+          echo '--- web-admin không sẵn sàng, 100 dòng cuối log:'
+          tail -100 "$RUNNER_TEMP/admin.log"
           exit 1
 
       - name: Playwright
@@ -184,12 +229,9 @@ jobs:
         env:
           E2E_BASE_URL: http://localhost:3000
           E2E_USERNAME: admin
-          E2E_PASSWORD: 'GiaoLy@CI2026!'
-          E2E_NEW_PASSWORD: 'GiaoLy@CI2026New!'
-        run: |
-          npm ci
-          npx playwright install --with-deps chromium
-          npx playwright test
+          E2E_PASSWORD: ${{ env.CI_ADMIN_PASSWORD }}
+          E2E_NEW_PASSWORD: ${{ env.CI_ADMIN_NEW_PASSWORD }}
+        run: npx playwright test
 
       - name: Lưu log khi lỗi
         if: failure()
@@ -201,3 +243,11 @@ jobs:
             e2e-tests/test-results
           retention-days: 7
           if-no-files-found: ignore
+
+      - name: In log server khi lỗi
+        if: failure()
+        run: |
+          echo '===== API ====='
+          tail -100 "$RUNNER_TEMP/api.log" 2>/dev/null || echo '(không có log API)'
+          echo '===== web-admin ====='
+          tail -100 "$RUNNER_TEMP/admin.log" 2>/dev/null || echo '(không có log web-admin)'
