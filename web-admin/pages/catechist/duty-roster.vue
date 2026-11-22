@@ -12,7 +12,7 @@
       <UButton
         icon="i-lucide-arrow-left"
         variant="soft"
-        color="gray"
+        color="neutral"
         to="/catechist"
       >
         Trở về

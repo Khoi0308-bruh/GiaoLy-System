@@ -5,7 +5,7 @@
 <script setup>
 definePageMeta({
   middleware: [
-    function (to, from) {
+    function () {
       return navigateTo('/login')
     }
   ]

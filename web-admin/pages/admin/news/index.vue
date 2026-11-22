@@ -130,11 +130,11 @@
           :data="articles"
           :columns="columns"
           :ui="{
-            wrapper: 'overflow-x-auto',
+            root: 'overflow-x-auto',
             thead: 'bg-stone-50/80 dark:bg-stone-800/50',
-            th: { base: 'text-[10px] font-black text-stone-500 uppercase tracking-widest py-3 px-4 whitespace-nowrap' },
-            td: { base: 'py-3 px-4 align-middle' },
-            tr: { base: 'hover:bg-sky-50/50 dark:hover:bg-sky-900/10 transition-colors border-b border-stone-100 dark:border-stone-800 last:border-0' }
+            th: 'text-[10px] font-black text-stone-500 uppercase tracking-widest py-3 px-4 whitespace-nowrap',
+            td: 'py-3 px-4 align-middle',
+            tr: 'hover:bg-sky-50/50 dark:hover:bg-sky-900/10 transition-colors border-b border-stone-100 dark:border-stone-800 last:border-0'
           }"
         >
           <!-- Tieu de -->
@@ -238,8 +238,7 @@
           :items-per-page="perPage"
           :ui="{
             list: 'gap-1',
-            item: { base: 'rounded-xl font-bold' },
-            active: 'bg-sky-500 text-white shadow-md'
+            item: 'rounded-xl font-bold'
           }"
         />
       </div>
@@ -298,7 +297,7 @@ interface PagedNews {
   totalPages: number
 }
 
-const authHeaders = computed<Record<string, string>>(() =>
+const authHeaders = computed<Record<string, string>>((): Record<string, string> =>
   session.accessToken ? { Authorization: `Bearer ${session.accessToken}` } : {}
 )
 
@@ -337,7 +336,9 @@ const sourceOptions = computed(() => [
   ...(sources.value ?? []).map(s => ({ label: s.name, value: s.id }))
 ])
 
-watch([selectedSource, perPage], () => { currentPage.value = 1 })
+watch([selectedSource, perPage], () => {
+  currentPage.value = 1
+})
 
 // Columns
 const columns = [
