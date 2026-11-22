@@ -1,0 +1,203 @@
+name: CI
+
+on:
+  push:
+    branches: [main, develop, 'feature/**']
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  DOTNET_NOLOGO: 'true'
+  DOTNET_CLI_TELEMETRY_OPTOUT: 'true'
+  DOTNET_SKIP_FIRST_TIME_EXPERIENCE: 'true'
+  NODE_VERSION: '24'
+  PNPM_VERSION: '11.13.1'
+
+jobs:
+  # ─────────────────────────────── 1. Backend ────────────────────────────────
+  backend:
+    name: Backend - build .NET
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - name: Restore
+        run: dotnet restore GiaoLySystem.slnx
+
+      - name: Build (Release)
+        run: dotnet build GiaoLySystem.slnx -c Release --no-restore
+
+  # ──────────────────────────── 2. Web (lint + types) ────────────────────────
+  web:
+    name: Web - lint & typecheck (${{ matrix.app }})
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        app: [web-admin, web-portal]
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: ${{ matrix.app }}/pnpm-lock.yaml
+
+      - name: Install
+        working-directory: ${{ matrix.app }}
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        working-directory: ${{ matrix.app }}
+        run: pnpm lint
+
+      - name: Typecheck
+        working-directory: ${{ matrix.app }}
+        run: pnpm typecheck
+
+  # ────────────────────────── 3. Kiểm tra layer/API ──────────────────────────
+  tools:
+    name: Tools - check_layer & fe_lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: web-admin/pnpm-lock.yaml
+
+      # check_layer.js mượn typescript + @vue/compiler-sfc từ web-admin/node_modules.
+      - name: Cài dependency cho check_layer
+        working-directory: web-admin
+        run: pnpm install --frozen-lockfile
+
+      - name: Kiểm tra layer dùng API/permission có thật
+        run: node tools/check_layer.js
+
+      - name: Đối chiếu endpoint API với màn hình
+        run: node tools/fe_lint.js
+
+  # ─────────────────────────────── 4. E2E ────────────────────────────────────
+  e2e:
+    name: E2E - Playwright (admin)
+    runs-on: ubuntu-latest
+    services:
+      mssql:
+        image: mcr.microsoft.com/mssql/server:2022-latest
+        env:
+          ACCEPT_EULA: 'Y'
+          MSSQL_PID: 'Developer'
+          MSSQL_SA_PASSWORD: 'GiaoLy_CI_2026!'
+        ports:
+          - 1433:1433
+        options: >-
+          --health-cmd "/opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P 'GiaoLy_CI_2026!' -C -Q 'SELECT 1' -b"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 30
+          --health-start-period 20s
+    env:
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: 'Server=localhost,1433;Database=GiaoLyCI;User Id=sa;Password=GiaoLy_CI_2026!;TrustServerCertificate=True;MultipleActiveResultSets=True'
+      # DB CI tạo mới nên seeder cấp mật khẩu tạm này cho admin (không phải bí mật thật).
+      Admin__InitialPassword: 'GiaoLy@CI2026!'
+      App__DefaultPassword: 'GiaoLy@CI2026!'
+      Jwt__Key: 'ci-only-jwt-signing-key-0123456789abcdef'
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '10.0.x'
+
+      - uses: pnpm/action-setup@v4
+        with:
+          version: ${{ env.PNPM_VERSION }}
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: pnpm
+          cache-dependency-path: web-admin/pnpm-lock.yaml
+
+      - name: Cài dependency web-admin
+        working-directory: web-admin
+        run: pnpm install --frozen-lockfile
+
+      - name: Khởi động API (tự áp migration + seed trên DB trống)
+        run: |
+          set -o pipefail
+          dotnet run --project GiaoLy.API --urls http://localhost:5000 > "$RUNNER_TEMP/api.log" 2>&1 &
+          for i in $(seq 1 90); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' -X POST \
+              -H 'Content-Type: application/json' -d '{}' \
+              http://localhost:5000/api/v1/auth/login || true)
+            if [ -n "$code" ] && [ "$code" != "000" ]; then
+              echo "API sẵn sàng (mã HTTP $code)"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo '--- API không khởi động được, log:'
+          tail -60 "$RUNNER_TEMP/api.log"
+          exit 1
+
+      - name: Khởi động web-admin
+        working-directory: web-admin
+        env:
+          NUXT_PUBLIC_API_BASE: http://localhost:5000
+        run: |
+          pnpm dev > "$RUNNER_TEMP/admin.log" 2>&1 &
+          for i in $(seq 1 90); do
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3000/dang-nhap || true)
+            if [ "$code" = "200" ]; then
+              echo 'web-admin sẵn sàng'
+              exit 0
+            fi
+            sleep 2
+          done
+          echo '--- web-admin không khởi động được, log:'
+          tail -60 "$RUNNER_TEMP/admin.log"
+          exit 1
+
+      - name: Playwright
+        working-directory: e2e-tests
+        env:
+          E2E_BASE_URL: http://localhost:3000
+          E2E_USERNAME: admin
+          E2E_PASSWORD: 'GiaoLy@CI2026!'
+          E2E_NEW_PASSWORD: 'GiaoLy@CI2026New!'
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npx playwright test
+
+      - name: Lưu log khi lỗi
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: e2e-failure-logs
+          path: |
+            e2e-tests/playwright-report
+            e2e-tests/test-results
+          retention-days: 7
+          if-no-files-found: ignore

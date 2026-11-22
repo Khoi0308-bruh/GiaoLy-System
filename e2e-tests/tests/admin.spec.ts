@@ -1,45 +1,69 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test'
 
-test.describe('Admin Workspace - Core Automated Tests', () => {
-  // Test case: Đăng nhập
-  test('Login_01: Should login successfully as superadmin', async ({ page }) => {
-    await page.goto('/login');
-    
-    // Giả lập nhập thông tin dựa trên thông tin đã cấp
-    // Chú ý: Ở đây ta dùng placeholder nếu chưa có form login thật trên URL (vì trình duyệt báo bị chặn)
-    // Thực tế sẽ tìm bằng locator của input
-    const emailInput = page.getByPlaceholder(/email/i).or(page.locator('input[type="email"]'));
-    const passwordInput = page.getByPlaceholder(/password/i).or(page.locator('input[type="password"]'));
-    const loginBtn = page.getByRole('button', { name: /đăng nhập/i }).or(page.locator('button[type="submit"]'));
+/**
+ * Smoke test cho web-admin, chạy được cả trên máy dev lẫn CI (job e2e):
+ *  - CI dựng DB trống, seeder tạo tài khoản admin với mật khẩu tạm và bật
+ *    mustChangePassword → lần đăng nhập đầu bị đẩy sang /doi-mat-khau-lan-dau.
+ *  - Lần chạy thứ hai (hoặc máy dev đã đổi mật khẩu) thì dùng mật khẩu mới.
+ * Vì vậy hàm đăng nhập thử lần lượt E2E_PASSWORD rồi E2E_NEW_PASSWORD.
+ */
 
-    // Không hard-code thông tin đăng nhập: đặt E2E_USERNAME / E2E_PASSWORD trong môi trường chạy test.
-    const username = process.env.E2E_USERNAME;
-    const password = process.env.E2E_PASSWORD;
+const USERNAME = process.env.E2E_USERNAME ?? 'admin'
+const NEW_PASSWORD = process.env.E2E_NEW_PASSWORD ?? 'GiaoLy@CI2026New!'
+const PASSWORDS = [process.env.E2E_PASSWORD, NEW_PASSWORD].filter((p): p is string => !!p)
 
-    if (username && password && await emailInput.count() > 0) {
-      await emailInput.fill(username);
-      await passwordInput.fill(password);
-      await loginBtn.click();
+const MAIN_PAGES: Array<[string, RegExp]> = [
+  ['/admin/doan-sinh', /đoàn sinh/i],
+  ['/admin/lop', /lớp/i],
+  ['/admin/nien-khoa', /niên khóa/i],
+]
+
+async function dangNhapVoi(page: Page, password: string) {
+  await page.goto('/dang-nhap')
+  const usernameInput = page.locator('input[autocomplete="username"]')
+  await expect(usernameInput).toBeVisible({ timeout: 20_000 })
+  await usernameInput.fill(USERNAME)
+  await page.locator('input[autocomplete="current-password"]').fill(password)
+  await page.locator('button[type="submit"]').click()
+  return page
+    .waitForURL(/\/(admin|doi-mat-khau-lan-dau)/, { timeout: 20_000 })
+    .then(() => true)
+    .catch(() => false)
+}
+
+async function dangNhap(page: Page) {
+  for (const password of PASSWORDS) {
+    if (await dangNhapVoi(page, password)) return password
+  }
+  throw new Error('Không đăng nhập được bằng E2E_PASSWORD hoặc E2E_NEW_PASSWORD')
+}
+
+async function doiMatKhauLanDau(page: Page, currentPassword: string) {
+  await page.locator('input[autocomplete="current-password"]').fill(currentPassword)
+  const newPasswordInputs = page.locator('input[autocomplete="new-password"]')
+  await newPasswordInputs.nth(0).fill(NEW_PASSWORD)
+  await newPasswordInputs.nth(1).fill(NEW_PASSWORD)
+  await page.locator('button[type="submit"]').click()
+  // Đổi mật khẩu thu hồi phiên nên app đưa về trang đăng nhập.
+  await page.waitForURL(/dang-nhap/, { timeout: 30_000 })
+}
+
+test.describe('web-admin - smoke', () => {
+  test('đăng nhập và mở được các trang chính', async ({ page }) => {
+    const passwordDaDung = await dangNhap(page)
+
+    if (page.url().includes('doi-mat-khau-lan-dau')) {
+      await doiMatKhauLanDau(page, passwordDaDung)
+      await expect(await dangNhapVoi(page, NEW_PASSWORD)).toBe(true)
     }
-    
-    // Chờ chuyển hướng đến trang chọn workspace
-    await expect(page).toHaveURL(/workspace|dashboard/i, { timeout: 10000 });
-  });
 
-  // Test case: Bảng Tổng Quan
-  test('DB_UI_01: Verify Dashboard UI components', async ({ page }) => {
-    await page.goto('/workspace');
-    
-    // Click vào phân hệ Admin nếu có
-    const adminWorkspaceBtn = page.locator('text="Ban Điều Hành & Chủ Showroom"').or(page.locator('text="EXECUTIVE OVERVIEW"'));
-    if (await adminWorkspaceBtn.count() > 0) {
-      await adminWorkspaceBtn.click();
+    await expect(page).toHaveURL(/\/admin/, { timeout: 30_000 })
+    await expect(page.locator('h1').first()).toBeVisible()
+
+    for (const [path, heading] of MAIN_PAGES) {
+      await page.goto(path)
+      await expect(page.locator('h1').first()).toHaveText(heading, { timeout: 20_000 })
+      await expect(page.getByText(/không có quyền truy cập|đã xảy ra lỗi/i)).toHaveCount(0)
     }
-    
-    // Kiểm tra UI Dashboard
-    await expect(page.locator('text="Tổng quan kinh doanh"')).toBeVisible({ timeout: 10000 });
-  });
-
-  // Các test case khác sẽ được sinh tự động theo mẫu này (hàng trăm test).
-  // Vì lý do an toàn dữ liệu trên môi trường live, bản run demo này chỉ kiểm tra Read-only UI
-});
+  })
+})
