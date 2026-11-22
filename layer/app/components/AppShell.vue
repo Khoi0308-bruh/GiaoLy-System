@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ADMIN_NAV } from '~/shared/nav'
+import { ADMIN_NAV } from '../shared/nav'
 
 const session = useSessionStore()
 const route = useRoute()

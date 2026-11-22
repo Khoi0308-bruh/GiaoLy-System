@@ -1,6 +1,5 @@
 <script setup lang="ts">
-import type { ApiError } from '~/composables/useApi'
-import { toApiError } from '~/composables/useApi'
+import { ApiError, toApiError } from '../../composables/useApi'
 
 definePageMeta({ layout: 'admin' })
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApiError } from '~/composables/useApi'
+import { ApiError } from '../../composables/useApi'
 
 const api = useApi()
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApiError } from '~/composables/useApi'
+import { ApiError } from '../../composables/useApi'
 
 definePageMeta({ public: true })
 
@@ -183,7 +183,7 @@ function openArticle(article: NewsArticle) {
       </div>
 
       <!-- Modal Chi tiết bài viết -->
-      <UModal v-model="modalOpen" :ui="{ width: 'sm:max-w-3xl' }">
+      <UModal v-model="modalOpen" :ui="{ content: 'sm:max-w-3xl' }">
         <div v-if="selectedArticle" class="p-6 space-y-4">
           <div class="flex items-start justify-between gap-4">
             <div>
@@ -202,7 +202,7 @@ function openArticle(article: NewsArticle) {
               </div>
             </div>
             <UButton
-              color="gray"
+              color="neutral"
               variant="ghost"
               icon="i-heroicons-x-mark"
               size="sm"
@@ -229,7 +229,7 @@ function openArticle(article: NewsArticle) {
           />
 
           <div class="pt-4 border-t border-stone-200 flex justify-end">
-            <UButton variant="outline" color="gray" @click="modalOpen = false">
+            <UButton variant="outline" color="neutral" @click="modalOpen = false">
               Đóng lại
             </UButton>
           </div>

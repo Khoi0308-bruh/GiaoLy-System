@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/shared/permissions'
-import type { ApiError } from '~/composables/useApi'
+import { PERMISSIONS } from '../../../shared/permissions'
+import type { ApiError } from '../../../composables/useApi'
 
 definePageMeta({ layout: 'admin', permission: PERMISSIONS.Liturgical.View })
 
@@ -155,9 +155,9 @@ const calendarDays = computed(() => {
   return days
 })
 
-function getColorStyle(colorKey: string) {
+function getColorStyle(colorKey?: string) {
   const found = liturgicalColors.find(c => c.key.toLowerCase() === (colorKey || '').toLowerCase())
-  return found || liturgicalColors[0]
+  return found ?? liturgicalColors[0] ?? { key: '', bgClass: 'bg-stone-200', textClass: '' }
 }
 
 function openDayDetail(day: { dateStr: string, event?: LiturgicalEventItem }) {
@@ -289,8 +289,8 @@ async function handleSaveOverride() {
               <span
                 v-if="day.event"
                 class="h-3 w-3 rounded-full shadow-xs"
-                :class="getColorStyle(day.event.color).bgClass"
-                :title="`Áo lễ: ${day.event.colorNameVi || day.event.color}`"
+                :class="getColorStyle(day.event?.color).bgClass"
+                :title="`Áo lễ: ${day.event?.colorNameVi || day.event?.color}`"
               />
             </div>
 

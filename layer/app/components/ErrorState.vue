@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import type { ApiError } from '~/composables/useApi'
+import type { ApiError } from '../composables/useApi'
 
 const props = defineProps<{ error: ApiError | null }>()
 defineEmits<{ retry: [] }>()

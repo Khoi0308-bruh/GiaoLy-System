@@ -1,5 +1,5 @@
-import { defineStore } from 'pinia'
-import type { PermissionCode } from '~/shared/permissions'
+// defineStore được @pinia/nuxt auto-import để file trong layer không phải tự resolve package.
+import type { PermissionCode } from '../shared/permissions'
 
 export interface Me {
   id: string

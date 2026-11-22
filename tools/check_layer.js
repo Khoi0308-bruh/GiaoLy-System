@@ -20,6 +20,8 @@ const root=process.env.LAYER_DIR || path.resolve(__dirname, "../layer");let file
 (function walk(d){for(const f of fs.readdirSync(d)){const p=path.join(d,f);fs.statSync(p).isDirectory()?walk(p):files.push(p)}})(root);
 let nts=0,nvue=0;
 for(const f of files){
+  // File khai báo kiểu không sinh output nên không transpile được.
+  if(f.endsWith(".d.ts"))continue;
   if(f.endsWith(".ts")){nts++;const src=fs.readFileSync(f,"utf8");const r=ts.transpileModule(src,{reportDiagnostics:true,compilerOptions:{target:"ES2022",module:"ESNext"},fileName:f});
     for(const d of r.diagnostics||[])bad.push(f+": "+ts.flattenDiagnosticMessageText(d.messageText,"\n"))}
   if(f.endsWith(".vue")){nvue++;const src=fs.readFileSync(f,"utf8");const {descriptor,errors}=sfc.parse(src,{filename:f});errors.forEach(e=>bad.push(f+": parse "+e.message));

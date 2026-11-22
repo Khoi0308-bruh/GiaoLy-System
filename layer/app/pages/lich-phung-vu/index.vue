@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ApiError } from '~/composables/useApi'
-import { liturgicalDisplayColor, type LiturgicalDisplayColor, type LiturgicalEventDto } from '~/composables/useLiturgical'
+import { ApiError } from '../../composables/useApi'
+import { liturgicalDisplayColor, type LiturgicalDisplayColor, type LiturgicalEventDto } from '../../composables/useLiturgical'
 
 definePageMeta({ public: true })
 

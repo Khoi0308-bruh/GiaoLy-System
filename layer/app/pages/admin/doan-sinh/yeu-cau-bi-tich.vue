@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { ApiError } from '~/composables/useApi'
-import { toApiError } from '~/composables/useApi'
-import { PERMISSIONS } from '~/shared/permissions'
+import type { ApiError } from '../../../composables/useApi'
+import { toApiError } from '../../../composables/useApi'
+import { PERMISSIONS } from '../../../shared/permissions'
 
 definePageMeta({
   layout: 'admin',
@@ -256,7 +256,7 @@ onMounted(loadRequirements)
           </UFormField>
 
           <UFormField label="Mô tả chi tiết" name="description">
-            <UTextarea v-model="formDescription" placeholder="Hướng dẫn cụ thể cho giáo lý viên khi đánh giá..." rows="2" class="w-full" />
+            <UTextarea v-model="formDescription" placeholder="Hướng dẫn cụ thể cho giáo lý viên khi đánh giá..." :rows="2" class="w-full" />
           </UFormField>
 
           <div class="flex items-center justify-between">

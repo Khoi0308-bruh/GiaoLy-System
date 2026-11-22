@@ -60,7 +60,7 @@ const navLinks = [
               <span>Cổng phụ huynh</span>
             </NuxtLink>
 
-            <template v-if="session.isAuthenticated">
+            <template v-if="session.me">
               <NuxtLink
                 to="/admin"
                 class="hidden sm:inline-flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-md bg-[#1D3A73] text-white hover:bg-[#1D3A73]/90 transition-colors"
@@ -72,7 +72,7 @@ const navLinks = [
                 type="button"
                 class="p-1.5 text-stone-500 hover:text-stone-700 rounded-md"
                 title="Đăng xuất"
-                @click="session.clearSession()"
+                @click="session.logout()"
               >
                 <UIcon name="i-heroicons-arrow-right-on-rectangle" class="h-4 w-4" />
               </button>
@@ -118,7 +118,7 @@ const navLinks = [
               Cổng phụ huynh tra cứu
             </NuxtLink>
             <NuxtLink
-              v-if="session.isAuthenticated"
+              v-if="session.me"
               to="/admin"
               class="block px-3 py-2 text-sm font-medium text-[#1D3A73] hover:bg-blue-50 rounded-md"
               @click="mobileMenuOpen = false"

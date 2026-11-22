@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/shared/permissions'
-import type { ApiError } from '~/composables/useApi'
+import { PERMISSIONS } from '../../../shared/permissions'
+import type { ApiError } from '../../../composables/useApi'
 
 definePageMeta({ layout: 'admin', permission: PERMISSIONS.Promotion.View })
 
@@ -662,7 +662,7 @@ function getOutcomeLabel(outcome: string) {
           <UButton
             color="primary"
             :loading="applying"
-            :disabled="batch?.approvedCount === 0 || (batch?.pendingCount > 0 && !skipPending)"
+            :disabled="batch?.approvedCount === 0 || (batch?.pendingCount ?? 0) > 0 && !skipPending"
             @click="handleApplyBatch"
           >
             Chính thức áp dụng

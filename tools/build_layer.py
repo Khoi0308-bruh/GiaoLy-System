@@ -12,7 +12,7 @@ for c,n,m,old in MA.PERMS:
 out="// Sinh tự động từ permission-matrix.csv. Không sửa tay: chạy tools/build_layer.py\nexport const PERMISSIONS = {\n"
 for mod,items in mods.items():
     out+=f"  {camel(mod)}: {{\n"+"".join(f"    {a}: '{c}', // {n}\n" for a,c,n in items)+"  },\n"
-out+="} as const\n\nexport type PermissionCode = typeof PERMISSIONS[keyof typeof PERMISSIONS][keyof typeof PERMISSIONS[keyof typeof PERMISSIONS]]\n"
+out+="} as const\n\n// Conditional phân phối trên union của các nhóm, rồi lấy hợp các giá trị chuỗi.\n// (Index thẳng bằng `keyof union` sẽ ra never vì các nhóm có bộ khoá khác nhau.)\ntype PermissionGroup = typeof PERMISSIONS[keyof typeof PERMISSIONS]\nexport type PermissionCode = PermissionGroup extends Record<string, infer V> ? V : never\n"
 W('app/shared/permissions.ts',out)
 # ---------- generated: errors.ts ----------
 FR={"AUTH_INVALID_CREDENTIALS":"Tên đăng nhập hoặc mật khẩu chưa đúng.","AUTH_LOCKED":"Tài khoản tạm khóa do nhập sai nhiều lần. Vui lòng thử lại sau ít phút.","AUTH_TOKEN_REVOKED":"Phiên đăng nhập đã hết hiệu lực. Vui lòng đăng nhập lại.","AUTH_MUST_CHANGE_PASSWORD":"Bạn cần đổi mật khẩu trước khi tiếp tục.","AUTH_PASSWORD_WEAK":"Mật khẩu chưa đạt yêu cầu: tối thiểu 10 ký tự, không chứa tên đăng nhập, không quá phổ biến.",

@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/shared/permissions'
-import { ApiError } from '~/composables/useApi'
-import { liturgicalDisplayColor, type LiturgicalEventDto } from '~/composables/useLiturgical'
+import { PERMISSIONS } from '../../shared/permissions'
+import { ApiError } from '../../composables/useApi'
+import { liturgicalDisplayColor, type LiturgicalEventDto } from '../../composables/useLiturgical'
 
 definePageMeta({ layout: 'admin' })
 

@@ -144,4 +144,7 @@ export const PERMISSIONS = {
   },
 } as const
 
-export type PermissionCode = typeof PERMISSIONS[keyof typeof PERMISSIONS][keyof typeof PERMISSIONS[keyof typeof PERMISSIONS]]
+// Conditional phân phối trên union của các nhóm, rồi lấy hợp các giá trị chuỗi.
+// (Index thẳng bằng `keyof union` sẽ ra never vì các nhóm có bộ khoá khác nhau.)
+type PermissionGroup = typeof PERMISSIONS[keyof typeof PERMISSIONS]
+export type PermissionCode = PermissionGroup extends Record<string, infer V> ? V : never

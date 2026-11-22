@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/shared/permissions'
-import type { ApiError } from '~/composables/useApi'
+import { PERMISSIONS } from '../../../shared/permissions'
+import type { ApiError } from '../../../composables/useApi'
 
 definePageMeta({ layout: 'admin', permission: PERMISSIONS.Academic.View })
 
@@ -95,7 +95,7 @@ async function initData() {
 
     if (years.value.length > 0) {
       const activeYear = years.value.find(y => y.status === 'Active')
-      selectedYearId.value = activeYear ? activeYear.id : years.value[0].id
+      selectedYearId.value = activeYear ? activeYear.id : years.value[0]?.id ?? ''
       await loadClassrooms()
     }
   } catch (e) {

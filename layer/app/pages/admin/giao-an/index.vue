@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/shared/permissions'
-import type { ApiError } from '~/composables/useApi'
+import { PERMISSIONS } from '../../../shared/permissions'
+import type { ApiError } from '../../../composables/useApi'
 
 definePageMeta({ layout: 'admin', permission: PERMISSIONS.LessonPlans.View })
 
@@ -104,7 +104,7 @@ const filteredPlans = computed(() => {
 
 function canEdit(p: LessonPlanSummary): boolean {
   if (can(PERMISSIONS.LessonPlans.ManageAll)) return true
-  if (can(PERMISSIONS.LessonPlans.Manage) && p.authorUserId === session.user?.id) return true
+  if (can(PERMISSIONS.LessonPlans.Manage) && p.authorUserId === session.me?.id) return true
   return false
 }
 
@@ -214,7 +214,7 @@ async function handleDeletePlan() {
 
 const stats = computed(() => {
   const total = plans.value.length
-  const myPlans = plans.value.filter(p => p.authorUserId === session.user?.id).length
+  const myPlans = plans.value.filter(p => p.authorUserId === session.me?.id).length
   const publicPlans = plans.value.filter(p => p.visibility === 'Public').length
   return { total, myPlans, publicPlans }
 })

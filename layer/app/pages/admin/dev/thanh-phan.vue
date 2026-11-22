@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ApiError } from '~/composables/useApi'
-import type { LiturgicalKey } from '~/composables/useLiturgical'
+import { ApiError } from '../../../composables/useApi'
+import type { LiturgicalKey } from '../../../composables/useLiturgical'
 
 definePageMeta({
   layout: 'admin',

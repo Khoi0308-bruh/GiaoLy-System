@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/shared/permissions'
-import type { ApiError } from '~/composables/useApi'
+import { PERMISSIONS } from '../../../../shared/permissions'
+import type { ApiError } from '../../../../composables/useApi'
 
 definePageMeta({ layout: 'admin', permission: PERMISSIONS.Academic.View })
 
@@ -114,6 +114,7 @@ const enrollNote = ref('')
 
 // Modal Chuyển Lớp
 const transferOpen = ref(false)
+const transfering = ref(false)
 const transferring = ref(false)
 const selectedEnrollment = ref<EnrollmentItem | null>(null)
 const transferForm = ref({
@@ -466,7 +467,7 @@ onMounted(loadClassroom)
               <h3 class="font-display text-lg font-bold text-stone-900 dark:text-stone-100">Đội ngũ Giáo lý viên</h3>
             </div>
             <UButton
-              v-can="PERMISSIONS.Academic.AssignTeachers"
+              v-can="PERMISSIONS.Classrooms.AssignTeachers"
               size="xs"
               variant="outline"
               icon="i-lucide-user-plus"

@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES, DEFAULT_ERROR } from '~/shared/errors'
+import { ERROR_MESSAGES, DEFAULT_ERROR } from '../shared/errors'
 
 interface ProblemDetails {
   status?: number
@@ -14,7 +14,9 @@ export class ApiError extends Error {
     public code: string,
     message: string,
     public fieldErrors: Record<string, string[]> = {},
-    public retryAfter?: number
+    public retryAfter?: number,
+    /** Thông điệp chi tiết từ server (ProblemDetails.detail), nếu có. */
+    public detail?: string
   ) {
     super(message)
   }
@@ -27,7 +29,7 @@ export function toApiError(error: unknown): ApiError {
   const fallback: Record<number, string> = { 401: 'AUTH_TOKEN_REVOKED', 403: 'FORBIDDEN', 404: 'NOT_FOUND', 409: 'CONFLICT_DUPLICATE', 429: 'RATE_LIMITED' }
   const code = data.code ?? fallback[status] ?? 'UNKNOWN'
   const retry = Number(e?.response?.headers?.get?.('retry-after')) || undefined
-  return new ApiError(status, code, ERROR_MESSAGES[code] ?? data.detail ?? DEFAULT_ERROR, data.errors ?? {}, retry)
+  return new ApiError(status, code, ERROR_MESSAGES[code] ?? data.detail ?? DEFAULT_ERROR, data.errors ?? {}, retry, data.detail)
 }
 
 export function useApi() {

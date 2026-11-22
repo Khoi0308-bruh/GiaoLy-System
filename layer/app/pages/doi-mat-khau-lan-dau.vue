@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import type { ApiError } from '~/composables/useApi'
-import { toApiError } from '~/composables/useApi'
+import type { ApiError } from '../composables/useApi'
+import { toApiError } from '../composables/useApi'
 
 const session = useSessionStore()
 const api = useApi()

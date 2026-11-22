@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/shared/permissions'
-import type { ApiError } from '~/composables/useApi'
+import { PERMISSIONS } from '../../../shared/permissions'
+import type { ApiError } from '../../../composables/useApi'
 
 definePageMeta({ layout: 'admin', permission: PERMISSIONS.Documents.View })
 
@@ -154,8 +154,8 @@ function openUploadModal() {
 
 function onFileSelected(event: Event) {
   const input = event.target as HTMLInputElement
-  if (!input.files || input.files.length === 0) return
-  const file = input.files[0]
+  const file = input.files?.[0]
+  if (!file) return
   uploadForm.value.fileName = file.name
   uploadForm.value.contentType = file.type || 'application/octet-stream'
 

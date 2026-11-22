@@ -13,7 +13,7 @@ const TABLE: Record<Domain, Record<string, [string, Tone]>> = {
   certificate: { Issued: ['Còn hiệu lực', 'success'], Revoked: ['Đã thu hồi', 'error'] }
 }
 
-const entry = computed(() => TABLE[props.domain][props.value] ?? [props.value, 'neutral' as Tone])
+const entry = computed<[string, Tone]>(() => TABLE[props.domain][props.value] ?? [props.value, 'neutral'])
 </script>
 
 <template>

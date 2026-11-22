@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { PERMISSIONS } from '~/shared/permissions'
-import type { ApiError } from '~/composables/useApi'
+import { PERMISSIONS } from '../../../shared/permissions'
+import type { ApiError } from '../../../composables/useApi'
 
 definePageMeta({ layout: 'admin', permission: PERMISSIONS.Reports.View })
 
@@ -129,7 +129,7 @@ async function initYears() {
     years.value = list || []
     if (years.value.length > 0) {
       const active = years.value.find(y => y.status === 'Active')
-      selectedYearId.value = active ? active.id : years.value[0].id
+      selectedYearId.value = active ? active.id : years.value[0]?.id ?? ''
       exportForm.value.academicYearId = selectedYearId.value
       await loadTabReport()
     }

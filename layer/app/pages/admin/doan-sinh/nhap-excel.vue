@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import type { ApiError } from '~/composables/useApi'
-import { toApiError } from '~/composables/useApi'
-import { PERMISSIONS } from '~/shared/permissions'
+import type { ApiError } from '../../../composables/useApi'
+import { toApiError } from '../../../composables/useApi'
+import { PERMISSIONS } from '../../../shared/permissions'
 
 definePageMeta({
   layout: 'admin',

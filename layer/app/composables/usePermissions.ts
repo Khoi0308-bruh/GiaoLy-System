@@ -1,4 +1,4 @@
-import type { PermissionCode } from '~/shared/permissions'
+import type { PermissionCode } from '../shared/permissions'
 
 export function usePermissions() {
   const session = useSessionStore()

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ApiError } from '~/composables/useApi'
+import { ApiError } from '../../composables/useApi'
 
 const route = useRoute()
 const api = useApi()
@@ -168,11 +168,7 @@ async function downloadCertificatePdf(cert: CertificateItem) {
   downloadingCertId.value = cert.id
   errorDownload.value = null
   try {
-    const blob = await api.get<Blob>(
-      `/portal/children/${childId.value}/certificates/${cert.id}/pdf`,
-      undefined,
-      { responseType: 'blob' }
-    )
+    const blob = await api.download(`/portal/children/${childId.value}/certificates/${cert.id}/pdf`)
     const url = window.URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url

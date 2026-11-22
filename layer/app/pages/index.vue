@@ -1,6 +1,6 @@
 <script setup lang="ts">
-import { ApiError } from '~/composables/useApi'
-import { liturgicalDisplayColor, type LiturgicalEventDto } from '~/composables/useLiturgical'
+import { ApiError } from '../composables/useApi'
+import { liturgicalDisplayColor, type LiturgicalEventDto } from '../composables/useLiturgical'
 
 definePageMeta({ public: true })
 
@@ -40,6 +40,7 @@ interface PublicAnnouncement {
 }
 
 const banners = ref<Banner[]>([])
+const heroBanner = computed(() => banners.value[0] ?? null)
 const liturgicalToday = ref<LiturgicalEventDto | null>(null)
 const liturgicalColor = computed(() => liturgicalDisplayColor(liturgicalToday.value?.color))
 const stats = ref<PublicStats | null>(null)
@@ -158,13 +159,13 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
 
           <div class="lg:col-span-5">
             <!-- Banner Card nếu có -->
-            <div v-if="banners.length > 0" class="rounded-2xl overflow-hidden border border-white/20 bg-white/5 backdrop-blur-md p-2 shadow-2xl">
-              <div v-if="banners[0].imageUrl" class="aspect-video w-full rounded-xl overflow-hidden bg-stone-800">
-                <img :src="banners[0].imageUrl" :alt="banners[0].title" class="h-full w-full object-cover">
+            <div v-if="heroBanner" class="rounded-2xl overflow-hidden border border-white/20 bg-white/5 backdrop-blur-md p-2 shadow-2xl">
+              <div v-if="heroBanner.imageUrl" class="aspect-video w-full rounded-xl overflow-hidden bg-stone-800">
+                <img :src="heroBanner.imageUrl" :alt="heroBanner.title" class="h-full w-full object-cover">
               </div>
               <div class="p-4 space-y-2">
-                <h3 class="font-serif text-lg font-bold text-white">{{ banners[0].title }}</h3>
-                <p v-if="banners[0].subtitle" class="text-xs text-stone-300">{{ banners[0].subtitle }}</p>
+                <h3 class="font-serif text-lg font-bold text-white">{{ heroBanner.title }}</h3>
+                <p v-if="heroBanner.subtitle" class="text-xs text-stone-300">{{ heroBanner.subtitle }}</p>
               </div>
             </div>
             <div v-else class="rounded-2xl border border-white/20 bg-white/5 backdrop-blur-md p-6 text-center space-y-3">
