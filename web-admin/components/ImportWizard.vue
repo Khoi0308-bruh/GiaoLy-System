@@ -104,7 +104,7 @@
                   <div v-if="row.errors.birthDate" class="text-[10px] text-red-500 absolute bottom-0 left-4 font-bold">{{ row.errors.birthDate }}</div>
                 </td>
                 <td class="px-4 py-3">
-                  <USelect v-model="row.branch" :options="[{ label: 'Chiên con', value: 1 }, { label: 'Ấu nhi', value: 2 }, { label: 'Thiếu nhi', value: 3 }, { label: 'Nghĩa sĩ', value: 4 }, { label: 'Hiệp sĩ', value: 5 }]" size="xs" variant="none" value-attribute="value" option-attribute="label" class="focus:bg-white dark:focus:bg-stone-900 rounded" @change="validateRow(row)" />
+                  <USelect v-model="row.branch" :items="branchItems" size="xs" variant="none" class="focus:bg-white dark:focus:bg-stone-900 rounded" @update:model-value="validateRow(row)" />
                 </td>
                 <td class="px-4 py-3">
                   <UInput v-model="row.className" size="xs" variant="none" class="bg-transparent focus:bg-white dark:focus:bg-stone-900 rounded" @blur="validateRow(row)" />
@@ -152,6 +152,14 @@ const props = defineProps({
 const emit = defineEmits(['imported'])
 const toast = useToast()
 const config = useRuntimeConfig()
+
+const branchItems = [
+  { label: 'Chiên con', value: 1 },
+  { label: 'Ấu nhi', value: 2 },
+  { label: 'Thiếu nhi', value: 3 },
+  { label: 'Nghĩa sĩ', value: 4 },
+  { label: 'Hiệp sĩ', value: 5 }
+]
 
 const fileInputRef = ref(null)
 const parsedData = ref([])
