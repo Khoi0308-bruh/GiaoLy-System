@@ -120,7 +120,7 @@
         </div>
       </div>
       
-      <UAlert v-if="duplicateCount > 0" title="Phát hiện hồ sơ trùng lặp" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" description="Có một số hồ sơ bị trùng tên và ngày sinh với dữ liệu trên hệ thống. Hệ thống sẽ tự động cập nhật đè lên thay vì tạo mới. Bạn có thể tự do sửa đổi trực tiếp ở bảng trên." />
+      <UAlert v-if="duplicateCount > 0" title="Phát hiện hồ sơ trùng lặp" icon="i-heroicons-exclamation-triangle" color="amber" variant="soft" description="Có một số hồ sơ trùng với dữ liệu đã có trên hệ thống. Khi đồng bộ, các dòng này sẽ được bỏ qua để không tạo hồ sơ trùng; mở hồ sơ đã có nếu cần cập nhật. Bạn có thể tự do sửa đổi trực tiếp ở bảng trên." />
     </div>
 
     <!-- Bước 3: Đồng Bộ Hoàn Tất -->
@@ -387,20 +387,41 @@ const saveData = async () => {
 
   isSaving.value = true
   const failures = []
+  const sacramentFailures = []
   let saved = 0
   try {
     // API không có endpoint lưu hàng loạt; tạo từng hồ sơ qua POST /students.
     for (const row of pending) {
       try {
-        await api.post('/students', {
+        const created = await api.post('/students', {
           holyName: row.holyName?.trim() || null,
           fullName: row.fullName.trim(),
           birthDate: row.birthDateStr,
           branchId: row.branch || null,
           bloodType: row.bloodType?.trim() || null,
           allergies: row.allergies?.trim() || null,
+          // Tệp chỉ có số điện thoại phụ huynh; để trống họ tên để không ghi đè
+          // tên của phụ huynh đã tồn tại (API khớp phụ huynh theo số điện thoại).
+          guardians: row.parentPhone?.trim()
+            ? [{ fullName: '', phone: row.parentPhone.trim(), relationship: 'Other', isPrimary: true }]
+            : [],
           hasPhotoConsent: false
         })
+
+        // Ngày bí tích phải ghi sau khi hồ sơ đã có Id.
+        for (const [type, date] of [
+          ['Baptism', row.baptismDateStr],
+          ['FirstCommunion', row.communionDateStr],
+          ['Confirmation', row.confirmationDateStr]
+        ]) {
+          if (!date) continue
+          try {
+            await api.put(`/students/${created.id}/sacraments/${type}`, { receivedOn: date })
+          } catch (err) {
+            sacramentFailures.push(`${row.fullName} (${type}): ${toApiError(err).message}`)
+          }
+        }
+
         saved++
       } catch (err) {
         failures.push(`${row.fullName}: ${toApiError(err).message}`)
@@ -416,6 +437,14 @@ const saveData = async () => {
       if (!saved) return
     } else {
       toast.add({ title: `Đã lưu ${saved} hồ sơ đoàn sinh`, color: 'success' })
+    }
+
+    if (sacramentFailures.length) {
+      toast.add({
+        title: `Chưa ghi được ngày bí tích cho ${sacramentFailures.length} mục`,
+        description: sacramentFailures.slice(0, 3).join(' · '),
+        color: 'warning'
+      })
     }
 
     currentStep.value = 3 // Move to step 3 (Success)
