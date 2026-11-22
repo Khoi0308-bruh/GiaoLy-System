@@ -11,14 +11,32 @@ const quickLinks = [
 </script>
 
 <template>
-  <footer class="relative mt-24 border-t overflow-hidden bg-white dark:bg-[#0a0d13]" style="border-color: rgba(201,169,110,0.25);">
+  <footer
+    class="relative mt-24 border-t overflow-hidden bg-white dark:bg-[#0a0d13]"
+    style="border-color: rgba(201,169,110,0.25);"
+  >
     <!-- Dải màu 5 Ngành TNTT tinh tế với hiệu ứng gradient -->
     <div class="flex h-2 w-full shadow-sm">
-      <div class="flex-1 bg-pink-500" title="Ngành Ấu Nhi" />
-      <div class="flex-1 bg-blue-500" title="Ngành Thiếu Nhi" />
-      <div class="flex-1 bg-emerald-500" title="Ngành Nghĩa Sĩ" />
-      <div class="flex-1 bg-red-600" title="Ngành Hiệp Sĩ" />
-      <div class="flex-1 bg-amber-700" title="Huynh Trưởng" />
+      <div
+        class="flex-1 bg-pink-500"
+        title="Ngành Ấu Nhi"
+      />
+      <div
+        class="flex-1 bg-blue-500"
+        title="Ngành Thiếu Nhi"
+      />
+      <div
+        class="flex-1 bg-emerald-500"
+        title="Ngành Nghĩa Sĩ"
+      />
+      <div
+        class="flex-1 bg-red-600"
+        title="Ngành Hiệp Sĩ"
+      />
+      <div
+        class="flex-1 bg-amber-700"
+        title="Huynh Trưởng"
+      />
     </div>
 
     <!-- Họa tiết Watermark chìm ở góc -->
@@ -41,10 +59,16 @@ const quickLinks = [
               "
             >
               <span class="text-white font-black text-2xl leading-none">✝</span>
-              <span class="text-white font-extrabold text-[9px] tracking-widest mt-0.5" style="color: #e8c98a;">TNTT</span>
+              <span
+                class="text-white font-extrabold text-[9px] tracking-widest mt-0.5"
+                style="color: #e8c98a;"
+              >TNTT</span>
             </div>
             <div>
-              <span class="text-[11px] font-black uppercase tracking-[0.25em]" style="color: #a07840;">
+              <span
+                class="text-[11px] font-black uppercase tracking-[0.25em]"
+                style="color: #a07840;"
+              >
                 Phong Trào Giới Trẻ
               </span>
               <h2 class="text-2xl font-black font-serif leading-tight uppercase text-[#1a3a6b] dark:text-[#e8c98a]">
@@ -138,7 +162,10 @@ const quickLinks = [
             </li>
           </ul>
 
-          <div class="mt-6 pt-6 border-t flex items-center gap-3" style="border-color: rgba(201,169,110,0.2);">
+          <div
+            class="mt-6 pt-6 border-t flex items-center gap-3"
+            style="border-color: rgba(201,169,110,0.2);"
+          >
             <span class="text-xs text-stone-400">Mạng xã hội:</span>
             <div class="flex gap-2">
               <UButton
@@ -174,8 +201,16 @@ const quickLinks = [
           &copy; {{ currentYear }} Hệ Thống Giáo Lý & Thiếu Nhi Thánh Thể. Mọi quyền được bảo lưu.
         </p>
         <div class="flex gap-5">
-          <NuxtLink to="#" class="hover:underline" style="color: #a07840;">Quy Chế Sinh Hoạt</NuxtLink>
-          <NuxtLink to="#" class="hover:underline" style="color: #a07840;">Bảo Vệ Thiếu Nhi</NuxtLink>
+          <NuxtLink
+            to="#"
+            class="hover:underline"
+            style="color: #a07840;"
+          >Quy Chế Sinh Hoạt</NuxtLink>
+          <NuxtLink
+            to="#"
+            class="hover:underline"
+            style="color: #a07840;"
+          >Bảo Vệ Thiếu Nhi</NuxtLink>
         </div>
       </div>
     </div>

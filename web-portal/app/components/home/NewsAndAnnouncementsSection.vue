@@ -35,9 +35,9 @@ const formatAnnouncementDate = (value?: string | null) => {
 
 <template>
   <div class="flex flex-col gap-12 mb-10 relative">
-
     <!-- Ambient glow (dark mode) -->
-    <div class="hidden dark:block absolute top-1/4 left-1/2 -translate-x-1/2 w-3/4 h-1/2 rounded-full pointer-events-none z-0"
+    <div
+      class="hidden dark:block absolute top-1/4 left-1/2 -translate-x-1/2 w-3/4 h-1/2 rounded-full pointer-events-none z-0"
       style="background: radial-gradient(ellipse, rgba(26,58,107,0.08) 0%, transparent 70%); filter: blur(80px);"
     />
 
@@ -51,8 +51,12 @@ const formatAnnouncementDate = (value?: string | null) => {
           <!-- Accent bar -->
           <div class="gold-accent-line" />
           <div>
-            <h2 class="section-heading">Tin Tức Mới Nhất</h2>
-            <p class="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Tin tức Công giáo & Giáo xứ</p>
+            <h2 class="section-heading">
+              Tin Tức Mới Nhất
+            </h2>
+            <p class="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+              Tin tức Công giáo & Giáo xứ
+            </p>
           </div>
         </div>
         <NuxtLink
@@ -61,7 +65,10 @@ const formatAnnouncementDate = (value?: string | null) => {
           style="color: #c9a96e;"
         >
           Xem tất cả
-          <UIcon name="i-heroicons-arrow-right-20-solid" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+          <UIcon
+            name="i-heroicons-arrow-right-20-solid"
+            class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+          />
         </NuxtLink>
       </div>
 
@@ -82,30 +89,41 @@ const formatAnnouncementDate = (value?: string | null) => {
             class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
           >
           <!-- Gradient overlay -->
-          <div class="absolute inset-0"
+          <div
+            class="absolute inset-0"
             style="background: linear-gradient(to top, rgba(13,17,23,0.92) 0%, rgba(13,17,23,0.3) 50%, transparent 100%);"
           />
           <!-- Viền vàng bottom -->
-          <div class="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
+          <div
+            class="absolute bottom-0 left-0 right-0 h-[2px] scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"
             style="background: linear-gradient(90deg, #c9a96e, #e8c98a);"
           />
           <!-- Content -->
           <div class="absolute inset-0 flex flex-col justify-end p-7">
             <!-- Category badge -->
-            <span class="inline-flex self-start px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase mb-3"
+            <span
+              class="inline-flex self-start px-3 py-1 rounded-full text-xs font-black tracking-wider uppercase mb-3"
               style="background: rgba(201,169,110,0.2); color: #e8c98a; border: 1px solid rgba(201,169,110,0.3); backdrop-filter: blur(8px);"
             >
               {{ news[0]?.category }}
             </span>
-            <h3 class="text-2xl md:text-3xl font-black text-white leading-snug group-hover:text-gold transition-colors duration-300 drop-shadow font-serif"
+            <h3
+              class="text-2xl md:text-3xl font-black text-white leading-snug group-hover:text-gold transition-colors duration-300 drop-shadow font-serif"
               style="--tw-text-opacity: 1;"
             >
               {{ news[0]?.title }}
             </h3>
             <!-- Read more arrow -->
             <div class="flex items-center gap-2 mt-4 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0 transition-all duration-300">
-              <span class="text-sm font-bold" style="color: #c9a96e;">Đọc tiếp</span>
-              <UIcon name="i-heroicons-arrow-right" class="w-4 h-4" style="color: #c9a96e;" />
+              <span
+                class="text-sm font-bold"
+                style="color: #c9a96e;"
+              >Đọc tiếp</span>
+              <UIcon
+                name="i-heroicons-arrow-right"
+                class="w-4 h-4"
+                style="color: #c9a96e;"
+              />
             </div>
           </div>
         </NuxtLink>
@@ -130,17 +148,27 @@ const formatAnnouncementDate = (value?: string | null) => {
             <!-- Text -->
             <div class="flex flex-col justify-between py-1 flex-1 min-w-0">
               <!-- Category -->
-              <span class="text-[10px] font-black tracking-widest uppercase mb-1" style="color: #c9a96e;">
+              <span
+                class="text-[10px] font-black tracking-widest uppercase mb-1"
+                style="color: #c9a96e;"
+              >
                 {{ item.category }}
               </span>
-              <h4 class="font-bold text-sm text-stone-800 dark:text-stone-100 group-hover:text-navy line-clamp-3 leading-snug transition-colors duration-200"
+              <h4
+                class="font-bold text-sm text-stone-800 dark:text-stone-100 group-hover:text-navy line-clamp-3 leading-snug transition-colors duration-200"
                 style="--hover-color: #1a3a6b;"
               >
                 {{ item.title }}
               </h4>
               <span class="text-xs text-stone-400 dark:text-stone-500 mt-1 flex items-center gap-1">
-                <UIcon name="i-heroicons-arrow-right-circle" class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity" />
-                <span class="opacity-0 group-hover:opacity-100 transition-opacity" style="color: #c9a96e;">Xem thêm</span>
+                <UIcon
+                  name="i-heroicons-arrow-right-circle"
+                  class="w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                />
+                <span
+                  class="opacity-0 group-hover:opacity-100 transition-opacity"
+                  style="color: #c9a96e;"
+                >Xem thêm</span>
               </span>
             </div>
           </NuxtLink>
@@ -148,10 +176,14 @@ const formatAnnouncementDate = (value?: string | null) => {
       </div>
 
       <!-- Skeleton / Empty state -->
-      <div v-else class="flex items-center justify-center h-40 rounded-2xl border border-dashed"
+      <div
+        v-else
+        class="flex items-center justify-center h-40 rounded-2xl border border-dashed"
         style="border-color: rgba(201,169,110,0.2); background: rgba(201,169,110,0.03);"
       >
-        <p class="text-stone-400 text-sm">Đang tải tin tức...</p>
+        <p class="text-stone-400 text-sm">
+          Đang tải tin tức...
+        </p>
       </div>
     </div>
 
@@ -159,14 +191,17 @@ const formatAnnouncementDate = (value?: string | null) => {
          BẢNG THÔNG BÁO — Modern Premium Board
     ══════════════════════════════════════════════════════════════════ -->
     <div class="relative z-10 w-full sacred-card p-6 md:p-8">
-
       <!-- Section Header -->
       <div class="flex items-center justify-between mb-8">
         <div class="flex items-center gap-4">
           <div class="gold-accent-line" />
           <div>
-            <h2 class="section-heading">Bảng Thông Báo</h2>
-            <p class="text-sm text-stone-500 dark:text-stone-400 mt-0.5">Cập nhật mới nhất từ Ban Điều Hành</p>
+            <h2 class="section-heading">
+              Bảng Thông Báo
+            </h2>
+            <p class="text-sm text-stone-500 dark:text-stone-400 mt-0.5">
+              Cập nhật mới nhất từ Ban Điều Hành
+            </p>
           </div>
         </div>
         <NuxtLink
@@ -175,7 +210,10 @@ const formatAnnouncementDate = (value?: string | null) => {
           style="color: #c9a96e;"
         >
           Xem bảng tin
-          <UIcon name="i-heroicons-arrow-right-20-solid" class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300" />
+          <UIcon
+            name="i-heroicons-arrow-right-20-solid"
+            class="w-4 h-4 group-hover:translate-x-1 transition-transform duration-300"
+          />
         </NuxtLink>
       </div>
 
@@ -193,7 +231,8 @@ const formatAnnouncementDate = (value?: string | null) => {
           <!-- Icon / Số thứ tự -->
           <div class="shrink-0 mt-0.5">
             <!-- Icon khẩn cấp -->
-            <div v-if="isUrgent(item)"
+            <div
+              v-if="isUrgent(item)"
               class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm"
               style="background: rgba(139,26,26,0.1);"
             >
@@ -204,7 +243,8 @@ const formatAnnouncementDate = (value?: string | null) => {
               />
             </div>
             <!-- Số thứ tự thường -->
-            <div v-else
+            <div
+              v-else
               class="w-10 h-10 rounded-xl flex items-center justify-center shadow-sm font-black text-sm font-serif"
               style="background: linear-gradient(135deg, rgba(26,58,107,0.08), rgba(201,169,110,0.08)); color: #1a3a6b;"
             >
@@ -223,7 +263,10 @@ const formatAnnouncementDate = (value?: string | null) => {
             <div class="flex items-center gap-3">
               <!-- Ngày đăng -->
               <span class="flex items-center gap-1 text-xs text-stone-500 dark:text-stone-400">
-                <UIcon name="i-heroicons-calendar" class="w-3.5 h-3.5" />
+                <UIcon
+                  name="i-heroicons-calendar"
+                  class="w-3.5 h-3.5"
+                />
                 {{ formatAnnouncementDate(item.publishedAt || item.createdAt) }}
               </span>
               <!-- Badge khẩn -->
@@ -249,13 +292,19 @@ const formatAnnouncementDate = (value?: string | null) => {
       </div>
 
       <!-- Empty state -->
-      <div v-if="!announcements || announcements.length === 0"
+      <div
+        v-if="!announcements || announcements.length === 0"
         class="flex flex-col items-center justify-center py-10 text-center"
       >
-        <UIcon name="i-heroicons-bell-slash" class="w-10 h-10 mb-2 opacity-20" style="color: #c9a96e;" />
-        <p class="text-sm text-stone-400">Chưa có thông báo nào.</p>
+        <UIcon
+          name="i-heroicons-bell-slash"
+          class="w-10 h-10 mb-2 opacity-20"
+          style="color: #c9a96e;"
+        />
+        <p class="text-sm text-stone-400">
+          Chưa có thông báo nào.
+        </p>
       </div>
     </div>
-
   </div>
 </template>

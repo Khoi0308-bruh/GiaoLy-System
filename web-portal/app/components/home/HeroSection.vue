@@ -73,7 +73,7 @@ const quickStats = computed(() => [
   { label: 'Đoàn Sinh', value: publicStats.value?.totalStudents, icon: 'i-heroicons-users' },
   { label: 'Huynh Trưởng', value: publicStats.value?.totalCatechists, icon: 'i-heroicons-academic-cap' },
   { label: 'Lớp Học', value: publicStats.value?.totalClasses, icon: 'i-heroicons-building-library' },
-  { label: 'Niên Khóa', value: publicStats.value?.totalActiveAcademicYears, icon: 'i-heroicons-star' },
+  { label: 'Niên Khóa', value: publicStats.value?.totalActiveAcademicYears, icon: 'i-heroicons-star' }
 ])
 
 // Số đoàn sinh và số lớp theo từng ngành, cùng nguồn /api/v1/public/stats.
@@ -82,12 +82,13 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
 
 <template>
   <div class="relative w-full mb-20 -mt-0">
-
     <!-- ══════════════════════════════════════════════════════════════
          HERO BANNER — Cinematic Edge-to-Edge
     ══════════════════════════════════════════════════════════════════ -->
-    <div class="relative w-full overflow-hidden shadow-2xl" style="box-shadow: 0 25px 60px rgba(26,58,107,0.25);">
-
+    <div
+      class="relative w-full overflow-hidden shadow-2xl"
+      style="box-shadow: 0 25px 60px rgba(26,58,107,0.25);"
+    >
       <!-- Bokeh particles giả (CSS only) -->
       <div class="bokeh-bg z-10" />
 
@@ -108,7 +109,6 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
       >
         <template #default="{ item }">
           <div class="relative w-full h-full group overflow-hidden">
-
             <!-- Ảnh nền với hiệu ứng zoom -->
             <img
               :src="item.imageUrl"
@@ -121,16 +121,20 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
             <div class="absolute inset-0 bg-gradient-to-t from-[#0d1117]/95 via-[#0d1117]/30 to-transparent" />
             <div class="absolute inset-0 bg-gradient-to-r from-[#0d1117]/80 via-[#0d1117]/20 to-transparent" />
             <!-- Viền vàng tinh tế ở bottom -->
-            <div class="absolute bottom-0 left-0 right-0 h-[3px]"
+            <div
+              class="absolute bottom-0 left-0 right-0 h-[3px]"
               style="background: linear-gradient(90deg, transparent, #c9a96e, transparent);"
             />
 
             <!-- Nội dung Slide — Typography "Spiritual Premium" -->
             <div class="absolute inset-0 flex flex-col justify-end p-6 sm:p-10 md:p-14 pb-24 sm:pb-28 z-10 max-w-4xl">
-
               <!-- Tag / Eyebrow Label -->
-              <div v-if="item.tag" class="mb-4">
-                <span class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black tracking-[0.2em] uppercase backdrop-blur-md border"
+              <div
+                v-if="item.tag"
+                class="mb-4"
+              >
+                <span
+                  class="inline-flex items-center px-4 py-1.5 rounded-full text-xs font-black tracking-[0.2em] uppercase backdrop-blur-md border"
                   style="
                     background: rgba(201,169,110,0.15);
                     border-color: rgba(201,169,110,0.4);
@@ -142,7 +146,8 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
               </div>
 
               <!-- Tiêu đề serif lớn -->
-              <h1 class="font-serif font-black text-white leading-[1.1] tracking-tight drop-shadow-2xl mb-4"
+              <h1
+                class="font-serif font-black text-white leading-[1.1] tracking-tight drop-shadow-2xl mb-4"
                 style="font-size: clamp(1.75rem, 5vw, 3.5rem);"
               >
                 {{ item.title }}
@@ -165,7 +170,10 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
                   class="gold-btn"
                 >
                   {{ item.ctaText || 'Xem Chi Tiết' }}
-                  <UIcon name="i-heroicons-arrow-right-20-solid" class="w-4 h-4" />
+                  <UIcon
+                    name="i-heroicons-arrow-right-20-solid"
+                    class="w-4 h-4"
+                  />
                 </NuxtLink>
 
                 <NuxtLink
@@ -231,13 +239,25 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
           :key="stat.label"
           class="sacred-card p-5 text-center group cursor-default"
         >
-          <div class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
+          <div
+            class="w-10 h-10 rounded-xl mx-auto mb-3 flex items-center justify-center transition-transform duration-300 group-hover:scale-110"
             style="background: linear-gradient(135deg, rgba(26,58,107,0.08), rgba(201,169,110,0.08));"
           >
-            <UIcon :name="stat.icon" class="w-5 h-5" style="color: #c9a96e;" />
+            <UIcon
+              :name="stat.icon"
+              class="w-5 h-5"
+              style="color: #c9a96e;"
+            />
           </div>
-          <div class="font-black text-2xl font-serif" style="color: #1a3a6b;">{{ stat.value ?? '—' }}</div>
-          <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 mt-0.5 tracking-wide uppercase">{{ stat.label }}</div>
+          <div
+            class="font-black text-2xl font-serif"
+            style="color: #1a3a6b;"
+          >
+            {{ stat.value ?? '—' }}
+          </div>
+          <div class="text-xs font-semibold text-stone-500 dark:text-stone-400 mt-0.5 tracking-wide uppercase">
+            {{ stat.label }}
+          </div>
         </div>
       </div>
 
@@ -251,7 +271,10 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
           :key="branch.branchId"
           class="sacred-card px-3 py-2.5 text-center"
         >
-          <div class="text-[11px] font-black uppercase tracking-[0.15em]" style="color: #a07840;">
+          <div
+            class="text-[11px] font-black uppercase tracking-[0.15em]"
+            style="color: #a07840;"
+          >
             {{ branch.branchName }}
           </div>
           <div class="mt-1 text-sm font-semibold text-stone-600 dark:text-stone-300">
@@ -260,6 +283,5 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
         </div>
       </div>
     </div>
-
   </div>
 </template>

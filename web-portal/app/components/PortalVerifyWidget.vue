@@ -64,19 +64,31 @@
           border-color: rgba(201,169,110,0.35);
         "
       >
-        <div class="flex items-start justify-between gap-4 border-b pb-4" style="border-color: rgba(201,169,110,0.2);">
+        <div
+          class="flex items-start justify-between gap-4 border-b pb-4"
+          style="border-color: rgba(201,169,110,0.2);"
+        >
           <div class="flex items-center gap-3">
             <div
               class="w-12 h-12 rounded-2xl flex items-center justify-center shadow-md shrink-0"
               style="background: linear-gradient(135deg, #1a3a6b, #2a5298);"
             >
-              <UIcon name="i-heroicons-academic-cap" class="w-6 h-6 text-white" />
+              <UIcon
+                name="i-heroicons-academic-cap"
+                class="w-6 h-6 text-white"
+              />
             </div>
             <div>
-              <span class="text-[10px] font-black uppercase tracking-widest" style="color: #a07840;">
+              <span
+                class="text-[10px] font-black uppercase tracking-widest"
+                style="color: #a07840;"
+              >
                 Kết quả hồ sơ
               </span>
-              <h3 class="font-black font-serif text-lg sm:text-xl text-navy" style="color: #1a3a6b;">
+              <h3
+                class="font-black font-serif text-lg sm:text-xl text-navy"
+                style="color: #1a3a6b;"
+              >
                 {{ result.displayName }}
               </h3>
               <span class="text-xs text-stone-400">{{ result.studentCode }}</span>
@@ -97,13 +109,19 @@
           </div>
           <div class="p-3 rounded-xl bg-white/70 dark:bg-stone-900/60 border border-stone-200/50">
             <span class="text-stone-400 block mb-0.5">Điểm Giáo Lý</span>
-            <span class="font-black text-sm font-serif" style="color: #1a3a6b;">
+            <span
+              class="font-black text-sm font-serif"
+              style="color: #1a3a6b;"
+            >
               {{ result.averageGrade !== null ? result.averageGrade.toFixed(1) : 'Chưa chấm' }}
             </span>
           </div>
           <div class="p-3 rounded-xl bg-white/70 dark:bg-stone-900/60 border border-stone-200/50">
             <span class="text-stone-400 block mb-0.5">Niên Khóa</span>
-            <span class="font-bold text-sm" style="color: #166534;">{{ result.academicYear || '—' }}</span>
+            <span
+              class="font-bold text-sm"
+              style="color: #166534;"
+            >{{ result.academicYear || '—' }}</span>
           </div>
         </div>
       </div>
@@ -117,7 +135,10 @@
           color: #8b1a1a;
         "
       >
-        <UIcon name="i-heroicons-exclamation-triangle" class="w-5 h-5 shrink-0" />
+        <UIcon
+          name="i-heroicons-exclamation-triangle"
+          class="w-5 h-5 shrink-0"
+        />
         <span>{{ errorMessage }}</span>
       </div>
     </Transition>
@@ -129,7 +150,10 @@
         style="color: #1a3a6b;"
       >
         <span>Mở trang tra cứu chi tiết</span>
-        <UIcon name="i-heroicons-arrow-right-20-solid" class="w-3.5 h-3.5" />
+        <UIcon
+          name="i-heroicons-arrow-right-20-solid"
+          class="w-3.5 h-3.5"
+        />
       </NuxtLink>
     </div>
   </div>

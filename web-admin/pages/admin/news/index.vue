@@ -2,19 +2,21 @@
   <div class="min-h-screen font-sans relative pb-24 overflow-hidden">
     <!-- BACKGROUND MESH GRADIENT -->
     <div class="fixed inset-0 pointer-events-none z-0">
-      <div class="absolute top-0 -left-32 w-[60vw] h-[60vw] rounded-full mix-blend-multiply filter blur-[120px] opacity-20 dark:opacity-10 animate-blob bg-sky-200 dark:bg-sky-900"></div>
-      <div class="absolute -bottom-32 right-0 w-[50vw] h-[50vw] rounded-full mix-blend-multiply filter blur-[120px] opacity-20 dark:opacity-10 animate-blob animation-delay-2000 bg-indigo-200 dark:bg-indigo-900"></div>
+      <div class="absolute top-0 -left-32 w-[60vw] h-[60vw] rounded-full mix-blend-multiply filter blur-[120px] opacity-20 dark:opacity-10 animate-blob bg-sky-200 dark:bg-sky-900" />
+      <div class="absolute -bottom-32 right-0 w-[50vw] h-[50vw] rounded-full mix-blend-multiply filter blur-[120px] opacity-20 dark:opacity-10 animate-blob animation-delay-2000 bg-indigo-200 dark:bg-indigo-900" />
     </div>
 
     <div class="relative z-10 space-y-6 animate-fade-in-up px-4 md:px-8 pt-8 max-w-7xl mx-auto">
-
       <!-- PAGE HEADER -->
       <div class="bg-white/40 dark:bg-stone-900/40 backdrop-blur-2xl border border-white/60 dark:border-stone-800 shadow-xl rounded-[2rem] p-8 flex flex-col md:flex-row items-center justify-between gap-6 relative overflow-hidden">
-        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-sky-400/20 to-transparent rounded-full blur-3xl pointer-events-none"></div>
+        <div class="absolute top-0 right-0 w-64 h-64 bg-gradient-to-bl from-sky-400/20 to-transparent rounded-full blur-3xl pointer-events-none" />
 
         <div class="z-10 text-center md:text-left">
           <div class="inline-flex items-center gap-2 px-3 py-1 mb-3 rounded-full bg-sky-100 dark:bg-sky-900/50 text-sky-600 dark:text-sky-300 text-xs font-black uppercase tracking-widest border border-sky-200 dark:border-sky-800 shadow-inner">
-            <UIcon name="i-heroicons-newspaper" class="w-4 h-4" />
+            <UIcon
+              name="i-heroicons-newspaper"
+              class="w-4 h-4"
+            />
             <span>Phan He Noi Dung</span>
           </div>
           <h1 class="text-3xl md:text-4xl font-black text-stone-800 dark:text-white tracking-tight">
@@ -46,7 +48,10 @@
       <!-- FILTER BAR -->
       <div class="bg-white/50 dark:bg-stone-900/50 backdrop-blur-xl border border-white/60 dark:border-stone-800 shadow-sm rounded-2xl p-4 flex flex-col sm:flex-row items-start sm:items-center gap-3">
         <div class="flex items-center gap-2 flex-shrink-0">
-          <UIcon name="i-heroicons-funnel" class="w-4 h-4 text-stone-400" />
+          <UIcon
+            name="i-heroicons-funnel"
+            class="w-4 h-4 text-stone-400"
+          />
           <span class="text-xs font-black text-stone-500 uppercase tracking-widest">Loc theo nguon:</span>
         </div>
         <USelect
@@ -68,9 +73,17 @@
       </div>
 
       <!-- LOADING -->
-      <div v-if="pending" class="flex flex-col items-center justify-center py-24">
-        <UIcon name="i-heroicons-arrow-path" class="w-12 h-12 animate-spin text-sky-400 mb-4" />
-        <p class="text-stone-500 font-bold uppercase tracking-widest text-sm">Dang tai tin tuc...</p>
+      <div
+        v-if="pending"
+        class="flex flex-col items-center justify-center py-24"
+      >
+        <UIcon
+          name="i-heroicons-arrow-path"
+          class="w-12 h-12 animate-spin text-sky-400 mb-4"
+        />
+        <p class="text-stone-500 font-bold uppercase tracking-widest text-sm">
+          Dang tai tin tuc...
+        </p>
       </div>
 
       <!-- ERROR -->
@@ -89,9 +102,16 @@
         v-else-if="!articles.length"
         class="text-center py-24 bg-white/40 dark:bg-stone-900/40 backdrop-blur-xl rounded-[2rem] border border-white/50 dark:border-stone-800 shadow-sm"
       >
-        <UIcon name="i-heroicons-newspaper" class="w-16 h-16 text-stone-300 dark:text-stone-700 mx-auto mb-4" />
-        <p class="text-stone-500 font-bold text-lg">Chua co bai viet nao.</p>
-        <p class="text-stone-400 text-sm mt-1">Thu dong bo de lay tin tuc moi nhat.</p>
+        <UIcon
+          name="i-heroicons-newspaper"
+          class="w-16 h-16 text-stone-300 dark:text-stone-700 mx-auto mb-4"
+        />
+        <p class="text-stone-500 font-bold text-lg">
+          Chua co bai viet nao.
+        </p>
+        <p class="text-stone-400 text-sm mt-1">
+          Thu dong bo de lay tin tuc moi nhat.
+        </p>
         <UButton
           label="Dong bo ngay"
           icon="i-heroicons-arrow-path"
@@ -127,7 +147,10 @@
                 rel="noopener"
                 class="font-bold text-stone-800 dark:text-white hover:text-sky-600 dark:hover:text-sky-400 transition-colors line-clamp-2 leading-snug"
               >{{ row.original.title }}</a>
-              <p v-else class="font-bold text-stone-800 dark:text-white line-clamp-2 leading-snug">
+              <p
+                v-else
+                class="font-bold text-stone-800 dark:text-white line-clamp-2 leading-snug"
+              >
                 {{ row.original.title }}
               </p>
             </div>
@@ -136,7 +159,7 @@
           <!-- Nguon -->
           <template #sourceName-cell="{ row }">
             <div class="flex items-center gap-2">
-              <div class="w-2 h-2 rounded-full bg-sky-400 flex-shrink-0"></div>
+              <div class="w-2 h-2 rounded-full bg-sky-400 flex-shrink-0" />
               <span class="text-xs font-bold text-stone-600 dark:text-stone-300 whitespace-nowrap">{{ row.original.sourceName || '—' }}</span>
             </div>
           </template>
@@ -150,7 +173,10 @@
               size="xs"
               class="font-bold uppercase tracking-wide rounded-lg whitespace-nowrap bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-300"
             />
-            <span v-else class="text-xs text-stone-400">—</span>
+            <span
+              v-else
+              class="text-xs text-stone-400"
+            >—</span>
           </template>
 
           <!-- Ngay dang -->
@@ -213,11 +239,10 @@
           :ui="{
             list: 'gap-1',
             item: { base: 'rounded-xl font-bold' },
-            active: 'bg-sky-500 text-white shadow-md',
+            active: 'bg-sky-500 text-white shadow-md'
           }"
         />
       </div>
-
     </div>
   </div>
 </template>
@@ -243,7 +268,7 @@ const perPageOptions = [
   { label: '10 / trang', value: 10 },
   { label: '15 / trang', value: 15 },
   { label: '25 / trang', value: 25 },
-  { label: '50 / trang', value: 50 },
+  { label: '50 / trang', value: 50 }
 ]
 
 // Types
@@ -280,7 +305,7 @@ const authHeaders = computed<Record<string, string>>(() =>
 const requestUrl = computed(() => {
   const params = new URLSearchParams({
     page: String(currentPage.value),
-    pageSize: String(perPage.value),
+    pageSize: String(perPage.value)
   })
   if (selectedSource.value && selectedSource.value !== 'all') params.set('sourceId', selectedSource.value)
   return `${apiBase}/api/v1/news/articles?${params.toString()}`
@@ -291,14 +316,14 @@ const { data: newsPage, pending, error, refresh } = await useFetch<PagedNews>(re
   headers: authHeaders,
   credentials: 'include',
   server: false,
-  default: () => ({ items: [], totalCount: 0, page: 1, pageSize: 15, totalPages: 0 }),
+  default: () => ({ items: [], totalCount: 0, page: 1, pageSize: 15, totalPages: 0 })
 })
 
 const { data: sources } = await useFetch<NewsSource[]>(`${apiBase}/api/v1/news/sources`, {
   headers: authHeaders,
   credentials: 'include',
   server: false,
-  default: () => [] as NewsSource[],
+  default: () => [] as NewsSource[]
 })
 
 const articles = computed(() => newsPage.value?.items ?? [])
@@ -309,24 +334,24 @@ const rangeEnd = computed(() => Math.min(currentPage.value * perPage.value, tota
 // Source filter options
 const sourceOptions = computed(() => [
   { label: 'Tat Ca Nguon', value: 'all' },
-  ...(sources.value ?? []).map(s => ({ label: s.name, value: s.id })),
+  ...(sources.value ?? []).map(s => ({ label: s.name, value: s.id }))
 ])
 
 watch([selectedSource, perPage], () => { currentPage.value = 1 })
 
 // Columns
 const columns = [
-  { accessorKey: 'title',       header: 'Tieu De' },
-  { accessorKey: 'sourceName',  header: 'Nguon' },
-  { accessorKey: 'category',    header: 'Danh Muc' },
+  { accessorKey: 'title', header: 'Tieu De' },
+  { accessorKey: 'sourceName', header: 'Nguon' },
+  { accessorKey: 'category', header: 'Danh Muc' },
   { accessorKey: 'publishedAt', header: 'Ngay Dang' },
-  { accessorKey: 'isActive',    header: 'Trang Thai' },
-  { accessorKey: 'actions',     header: '' },
+  { accessorKey: 'isActive', header: 'Trang Thai' },
+  { accessorKey: 'actions', header: '' }
 ]
 
 const getErrorMessage = (e: unknown, fallback: string) => {
   // API trả ProblemDetails nên thông điệp tiếng Việt nằm ở `detail`.
-  const err = e as { data?: { detail?: string; message?: string }; message?: string }
+  const err = e as { data?: { detail?: string, message?: string }, message?: string }
   return err?.data?.detail || err?.data?.message || err?.message || fallback
 }
 
@@ -334,7 +359,7 @@ const getErrorMessage = (e: unknown, fallback: string) => {
 const syncNow = async () => {
   syncing.value = true
   try {
-    const result = await $fetch<{ status: string; message?: string }>(
+    const result = await $fetch<{ status: string, message?: string }>(
       `${apiBase}/api/v1/news/sync`,
       { method: 'POST', headers: authHeaders.value, credentials: 'include' }
     )
@@ -357,11 +382,11 @@ const toggleActive = async (article: NewsArticle) => {
       method: 'PUT',
       headers: authHeaders.value,
       credentials: 'include',
-      body: { isActive: !article.isActive },
+      body: { isActive: !article.isActive }
     })
     toast.add({
       title: article.isActive ? 'Da an bai viet' : 'Da hien bai viet',
-      color: 'success',
+      color: 'success'
     })
     await refresh()
   } catch (e: unknown) {
@@ -371,10 +396,12 @@ const toggleActive = async (article: NewsArticle) => {
 
 // Date formatter
 const formatDate = (d?: string) =>
-  d ? new Date(d).toLocaleDateString('vi-VN', {
-    day: '2-digit', month: '2-digit', year: 'numeric',
-    hour: '2-digit', minute: '2-digit',
-  }) : '—'
+  d
+    ? new Date(d).toLocaleDateString('vi-VN', {
+        day: '2-digit', month: '2-digit', year: 'numeric',
+        hour: '2-digit', minute: '2-digit'
+      })
+    : '—'
 </script>
 
 <style scoped>

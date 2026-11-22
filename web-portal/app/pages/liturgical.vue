@@ -149,7 +149,7 @@ const { data, status, error, refresh } = await useAsyncData<LiturgicalEntry[]>(
     // Hai nguồn độc lập: một nguồn lỗi vẫn hiển thị được dữ liệu của nguồn còn lại.
     const [todayResult, monthResult] = await Promise.allSettled([
       $fetch<ApiLiturgicalEntry>(`${apiBase}/api/v1/public/liturgical/today`),
-      $fetch<ApiLiturgicalEntry[]>(`${apiBase}/api/v1/public/liturgical/month/${year}/${month}`),
+      $fetch<ApiLiturgicalEntry[]>(`${apiBase}/api/v1/public/liturgical/month/${year}/${month}`)
     ])
 
     if (todayResult.status === 'rejected' && monthResult.status === 'rejected') {
@@ -172,7 +172,7 @@ const { data, status, error, refresh } = await useAsyncData<LiturgicalEntry[]>(
         title: entry.title,
         liturgyName: entry.title,
         description: entry.description,
-        season: entry.colorNameVi,
+        season: entry.colorNameVi
       }))
   }
 )
@@ -181,7 +181,7 @@ const entries = computed(() => data.value ?? [])
 const loading = computed(() => status.value === 'pending')
 const loadError = computed(() => {
   if (!error.value) return null
-  const err = error.value as unknown as { data?: { detail?: string; message?: string }; message?: string }
+  const err = error.value as unknown as { data?: { detail?: string, message?: string }, message?: string }
   return err?.data?.detail || err?.data?.message || err?.message || 'Lỗi không xác định'
 })
 

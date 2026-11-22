@@ -3,7 +3,6 @@
   <div class="scroll-progress-bar" />
 
   <div class="min-h-screen bg-ivory dark:bg-[#0d1117] font-sans text-stone-900 dark:text-stone-100 transition-colors duration-300">
-
     <!-- ══════════════════════════════════════════════════════════════
          HEADER CỐ ĐỊNH — Glassmorphism Premium
     ══════════════════════════════════════════════════════════════════ -->
@@ -16,7 +15,6 @@
       ]"
     >
       <div class="max-w-[1400px] mx-auto px-4 sm:px-6 h-[68px] flex items-center gap-3">
-
         <!-- ── Logo / Brand ── -->
         <div class="flex items-center gap-3 shrink-0 lg:w-[260px]">
           <NuxtLink
@@ -24,12 +22,14 @@
             class="flex items-center gap-3 group"
           >
             <!-- Icon Thánh Thể -->
-            <div class="relative w-11 h-11 rounded-full flex items-center justify-center shadow-lg shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:shadow-gold/40"
+            <div
+              class="relative w-11 h-11 rounded-full flex items-center justify-center shadow-lg shrink-0 transition-all duration-500 group-hover:scale-110 group-hover:shadow-gold/40"
               style="background: linear-gradient(135deg, #1a3a6b, #2a5298);"
             >
               <span class="text-white font-black text-xl leading-none">✝</span>
               <!-- Vành vàng -->
-              <div class="absolute inset-0 rounded-full border-2 border-gold/40 group-hover:border-gold/80 transition-colors duration-300"
+              <div
+                class="absolute inset-0 rounded-full border-2 border-gold/40 group-hover:border-gold/80 transition-colors duration-300"
                 style="border-color: rgba(201,169,110,0.4);"
               />
             </div>
@@ -85,7 +85,8 @@
             class="flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 transition-all duration-300 border"
             style="background: rgba(26,58,107,0.06); border-color: rgba(201,169,110,0.2);"
           >
-            <div class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
+            <div
+              class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
               style="background: linear-gradient(135deg, #c9a96e, #e8c98a);"
             >
               <UIcon
@@ -126,7 +127,10 @@
               to="/"
               class="hover:text-navy dark:hover:text-gold transition-colors font-medium"
             >Trang Chủ</NuxtLink>
-            <UIcon name="i-heroicons-chevron-right" class="w-4 h-4 opacity-50" />
+            <UIcon
+              name="i-heroicons-chevron-right"
+              class="w-4 h-4 opacity-50"
+            />
             <span class="font-semibold text-navy dark:text-gold capitalize">
               {{ currentPageLabel }}
             </span>
@@ -146,16 +150,19 @@
       side="left"
       class="md:hidden z-[100]"
     >
-      <div class="flex flex-col h-full bg-ivory dark:bg-[#0d1117]"
+      <div
+        class="flex flex-col h-full bg-ivory dark:bg-[#0d1117]"
         style="background: linear-gradient(180deg, #faf8f3 0%, #f0ece0 100%);"
       >
         <!-- Header mobile menu -->
-        <div class="flex items-center justify-between p-5 border-b"
+        <div
+          class="flex items-center justify-between p-5 border-b"
           style="border-color: rgba(201,169,110,0.2);"
         >
           <!-- Avatar placeholder + tên -->
           <div class="flex items-center gap-3">
-            <div class="w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-md"
+            <div
+              class="w-12 h-12 rounded-full border-2 flex items-center justify-center shadow-md"
               style="background: linear-gradient(135deg, #1a3a6b, #2a5298); border-color: rgba(201,169,110,0.5);"
             >
               <span class="text-white font-black text-xl">✝</span>
@@ -206,7 +213,8 @@
         </nav>
 
         <!-- Footer mobile menu -->
-        <div class="p-5 border-t"
+        <div
+          class="p-5 border-t"
           style="border-color: rgba(201,169,110,0.2);"
         >
           <!-- 5 màu ngành -->
@@ -231,7 +239,8 @@
       <!-- Hover submenu -->
       <div class="absolute bottom-[68px] right-0 flex flex-col gap-2 scale-0 opacity-0 group-hover:scale-100 group-hover:opacity-100 transition-all duration-300 origin-bottom-right">
         <!-- Email -->
-        <button class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl font-semibold text-sm shadow-lg border transition-all duration-300 hover:-translate-y-0.5 whitespace-nowrap"
+        <button
+          class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl font-semibold text-sm shadow-lg border transition-all duration-300 hover:-translate-y-0.5 whitespace-nowrap"
           style="background: white; border-color: rgba(201,169,110,0.3); color: #1a3a6b; box-shadow: 0 4px 20px rgba(26,58,107,0.12);"
         >
           <UIcon
@@ -242,7 +251,8 @@
           <span>Email Huynh Trưởng</span>
         </button>
         <!-- Phone -->
-        <button class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl font-semibold text-sm shadow-lg border transition-all duration-300 hover:-translate-y-0.5 whitespace-nowrap"
+        <button
+          class="flex items-center gap-2.5 px-4 py-2.5 rounded-2xl font-semibold text-sm shadow-lg border transition-all duration-300 hover:-translate-y-0.5 whitespace-nowrap"
           style="background: white; border-color: rgba(201,169,110,0.3); color: #1a3a6b; box-shadow: 0 4px 20px rgba(26,58,107,0.12);"
         >
           <UIcon
@@ -305,7 +315,7 @@ const pageLabelMap: Record<string, string> = {
   '/library': 'Tài Liệu',
   '/liturgical': 'Lịch Phụng Vụ',
   '/verify': 'Tra Cứu',
-  '/profile': 'Hồ Sơ Cá Nhân',
+  '/profile': 'Hồ Sơ Cá Nhân'
 }
 // Trang con (vd /phu-huynh/<id>) dùng nhãn của đoạn đường dẫn đầu tiên thay vì in GUID thô.
 const currentPageLabel = computed(() => {
@@ -315,54 +325,54 @@ const currentPageLabel = computed(() => {
 })
 
 // ── Nav Items (top bar) ──
-interface NavItem { to: string; icon: string; label: string; badge?: string; external?: boolean }
+interface NavItem { to: string, icon: string, label: string, badge?: string, external?: boolean }
 const navItems: NavItem[] = [
   { to: '/', icon: 'i-heroicons-home-solid', label: 'Trang Chủ' },
   { to: '/leadership', icon: 'i-heroicons-user-group', label: 'Giới Thiệu' },
   { to: '/thong-bao', icon: 'i-heroicons-bell-alert', label: 'Thông Báo' },
   { to: '/news', icon: 'i-heroicons-newspaper', label: 'Tin Tức' },
   { to: useRuntimeConfig().public.adminBase as string, icon: 'i-heroicons-cog-6-tooth', label: 'Quản Lý Đoàn Sinh', external: true },
-  { to: '/library', icon: 'i-heroicons-book-open', label: 'Tài Liệu' },
+  { to: '/library', icon: 'i-heroicons-book-open', label: 'Tài Liệu' }
 ]
 
 // ── Sidebar Items (mobile menu) ──
-interface SidebarItem { to: string; label: string; desc: string; icon: string; iconBg: string; iconColor: string; badge?: string; external?: boolean }
+interface SidebarItem { to: string, label: string, desc: string, icon: string, iconBg: string, iconColor: string, badge?: string, external?: boolean }
 const sidebarItems: SidebarItem[] = [
   {
     to: '/', label: 'Trang Chủ', desc: 'Bản tin tổng hợp',
     icon: 'i-heroicons-home-solid',
-    iconBg: 'bg-blue-100 dark:bg-blue-900/30', iconColor: 'text-blue-700 dark:text-blue-400',
+    iconBg: 'bg-blue-100 dark:bg-blue-900/30', iconColor: 'text-blue-700 dark:text-blue-400'
   },
   {
     to: '/leadership', label: 'Ban Điều Hành Xứ', desc: 'Sơ đồ tổ chức Sứ Đoàn',
     icon: 'i-heroicons-user-group',
-    iconBg: 'bg-purple-100 dark:bg-purple-900/30', iconColor: 'text-purple-700 dark:text-purple-400',
+    iconBg: 'bg-purple-100 dark:bg-purple-900/30', iconColor: 'text-purple-700 dark:text-purple-400'
   },
   {
     to: '/thong-bao', label: 'Thông Báo', desc: 'Thông báo từ giáo xứ',
     icon: 'i-heroicons-bell-alert',
-    iconBg: 'bg-red-100 dark:bg-red-900/30', iconColor: 'text-red-700 dark:text-red-400',
+    iconBg: 'bg-red-100 dark:bg-red-900/30', iconColor: 'text-red-700 dark:text-red-400'
   },
   {
     to: '/news', label: 'Tin Tức', desc: 'Tin tức Công giáo',
     icon: 'i-heroicons-newspaper',
-    iconBg: 'bg-green-100 dark:bg-green-900/30', iconColor: 'text-green-700 dark:text-green-400',
+    iconBg: 'bg-green-100 dark:bg-green-900/30', iconColor: 'text-green-700 dark:text-green-400'
   },
   {
     to: 'http://localhost:3000', label: 'Quản Lý Đoàn Sinh', desc: 'Dành cho Huynh Trưởng',
     icon: 'i-heroicons-cog-6-tooth',
     iconBg: 'bg-stone-200 dark:bg-stone-800', iconColor: 'text-stone-700 dark:text-stone-400',
-    external: true,
+    external: true
   },
   {
     to: '/library', label: 'Tài Liệu', desc: 'Tài liệu học tập & biểu mẫu',
     icon: 'i-heroicons-book-open',
-    iconBg: 'bg-amber-100 dark:bg-amber-900/30', iconColor: 'text-amber-700 dark:text-amber-400',
+    iconBg: 'bg-amber-100 dark:bg-amber-900/30', iconColor: 'text-amber-700 dark:text-amber-400'
   },
   {
     to: '/profile', label: 'Thông Tin Cá Nhân', desc: 'Hồ sơ, điểm số, điểm danh',
     icon: 'i-heroicons-user',
-    iconBg: 'bg-yellow-100 dark:bg-yellow-900/30', iconColor: 'text-yellow-700 dark:text-yellow-400',
-  },
+    iconBg: 'bg-yellow-100 dark:bg-yellow-900/30', iconColor: 'text-yellow-700 dark:text-yellow-400'
+  }
 ]
 </script>

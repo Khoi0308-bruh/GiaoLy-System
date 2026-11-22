@@ -14,7 +14,10 @@
 
       <div class="relative max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
         <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-white/10 backdrop-blur-md border border-white/20 text-amber-200 text-xs font-bold uppercase tracking-widest mb-4">
-          <UIcon name="i-heroicons-users" class="w-4 h-4 text-amber-300" />
+          <UIcon
+            name="i-heroicons-users"
+            class="w-4 h-4 text-amber-300"
+          />
           <span>Cơ Cấu Tổ Chức Mục Vụ</span>
         </div>
         <h1 class="text-3xl sm:text-4xl md:text-5xl font-black uppercase tracking-tight drop-shadow-md text-white font-serif">
@@ -31,7 +34,10 @@
             :class="viewMode === 'chart' ? 'bg-amber-500 text-stone-950 shadow-md' : 'text-stone-200 hover:text-white'"
             @click="viewMode = 'chart'"
           >
-            <UIcon name="i-heroicons-rectangle-group" class="w-4 h-4" />
+            <UIcon
+              name="i-heroicons-rectangle-group"
+              class="w-4 h-4"
+            />
             <span>Sơ Đồ Phân Cấp (Org Chart)</span>
           </button>
           <button
@@ -39,7 +45,10 @@
             :class="viewMode === 'grid' ? 'bg-amber-500 text-stone-950 shadow-md' : 'text-stone-200 hover:text-white'"
             @click="viewMode = 'grid'"
           >
-            <UIcon name="i-heroicons-squares-2x2" class="w-4 h-4" />
+            <UIcon
+              name="i-heroicons-squares-2x2"
+              class="w-4 h-4"
+            />
             <span>Danh Sách Toàn Đoàn</span>
           </button>
         </div>
@@ -51,16 +60,25 @@
     ═══════════════════════════════════════════════════════ -->
     <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 -mt-6 relative z-10">
       <!-- Loading Skeleton -->
-      <div v-if="loading" class="space-y-8 pt-10">
+      <div
+        v-if="loading"
+        class="space-y-8 pt-10"
+      >
         <div class="h-32 bg-white/60 dark:bg-stone-900/60 rounded-3xl animate-pulse" />
         <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
-          <div v-for="n in 5" :key="n" class="h-80 bg-white/60 dark:bg-stone-900/60 rounded-3xl animate-pulse" />
+          <div
+            v-for="n in 5"
+            :key="n"
+            class="h-80 bg-white/60 dark:bg-stone-900/60 rounded-3xl animate-pulse"
+          />
         </div>
       </div>
 
       <!-- SƠ ĐỒ PHÂN CẤP ORG CHART (VIEW MODE: CHART) -->
-      <div v-else-if="viewMode === 'chart'" class="space-y-12 pt-6">
-
+      <div
+        v-else-if="viewMode === 'chart'"
+        class="space-y-12 pt-6"
+      >
         <!-- ───────────────────────────────────────────
              TẦNG 1: CHA TUYÊN ÚY (ĐỈNH CAO NHẤT)
         ─────────────────────────────────────────── -->
@@ -82,7 +100,10 @@
                 :alt="chaplainLeader.fullName"
                 class="w-full h-full object-cover group-hover:scale-105 transition-transform"
               >
-              <div v-else class="w-full h-full flex items-center justify-center text-3xl font-serif text-amber-700 dark:text-amber-300">
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center text-3xl font-serif text-amber-700 dark:text-amber-300"
+              >
                 ✝
               </div>
             </div>
@@ -105,9 +126,15 @@
             <div class="w-20 h-20 mx-auto mb-3 rounded-full bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center text-3xl text-amber-600">
               ✝
             </div>
-            <p class="text-xs font-bold text-amber-600 uppercase">Linh Mục</p>
-            <h3 class="font-black text-stone-800 dark:text-white">Cha Tuyên Úy</h3>
-            <p class="text-xs text-stone-500">Tổng linh hướng Xứ Đoàn</p>
+            <p class="text-xs font-bold text-amber-600 uppercase">
+              Linh Mục
+            </p>
+            <h3 class="font-black text-stone-800 dark:text-white">
+              Cha Tuyên Úy
+            </h3>
+            <p class="text-xs text-stone-500">
+              Tổng linh hướng Xứ Đoàn
+            </p>
           </div>
 
           <!-- Đường dây nối đứng -->
@@ -121,20 +148,46 @@
           <!-- Cánh Trái: BAN TRỢ TÁ -->
           <div class="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md rounded-3xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm text-center">
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-orange-100 dark:bg-orange-950/50 text-orange-700 dark:text-orange-300 text-xs font-bold uppercase tracking-wider mb-3">
-              <UIcon name="i-heroicons-hand-raised" class="w-4 h-4" />
+              <UIcon
+                name="i-heroicons-hand-raised"
+                class="w-4 h-4"
+              />
               <span>Ban Trợ Tá</span>
             </div>
-            <div v-if="troTaLeaders.length" class="flex flex-wrap justify-center gap-3">
-              <div v-for="lead in troTaLeaders" :key="lead.id" class="text-center">
+            <div
+              v-if="troTaLeaders.length"
+              class="flex flex-wrap justify-center gap-3"
+            >
+              <div
+                v-for="lead in troTaLeaders"
+                :key="lead.id"
+                class="text-center"
+              >
                 <div class="w-14 h-14 mx-auto mb-1.5 rounded-full overflow-hidden ring-2 ring-orange-300 bg-stone-100 dark:bg-stone-800">
-                  <img v-if="lead.avatarPath" :src="getAvatarUrl(lead.avatarPath)" class="w-full h-full object-cover">
-                  <span v-else class="w-full h-full flex items-center justify-center font-bold text-orange-600">{{ lead.fullName.charAt(0) }}</span>
+                  <img
+                    v-if="lead.avatarPath"
+                    :src="getAvatarUrl(lead.avatarPath)"
+                    class="w-full h-full object-cover"
+                  >
+                  <span
+                    v-else
+                    class="w-full h-full flex items-center justify-center font-bold text-orange-600"
+                  >{{ lead.fullName.charAt(0) }}</span>
                 </div>
-                <p class="text-[11px] font-bold text-stone-800 dark:text-stone-200 line-clamp-1">{{ lead.fullName }}</p>
-                <p class="text-[10px] text-stone-500">{{ lead.position || 'Trợ Tá' }}</p>
+                <p class="text-[11px] font-bold text-stone-800 dark:text-stone-200 line-clamp-1">
+                  {{ lead.fullName }}
+                </p>
+                <p class="text-[10px] text-stone-500">
+                  {{ lead.position || 'Trợ Tá' }}
+                </p>
               </div>
             </div>
-            <p v-else class="text-xs text-stone-400 italic py-3">Quý Phụ Huynh & Hội Đồng Mục Vụ đồng hành</p>
+            <p
+              v-else
+              class="text-xs text-stone-400 italic py-3"
+            >
+              Quý Phụ Huynh & Hội Đồng Mục Vụ đồng hành
+            </p>
           </div>
 
           <!-- Trung tâm: CHA ĐẶC TRÁCH -->
@@ -150,7 +203,10 @@
                   :alt="specialPriestLeader.fullName"
                   class="w-full h-full object-cover"
                 >
-                <div v-else class="w-full h-full flex items-center justify-center text-2xl font-serif text-amber-700 dark:text-amber-400">
+                <div
+                  v-else
+                  class="w-full h-full flex items-center justify-center text-2xl font-serif text-amber-700 dark:text-amber-400"
+                >
                   ✝
                 </div>
               </div>
@@ -171,28 +227,58 @@
               <div class="w-16 h-16 mx-auto mb-2 rounded-full bg-amber-100 dark:bg-amber-950/40 flex items-center justify-center text-2xl text-amber-600">
                 ✝
               </div>
-              <h3 class="font-bold text-stone-800 dark:text-white">Cha Đặc Trách</h3>
-              <p class="text-xs text-stone-500">Điều hành mục vụ thiếu nhi</p>
+              <h3 class="font-bold text-stone-800 dark:text-white">
+                Cha Đặc Trách
+              </h3>
+              <p class="text-xs text-stone-500">
+                Điều hành mục vụ thiếu nhi
+              </p>
             </div>
           </div>
 
           <!-- Cánh Phải: BAN TRỢ ÚY (Quý Dì / Thầy) -->
           <div class="bg-white/80 dark:bg-stone-900/80 backdrop-blur-md rounded-3xl p-5 border border-stone-200 dark:border-stone-800 shadow-sm text-center">
             <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-xl bg-purple-100 dark:bg-purple-950/50 text-purple-700 dark:text-purple-300 text-xs font-bold uppercase tracking-wider mb-3">
-              <UIcon name="i-heroicons-sparkles" class="w-4 h-4" />
+              <UIcon
+                name="i-heroicons-sparkles"
+                class="w-4 h-4"
+              />
               <span>Ban Trợ Úy</span>
             </div>
-            <div v-if="troUyLeaders.length" class="flex flex-wrap justify-center gap-3">
-              <div v-for="lead in troUyLeaders" :key="lead.id" class="text-center">
+            <div
+              v-if="troUyLeaders.length"
+              class="flex flex-wrap justify-center gap-3"
+            >
+              <div
+                v-for="lead in troUyLeaders"
+                :key="lead.id"
+                class="text-center"
+              >
                 <div class="w-14 h-14 mx-auto mb-1.5 rounded-full overflow-hidden ring-2 ring-purple-300 bg-stone-100 dark:bg-stone-800">
-                  <img v-if="lead.avatarPath" :src="getAvatarUrl(lead.avatarPath)" class="w-full h-full object-cover">
-                  <span v-else class="w-full h-full flex items-center justify-center font-bold text-purple-600">{{ lead.fullName.charAt(0) }}</span>
+                  <img
+                    v-if="lead.avatarPath"
+                    :src="getAvatarUrl(lead.avatarPath)"
+                    class="w-full h-full object-cover"
+                  >
+                  <span
+                    v-else
+                    class="w-full h-full flex items-center justify-center font-bold text-purple-600"
+                  >{{ lead.fullName.charAt(0) }}</span>
                 </div>
-                <p class="text-[11px] font-bold text-stone-800 dark:text-stone-200 line-clamp-1">{{ lead.fullName }}</p>
-                <p class="text-[10px] text-stone-500">{{ lead.position || 'Trợ Úy' }}</p>
+                <p class="text-[11px] font-bold text-stone-800 dark:text-stone-200 line-clamp-1">
+                  {{ lead.fullName }}
+                </p>
+                <p class="text-[10px] text-stone-500">
+                  {{ lead.position || 'Trợ Úy' }}
+                </p>
               </div>
             </div>
-            <p v-else class="text-xs text-stone-400 italic py-3">Quý Tu Sĩ & Trợ Úy linh hướng</p>
+            <p
+              v-else
+              class="text-xs text-stone-400 italic py-3"
+            >
+              Quý Tu Sĩ & Trợ Úy linh hướng
+            </p>
           </div>
         </div>
 
@@ -207,10 +293,15 @@
         <div class="bg-gradient-to-r from-amber-500/10 via-amber-500/20 to-amber-500/10 dark:from-stone-900/90 dark:to-stone-900/90 border-2 border-amber-400/50 dark:border-amber-600/40 rounded-[2.5rem] p-6 sm:p-8 max-w-5xl mx-auto shadow-xl backdrop-blur-md">
           <div class="text-center mb-6">
             <div class="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-amber-500 text-stone-950 font-black text-xs uppercase tracking-widest shadow-sm">
-              <UIcon name="i-heroicons-star" class="w-4 h-4" />
+              <UIcon
+                name="i-heroicons-star"
+                class="w-4 h-4"
+              />
               <span>Ban Điều Hành Xứ Đoàn</span>
             </div>
-            <p class="text-xs text-stone-500 dark:text-stone-400 mt-2 font-medium">Nhiệm Kỳ 2023 - 2026</p>
+            <p class="text-xs text-stone-500 dark:text-stone-400 mt-2 font-medium">
+              Nhiệm Kỳ 2023 - 2026
+            </p>
           </div>
 
           <div class="grid grid-cols-2 sm:grid-cols-4 gap-4 sm:gap-6">
@@ -226,13 +317,22 @@
                   :alt="leader.fullName"
                   class="w-full h-full object-cover group-hover:scale-105 transition-transform"
                 >
-                <div v-else class="w-full h-full flex items-center justify-center text-xl font-bold text-amber-600">
+                <div
+                  v-else
+                  class="w-full h-full flex items-center justify-center text-xl font-bold text-amber-600"
+                >
                   {{ leader.fullName.charAt(0) }}
                 </div>
               </div>
-              <p class="text-[10px] text-stone-400 uppercase font-bold tracking-wider">{{ leader.holyName }}</p>
-              <h4 class="font-bold text-stone-900 dark:text-white text-sm line-clamp-1 mt-0.5">{{ leader.fullName }}</h4>
-              <p class="text-xs font-bold text-amber-600 dark:text-amber-400 mt-1 line-clamp-1">{{ leader.position }}</p>
+              <p class="text-[10px] text-stone-400 uppercase font-bold tracking-wider">
+                {{ leader.holyName }}
+              </p>
+              <h4 class="font-bold text-stone-900 dark:text-white text-sm line-clamp-1 mt-0.5">
+                {{ leader.fullName }}
+              </h4>
+              <p class="text-xs font-bold text-amber-600 dark:text-amber-400 mt-1 line-clamp-1">
+                {{ leader.position }}
+              </p>
             </div>
           </div>
         </div>
@@ -260,37 +360,65 @@
             >
               <!-- Header Ngành -->
               <div :class="['p-4 text-center text-white', branch.headerClass]">
-                <div class="text-2xl mb-1">{{ branch.icon }}</div>
-                <h3 class="font-black text-sm uppercase tracking-wider">{{ branch.name }}</h3>
-                <p class="text-[10px] opacity-90 font-medium">{{ branch.ageRange }}</p>
+                <div class="text-2xl mb-1">
+                  {{ branch.icon }}
+                </div>
+                <h3 class="font-black text-sm uppercase tracking-wider">
+                  {{ branch.name }}
+                </h3>
+                <p class="text-[10px] opacity-90 font-medium">
+                  {{ branch.ageRange }}
+                </p>
               </div>
 
               <div class="p-4 space-y-4 flex-1">
                 <!-- Box Trưởng Ngành -->
                 <div>
                   <div class="text-[10px] font-black uppercase tracking-wider text-stone-400 mb-2 flex items-center gap-1">
-                    <UIcon name="i-heroicons-shield-check" class="w-3.5 h-3.5 text-amber-500" />
+                    <UIcon
+                      name="i-heroicons-shield-check"
+                      class="w-3.5 h-3.5 text-amber-500"
+                    />
                     <span>Ban Trưởng Ngành</span>
                   </div>
 
-                  <div v-if="getBranchChiefs(branch.id).length" class="space-y-2">
+                  <div
+                    v-if="getBranchChiefs(branch.id).length"
+                    class="space-y-2"
+                  >
                     <div
                       v-for="chief in getBranchChiefs(branch.id)"
                       :key="chief.id"
                       class="bg-stone-50 dark:bg-stone-800/60 p-2.5 rounded-2xl border border-stone-200/60 dark:border-stone-700/60 flex items-center gap-3"
                     >
                       <div class="w-10 h-10 rounded-full overflow-hidden shrink-0 ring-2 ring-stone-300 dark:ring-stone-600 bg-stone-200">
-                        <img v-if="chief.avatarPath" :src="getAvatarUrl(chief.avatarPath)" class="w-full h-full object-cover">
-                        <span v-else class="w-full h-full flex items-center justify-center font-bold text-xs">{{ chief.fullName.charAt(0) }}</span>
+                        <img
+                          v-if="chief.avatarPath"
+                          :src="getAvatarUrl(chief.avatarPath)"
+                          class="w-full h-full object-cover"
+                        >
+                        <span
+                          v-else
+                          class="w-full h-full flex items-center justify-center font-bold text-xs"
+                        >{{ chief.fullName.charAt(0) }}</span>
                       </div>
                       <div class="overflow-hidden">
-                        <p class="text-[10px] text-stone-400 font-semibold">{{ chief.holyName }}</p>
-                        <p class="text-xs font-bold text-stone-800 dark:text-white truncate">{{ chief.fullName }}</p>
-                        <p class="text-[10px] text-amber-600 font-medium">{{ chief.position || 'Trưởng ngành' }}</p>
+                        <p class="text-[10px] text-stone-400 font-semibold">
+                          {{ chief.holyName }}
+                        </p>
+                        <p class="text-xs font-bold text-stone-800 dark:text-white truncate">
+                          {{ chief.fullName }}
+                        </p>
+                        <p class="text-[10px] text-amber-600 font-medium">
+                          {{ chief.position || 'Trưởng ngành' }}
+                        </p>
                       </div>
                     </div>
                   </div>
-                  <div v-else class="text-xs text-stone-400 italic bg-stone-50 dark:bg-stone-800/40 p-2.5 rounded-2xl text-center">
+                  <div
+                    v-else
+                    class="text-xs text-stone-400 italic bg-stone-50 dark:bg-stone-800/40 p-2.5 rounded-2xl text-center"
+                  >
                     Đang kiện toàn nhân sự
                   </div>
                 </div>
@@ -298,11 +426,17 @@
                 <!-- Lưới GLV Đứng Lớp -->
                 <div>
                   <div class="text-[10px] font-black uppercase tracking-wider text-stone-400 mb-2 flex items-center gap-1">
-                    <UIcon name="i-heroicons-academic-cap" class="w-3.5 h-3.5 text-blue-500" />
+                    <UIcon
+                      name="i-heroicons-academic-cap"
+                      class="w-3.5 h-3.5 text-blue-500"
+                    />
                     <span>Giáo Lý Viên Đứng Lớp</span>
                   </div>
 
-                  <div v-if="getBranchTeachers(branch.id).length" class="grid grid-cols-2 gap-2">
+                  <div
+                    v-if="getBranchTeachers(branch.id).length"
+                    class="grid grid-cols-2 gap-2"
+                  >
                     <div
                       v-for="teacher in getBranchTeachers(branch.id)"
                       :key="teacher.id"
@@ -310,17 +444,31 @@
                       @click="selectedLeader = teacher"
                     >
                       <div class="w-12 h-12 mx-auto mb-1.5 rounded-xl overflow-hidden ring-1 ring-stone-200 bg-stone-200 dark:bg-stone-700">
-                        <img v-if="teacher.avatarPath" :src="getAvatarUrl(teacher.avatarPath)" class="w-full h-full object-cover">
-                        <span v-else class="w-full h-full flex items-center justify-center font-bold text-xs text-stone-600 dark:text-stone-300">{{ teacher.fullName.charAt(0) }}</span>
+                        <img
+                          v-if="teacher.avatarPath"
+                          :src="getAvatarUrl(teacher.avatarPath)"
+                          class="w-full h-full object-cover"
+                        >
+                        <span
+                          v-else
+                          class="w-full h-full flex items-center justify-center font-bold text-xs text-stone-600 dark:text-stone-300"
+                        >{{ teacher.fullName.charAt(0) }}</span>
                       </div>
-                      <p class="text-[9px] text-stone-400 truncate">{{ teacher.holyName }}</p>
-                      <p class="text-[11px] font-bold text-stone-800 dark:text-stone-200 truncate">{{ teacher.fullName }}</p>
+                      <p class="text-[9px] text-stone-400 truncate">
+                        {{ teacher.holyName }}
+                      </p>
+                      <p class="text-[11px] font-bold text-stone-800 dark:text-stone-200 truncate">
+                        {{ teacher.fullName }}
+                      </p>
                       <span class="inline-block px-1.5 py-0.5 rounded text-[9px] font-bold bg-white dark:bg-stone-700 text-stone-600 dark:text-stone-300 mt-1 border border-stone-200 dark:border-stone-600">
                         {{ teacher.position || 'GLV' }}
                       </span>
                     </div>
                   </div>
-                  <div v-else class="text-xs text-stone-400 italic text-center py-4 bg-stone-50 dark:bg-stone-800/30 rounded-2xl">
+                  <div
+                    v-else
+                    class="text-xs text-stone-400 italic text-center py-4 bg-stone-50 dark:bg-stone-800/30 rounded-2xl"
+                  >
                     Chưa phân công GLV
                   </div>
                 </div>
@@ -328,11 +476,13 @@
             </div>
           </div>
         </div>
-
       </div>
 
       <!-- CHẾ ĐỘ XEM GRID TOÀN ĐOÀN (VIEW MODE: GRID) -->
-      <div v-else class="space-y-8 pt-8">
+      <div
+        v-else
+        class="space-y-8 pt-8"
+      >
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 gap-4">
           <div
             v-for="lead in leaders"
@@ -341,12 +491,27 @@
             @click="selectedLeader = lead"
           >
             <div class="w-16 h-16 mx-auto mb-2 rounded-2xl overflow-hidden ring-2 ring-amber-400/40 bg-stone-100 dark:bg-stone-800">
-              <img v-if="lead.avatarPath" :src="getAvatarUrl(lead.avatarPath)" class="w-full h-full object-cover">
-              <div v-else class="w-full h-full flex items-center justify-center font-bold text-amber-600">{{ lead.fullName.charAt(0) }}</div>
+              <img
+                v-if="lead.avatarPath"
+                :src="getAvatarUrl(lead.avatarPath)"
+                class="w-full h-full object-cover"
+              >
+              <div
+                v-else
+                class="w-full h-full flex items-center justify-center font-bold text-amber-600"
+              >
+                {{ lead.fullName.charAt(0) }}
+              </div>
             </div>
-            <p class="text-[10px] text-stone-400 font-bold uppercase">{{ lead.holyName }}</p>
-            <h4 class="font-bold text-stone-900 dark:text-white text-xs truncate">{{ lead.fullName }}</h4>
-            <p class="text-[11px] text-amber-600 font-medium truncate mt-0.5">{{ lead.position }}</p>
+            <p class="text-[10px] text-stone-400 font-bold uppercase">
+              {{ lead.holyName }}
+            </p>
+            <h4 class="font-bold text-stone-900 dark:text-white text-xs truncate">
+              {{ lead.fullName }}
+            </h4>
+            <p class="text-[11px] text-amber-600 font-medium truncate mt-0.5">
+              {{ lead.position }}
+            </p>
           </div>
         </div>
       </div>
@@ -354,19 +519,46 @@
 
     <!-- MODAL CHI TIẾT GLV -->
     <UModal v-model="isDetailOpen">
-      <div v-if="selectedLeader" class="p-6 text-center">
+      <div
+        v-if="selectedLeader"
+        class="p-6 text-center"
+      >
         <div class="w-24 h-24 mx-auto mb-4 rounded-3xl overflow-hidden ring-4 ring-amber-400 shadow-lg bg-stone-100">
-          <img v-if="selectedLeader.avatarPath" :src="getAvatarUrl(selectedLeader.avatarPath)" class="w-full h-full object-cover">
-          <div v-else class="w-full h-full flex items-center justify-center text-3xl font-bold text-amber-600">{{ selectedLeader.fullName.charAt(0) }}</div>
+          <img
+            v-if="selectedLeader.avatarPath"
+            :src="getAvatarUrl(selectedLeader.avatarPath)"
+            class="w-full h-full object-cover"
+          >
+          <div
+            v-else
+            class="w-full h-full flex items-center justify-center text-3xl font-bold text-amber-600"
+          >
+            {{ selectedLeader.fullName.charAt(0) }}
+          </div>
         </div>
-        <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">{{ selectedLeader.holyName }}</p>
-        <h3 class="text-xl font-black text-stone-900 dark:text-white mt-1">{{ selectedLeader.fullName }}</h3>
-        <p class="text-sm font-bold text-stone-600 dark:text-stone-300 mt-1">{{ selectedLeader.position }}</p>
-        <div v-if="selectedLeader.description" class="mt-4 p-4 rounded-2xl bg-amber-50 dark:bg-stone-800 text-xs italic text-stone-600 dark:text-stone-300">
+        <p class="text-xs font-bold text-amber-600 uppercase tracking-wider">
+          {{ selectedLeader.holyName }}
+        </p>
+        <h3 class="text-xl font-black text-stone-900 dark:text-white mt-1">
+          {{ selectedLeader.fullName }}
+        </h3>
+        <p class="text-sm font-bold text-stone-600 dark:text-stone-300 mt-1">
+          {{ selectedLeader.position }}
+        </p>
+        <div
+          v-if="selectedLeader.description"
+          class="mt-4 p-4 rounded-2xl bg-amber-50 dark:bg-stone-800 text-xs italic text-stone-600 dark:text-stone-300"
+        >
           "{{ selectedLeader.description }}"
         </div>
         <div class="mt-6">
-          <UButton label="Đóng" color="neutral" variant="soft" class="rounded-xl px-6" @click="selectedLeader = null" />
+          <UButton
+            label="Đóng"
+            color="neutral"
+            variant="soft"
+            class="rounded-xl px-6"
+            @click="selectedLeader = null"
+          />
         </div>
       </div>
     </UModal>
@@ -491,11 +683,11 @@ const troUyLeaders = computed(() => {
 
 // Ban Điều Hành Xứ Đoàn (Xứ đoàn trưởng, phó, thư ký, thủ quỹ)
 const bdhLeaders = computed(() => {
-  return leaders.value.filter(l => {
+  return leaders.value.filter((l) => {
     const pos = l.position.toLowerCase()
-    return (l.level === 2 || l.level === 3) && 
-      (pos.includes('xứ đoàn') || pos.includes('thư ký') || pos.includes('thủ quỹ') || pos.includes('trưởng ban')) &&
-      !pos.includes('đặc trách')
+    return (l.level === 2 || l.level === 3)
+      && (pos.includes('xứ đoàn') || pos.includes('thư ký') || pos.includes('thủ quỹ') || pos.includes('trưởng ban'))
+      && !pos.includes('đặc trách')
   })
 })
 
@@ -504,14 +696,14 @@ const branchOf = (l: Leader) => l.branchId ?? l.branch ?? null
 
 // Lấy danh sách Trưởng Ngành cho từng Ngành
 const getBranchChiefs = (branchId: number) => {
-  return leaders.value.filter(l => {
+  return leaders.value.filter((l) => {
     return branchOf(l) === branchId && (l.level === 3 || l.position.toLowerCase().includes('trưởng ngành') || l.position.toLowerCase().includes('phó ngành'))
   })
 }
 
 // Lấy danh sách Giáo Lý Viên đứng lớp cho từng Ngành
 const getBranchTeachers = (branchId: number) => {
-  return leaders.value.filter(l => {
+  return leaders.value.filter((l) => {
     const isChief = l.level === 3 || l.position.toLowerCase().includes('trưởng ngành') || l.position.toLowerCase().includes('phó ngành')
     return branchOf(l) === branchId && !isChief
   })
