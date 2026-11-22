@@ -108,9 +108,9 @@ jobs:
 
   # ─────────────────────────────── 4. E2E ────────────────────────────────────
   e2e:
-    name: E2E - Playwright (admin)
+    name: E2E - Playwright (admin + portal)
     runs-on: ubuntu-latest
-    timeout-minutes: 35
+    timeout-minutes: 40
     services:
       mssql:
         image: mcr.microsoft.com/mssql/server:2022-latest
@@ -141,10 +141,16 @@ jobs:
         with:
           node-version: ${{ env.NODE_VERSION }}
           cache: pnpm
-          cache-dependency-path: web-admin/pnpm-lock.yaml
+          cache-dependency-path: |
+            web-admin/pnpm-lock.yaml
+            web-portal/pnpm-lock.yaml
 
       - name: Cài dependency web-admin
         working-directory: web-admin
+        run: pnpm install --frozen-lockfile
+
+      - name: Cài dependency web-portal
+        working-directory: web-portal
         run: pnpm install --frozen-lockfile
 
       # Cài test trước khi dựng server để lỗi mạng/npm lộ ra sớm.
@@ -237,10 +243,35 @@ jobs:
           tail -100 "$RUNNER_TEMP/admin.log"
           exit 1
 
+      - name: Khởi động web-portal
+        working-directory: web-portal
+        env:
+          NUXT_PUBLIC_API_BASE: http://localhost:5000
+        run: |
+          pnpm dev > "$RUNNER_TEMP/portal.log" 2>&1 &
+          portal_pid=$!
+          for i in $(seq 1 90); do
+            if ! kill -0 "$portal_pid" 2>/dev/null; then
+              echo "web-portal thoát sớm ở giây thứ $((i * 2))"
+              break
+            fi
+            code=$(curl -s -o /dev/null -w '%{http_code}' http://localhost:3001/ || true)
+            if [ "$code" = "200" ]; then
+              echo "web-portal sẵn sàng sau $((i * 2))s"
+              exit 0
+            fi
+            sleep 2
+          done
+          echo '--- web-portal không sẵn sàng, 100 dòng cuối log:'
+          tail -100 "$RUNNER_TEMP/portal.log"
+          exit 1
+
       - name: Playwright
         working-directory: e2e-tests
         env:
           E2E_BASE_URL: http://localhost:3000
+          E2E_PORTAL_BASE_URL: http://localhost:3001
+          E2E_API_URL: http://localhost:5000
           E2E_USERNAME: admin
           E2E_PASSWORD: ${{ env.CI_ADMIN_PASSWORD }}
           E2E_NEW_PASSWORD: ${{ env.CI_ADMIN_NEW_PASSWORD }}
@@ -264,3 +295,5 @@ jobs:
           tail -100 "$RUNNER_TEMP/api.log" 2>/dev/null || echo '(không có log API)'
           echo '===== web-admin ====='
           tail -100 "$RUNNER_TEMP/admin.log" 2>/dev/null || echo '(không có log web-admin)'
+          echo '===== web-portal ====='
+          tail -100 "$RUNNER_TEMP/portal.log" 2>/dev/null || echo '(không có log web-portal)'
