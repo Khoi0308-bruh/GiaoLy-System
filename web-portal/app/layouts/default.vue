@@ -1,4 +1,6 @@
 <template>
+  <!-- Layout gồm 2 khối anh em là hợp lệ ở Vue 3; rule này chỉ dành cho Vue 2. -->
+  <!-- eslint-disable vue/no-multiple-template-root -->
   <!-- Scroll Progress Indicator -->
   <div class="scroll-progress-bar" />
 

@@ -26,7 +26,7 @@ const wordOfGod = computed(() => {
     }
   }
   return {
-    text: '\"Thầy là đường, là sự thật và là sự sống. Không ai đến được với Chúa Cha mà không qua Thầy.\"',
+    text: '"Thầy là đường, là sự thật và là sự sống. Không ai đến được với Chúa Cha mà không qua Thầy."',
     reference: 'Ga 14, 6'
   }
 })
