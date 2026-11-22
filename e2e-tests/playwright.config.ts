@@ -47,6 +47,12 @@ export default defineConfig({
       use: { ...devices['Desktop Chrome'], baseURL: ADMIN_BASE }
     },
     {
+      name: 'auth',
+      testMatch: /auth-concurrent\.spec\.ts/,
+      dependencies: ['setup'],
+      use: { baseURL: ADMIN_BASE }
+    },
+    {
       name: 'portal',
       testMatch: /portal\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: PORTAL_BASE }

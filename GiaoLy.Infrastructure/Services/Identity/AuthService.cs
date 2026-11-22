@@ -51,7 +51,12 @@ public class AuthService : IAuthService
         }
 
         var username = request.Username.Trim();
+        // AsNoTracking: đăng nhập chỉ cần dữ liệu để kiểm tra mật khẩu và phát token,
+        // không sửa entity. Nếu theo dõi entity, SaveChanges tạo refresh token sẽ kèm
+        // UPDATE Users ... WHERE RowVersion (thuộc tính tương thích Role bị coi là đã
+        // đổi) và hai lượt đăng nhập song song lại vấp DbUpdateConcurrencyException.
         var user = await _db.Users
+            .AsNoTracking()
             .Include(u => u.RoleEntity)
             .FirstOrDefaultAsync(u => u.Username == username, ct);
 
@@ -78,20 +83,34 @@ public class AuthService : IAuthService
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid)
         {
-            user.FailedLoginCount++;
-            if (user.FailedLoginCount >= MaxFailedAttempts)
-            {
-                user.LockoutUntil = DateTime.UtcNow.Add(LockoutDuration);
-            }
-            await _db.SaveChangesAsync(ct);
+            var failedCount = user.FailedLoginCount + 1;
+            var lockoutUntil = failedCount >= MaxFailedAttempts
+                ? DateTime.UtcNow.Add(LockoutDuration)
+                : user.LockoutUntil;
+
+            await _db.Users
+                .Where(u => u.Id == user.Id)
+                .ExecuteUpdateAsync(setters => setters
+                    .SetProperty(u => u.FailedLoginCount, failedCount)
+                    .SetProperty(u => u.LockoutUntil, lockoutUntil), ct);
 
             return Result.Failure<AuthResponse>(401, ErrorCodes.AuthInvalidCredentials, "Tên đăng nhập hoặc mật khẩu không chính xác.");
         }
 
         // Login successful: reset lockout counters
-        user.FailedLoginCount = 0;
-        user.LockoutUntil = null;
-        user.LastLoginAt = DateTime.UtcNow;
+        var loginAt = DateTime.UtcNow;
+
+        // Ghi trạng thái đăng nhập bằng một câu UPDATE nguyên tử, không kèm điều kiện
+        // RowVersion: nhiều lượt đăng nhập song song cùng ghi dòng Users nên nếu đi qua
+        // SaveChanges thì các lượt sau vấp DbUpdateConcurrencyException và trả HTTP 500
+        // (mọi lượt ghi cùng giá trị, lượt ghi sau thắng). Entity đang theo dõi không bị
+        // sửa nên SaveChanges dưới đây (tạo refresh token) không ghi đè dòng này nữa.
+        await _db.Users
+            .Where(u => u.Id == user.Id)
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(u => u.FailedLoginCount, 0)
+                .SetProperty(u => u.LockoutUntil, (DateTime?)null)
+                .SetProperty(u => u.LastLoginAt, loginAt), ct);
 
         var roleCode = user.RoleEntity?.Code ?? "Viewer";
         var scopeType = user.RoleEntity?.ScopeType ?? "All";
