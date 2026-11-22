@@ -217,8 +217,7 @@ const processFile = async (file) => {
           fullName: row[1]?.toString() || '',
           birthDateStr: parseExcelDate(row[2]),
           className: row[3]?.toString() || '',
-          branchName: row[4]?.toString() || '',
-          branch: null,
+          branch: matchBranch(row[4]),
           parentPhone: row[5]?.toString() || '',
           bloodType: row[6]?.toString() || '',
           allergies: row[7]?.toString() || '',
@@ -226,8 +225,7 @@ const processFile = async (file) => {
           communionDateStr: parseExcelDate(row[9]),
           confirmationDateStr: parseExcelDate(row[10]),
           errors: {},
-          isDuplicate: false,
-          existingId: null
+          isDuplicate: false
         }
       })
     } else if (file.name.endsWith('.docx')) {
@@ -239,9 +237,6 @@ const processFile = async (file) => {
     }
     
     if (!rawData.length) throw new Error('Không tìm thấy dữ liệu hợp lệ trong file')
-
-    // Ghép tên ngành trong tệp với ngành thật của hệ thống
-    rawData.forEach(r => { r.branch = matchBranch(r.branchName) })
 
     // Gán dữ liệu và chạy check validation, trùng lặp
     parsedData.value = rawData
@@ -256,14 +251,11 @@ const processFile = async (file) => {
 
 const parseExcelDate = (excelDate) => {
   if (!excelDate) return ''
-  if (typeof excelDate === 'number') {
-    const date = new Date(Math.round((excelDate - 25569) * 86400 * 1000))
-    return date.toISOString().split('T')[0]
-  }
-  // Thử parse string
-  try {
-    return new Date(excelDate).toISOString().split('T')[0]
-  } catch { return '' }
+  // Excel lưu ngày dưới dạng số ngày kể từ 01/01/1900
+  const date = typeof excelDate === 'number'
+    ? new Date(Math.round((excelDate - 25569) * 86400 * 1000))
+    : new Date(excelDate)
+  return Number.isNaN(date.getTime()) ? '' : date.toISOString().split('T')[0]
 }
 
 const normalizeText = str => (str || '')
@@ -276,14 +268,16 @@ const normalizeText = str => (str || '')
   .toLowerCase()
 
 // Trả về branchId thật; không khớp thì để trống để người dùng tự chọn, tránh gán sai ngành.
-const matchBranch = (str) => {
-  const needle = normalizeText(str)
+const matchBranch = (raw) => {
+  const needle = normalizeText(raw)
   if (!needle) return null
-  const list = branches.value
-  const exact = list.find(b => normalizeText(b.code) === needle || normalizeText(b.name) === needle)
-  if (exact) return exact.id
-  const loose = list.find(b => normalizeText(b.name).includes(needle) || needle.includes(normalizeText(b.name)))
-  return loose ? loose.id : null
+  // Một số tệp ghi thẳng mã số ngành (1, 2, 3, 4)
+  if (/^\d+$/.test(needle)) return branches.value.find(b => b.id === Number(needle))?.id ?? null
+  const hit = branches.value.find((b) => {
+    const name = normalizeText(b.name)
+    return name === needle || normalizeText(b.code) === needle || name.includes(needle) || needle.includes(name)
+  })
+  return hit?.id ?? null
 }
 
 // Regex đọc text từ Word. Tuỳ theo Xứ, mẫu sẽ khác nhau.
@@ -309,7 +303,6 @@ const parseWordRegex = (text) => {
         fullName: (match[2] || '').trim(),
         birthDateStr: d,
         className: '',
-        branchName: '',
         branch: null,
         parentPhone: '', bloodType: '', allergies: '', baptismDateStr: '', communionDateStr: '', confirmationDateStr: '',
         errors: {},
@@ -354,10 +347,7 @@ const checkDuplicates = async () => {
         birthDate: row.birthDateStr,
         guardianPhones: row.parentPhone ? [row.parentPhone.trim()] : []
       })
-      if (res?.level && res.level !== 'None') {
-        row.isDuplicate = true
-        row.existingId = res.existingStudentId ?? null
-      }
+      if (res?.level && res.level !== 'None') row.isDuplicate = true
     } catch (err) {
       // Không chặn bước xem trước nếu API kiểm tra trùng lặp lỗi; lúc lưu API vẫn tự chặn.
       console.error('Lỗi check trùng lặp:', toApiError(err).message)
