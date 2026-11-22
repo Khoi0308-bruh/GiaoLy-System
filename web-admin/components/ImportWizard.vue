@@ -151,15 +151,20 @@ const props = defineProps({
 
 const emit = defineEmits(['imported'])
 const toast = useToast()
-const config = useRuntimeConfig()
+const api = useApi()
 
-const branchItems = [
-  { label: 'Chiên con', value: 1 },
-  { label: 'Ấu nhi', value: 2 },
-  { label: 'Thiếu nhi', value: 3 },
-  { label: 'Nghĩa sĩ', value: 4 },
-  { label: 'Hiệp sĩ', value: 5 }
-]
+// Danh sách ngành lấy từ API thay vì hard-code: mã và tên ngành do backend quản lý.
+const branches = ref([])
+const branchItems = computed(() => branches.value.map(b => ({ label: b.name, value: b.id })))
+
+onMounted(async () => {
+  try {
+    const res = await api.get('/branches')
+    branches.value = Array.isArray(res) ? res : []
+  } catch (err) {
+    console.error('Lỗi tải danh sách ngành:', toApiError(err).message)
+  }
+})
 
 const fileInputRef = ref(null)
 const parsedData = ref([])
@@ -212,7 +217,8 @@ const processFile = async (file) => {
           fullName: row[1]?.toString() || '',
           birthDateStr: parseExcelDate(row[2]),
           className: row[3]?.toString() || '',
-          branch: mapBranch(row[4]?.toString() || ''),
+          branchName: row[4]?.toString() || '',
+          branch: null,
           parentPhone: row[5]?.toString() || '',
           bloodType: row[6]?.toString() || '',
           allergies: row[7]?.toString() || '',
@@ -233,7 +239,10 @@ const processFile = async (file) => {
     }
     
     if (!rawData.length) throw new Error('Không tìm thấy dữ liệu hợp lệ trong file')
-    
+
+    // Ghép tên ngành trong tệp với ngành thật của hệ thống
+    rawData.forEach(r => { r.branch = matchBranch(r.branchName) })
+
     // Gán dữ liệu và chạy check validation, trùng lặp
     parsedData.value = rawData
     currentStep.value = 2 // Move to step 2 after file parsing
@@ -257,13 +266,24 @@ const parseExcelDate = (excelDate) => {
   } catch { return '' }
 }
 
-const mapBranch = (str) => {
-  str = str.toLowerCase()
-  if (str.includes('chiên')) return 1
-  if (str.includes('ấu') || str == '2') return 2
-  if (str.includes('thiếu') || str == '3') return 3
-  if (str.includes('nghĩa') || str == '4') return 4
-  return 2 // Default
+const normalizeText = str => (str || '')
+  .toString()
+  .normalize('NFD')
+  .replace(/[\u0300-\u036f]/g, '')
+  .replace(/đ/g, 'd')
+  .replace(/Đ/g, 'D')
+  .trim()
+  .toLowerCase()
+
+// Trả về branchId thật; không khớp thì để trống để người dùng tự chọn, tránh gán sai ngành.
+const matchBranch = (str) => {
+  const needle = normalizeText(str)
+  if (!needle) return null
+  const list = branches.value
+  const exact = list.find(b => normalizeText(b.code) === needle || normalizeText(b.name) === needle)
+  if (exact) return exact.id
+  const loose = list.find(b => normalizeText(b.name).includes(needle) || needle.includes(normalizeText(b.name)))
+  return loose ? loose.id : null
 }
 
 // Regex đọc text từ Word. Tuỳ theo Xứ, mẫu sẽ khác nhau.
@@ -289,7 +309,8 @@ const parseWordRegex = (text) => {
         fullName: (match[2] || '').trim(),
         birthDateStr: d,
         className: '',
-        branch: 2,
+        branchName: '',
+        branch: null,
         parentPhone: '', bloodType: '', allergies: '', baptismDateStr: '', communionDateStr: '', confirmationDateStr: '',
         errors: {},
         isDuplicate: false
@@ -322,24 +343,25 @@ const runValidation = () => {
   parsedData.value.forEach(row => validateRow(row))
 }
 
+// API chỉ kiểm tra trùng lặp cho từng hồ sơ (cần họ tên + ngày sinh), nên gọi lần lượt
+// để không dội request và để mỗi dòng nhận đúng kết quả của chính nó.
 const checkDuplicates = async () => {
-  try {
-    const requests = parsedData.value.map(r => ({ fullName: r.fullName, birthDate: r.birthDateStr || null }))
-    const duplicates = await $api('/Student/check-duplicates', {
-      method: 'POST',
-      body: requests
-    })
-    
-    // Gán cờ trùng lặp
-    parsedData.value.forEach(row => {
-      const dup = duplicates.find(d => d.fullName.toLowerCase() === row.fullName.toLowerCase())
-      if (dup) {
+  for (const row of parsedData.value) {
+    if (!row.fullName || !row.birthDateStr) continue
+    try {
+      const res = await api.post('/students/duplicates/check', {
+        fullName: row.fullName.trim(),
+        birthDate: row.birthDateStr,
+        guardianPhones: row.parentPhone ? [row.parentPhone.trim()] : []
+      })
+      if (res?.level && res.level !== 'None') {
         row.isDuplicate = true
-        row.existingId = dup.existingId
+        row.existingId = res.existingStudentId ?? null
       }
-    })
-  } catch (err) {
-    console.error('Lỗi check trùng lặp:', err)
+    } catch (err) {
+      // Không chặn bước xem trước nếu API kiểm tra trùng lặp lỗi; lúc lưu API vẫn tự chặn.
+      console.error('Lỗi check trùng lặp:', toApiError(err).message)
+    }
   }
 }
 
@@ -356,35 +378,47 @@ const getRowClass = (row) => {
 const saveData = async () => {
   if (errorCount.value > 0) return toast.add({ title: 'Vui lòng sửa các dòng lỗi trước khi lưu', color: 'amber' })
   
+  // Dòng đã trùng hồ sơ có sẵn thì bỏ qua để không tạo bản ghi trùng.
+  const pending = parsedData.value.filter(r => !r.isDuplicate)
+  if (!pending.length) {
+    toast.add({ title: 'Không còn dòng nào cần lưu', description: 'Toàn bộ dòng trong tệp đã trùng hồ sơ có sẵn.', color: 'amber' })
+    return
+  }
+
   isSaving.value = true
+  const failures = []
+  let saved = 0
   try {
-    const payload = parsedData.value.map(r => ({
-      // Nếu trùng lặp, ta có thể gửi ID lên để backend update thay vì insert.
-      // Tạm thời backend "bulk" đang Insert. Cần update logic backend hoặc xử lý frontend.
-      // Dành cho bản demo, gửi thẳng lên bulk import.
-      id: r.existingId || undefined, 
-      holyName: r.holyName,
-      fullName: r.fullName,
-      birthDate: r.birthDateStr || null,
-      branch: r.branch,
-      className: r.className,
-      parentPhone: r.parentPhone,
-      bloodType: r.bloodType,
-      allergies: r.allergies,
-      baptismDate: r.baptismDateStr || null,
-      communionDate: r.communionDateStr || null,
-      confirmationDate: r.confirmationDateStr || null
-    }))
-    
-    await $api('/Student/bulk', {
-      method: 'POST',
-      body: payload
-    })
-    
-    toast.add({ title: 'Đã lưu danh sách thành công!', color: 'success' })
+    // API không có endpoint lưu hàng loạt; tạo từng hồ sơ qua POST /students.
+    for (const row of pending) {
+      try {
+        await api.post('/students', {
+          holyName: row.holyName?.trim() || null,
+          fullName: row.fullName.trim(),
+          birthDate: row.birthDateStr,
+          branchId: row.branch || null,
+          bloodType: row.bloodType?.trim() || null,
+          allergies: row.allergies?.trim() || null,
+          hasPhotoConsent: false
+        })
+        saved++
+      } catch (err) {
+        failures.push(`${row.fullName}: ${toApiError(err).message}`)
+      }
+    }
+
+    if (failures.length) {
+      toast.add({
+        title: `Đã lưu ${saved}/${pending.length} hồ sơ`,
+        description: failures.slice(0, 3).join(' · '),
+        color: saved ? 'warning' : 'error'
+      })
+      if (!saved) return
+    } else {
+      toast.add({ title: `Đã lưu ${saved} hồ sơ đoàn sinh`, color: 'success' })
+    }
+
     currentStep.value = 3 // Move to step 3 (Success)
-  } catch (err) {
-    toast.add({ title: 'Lỗi lưu dữ liệu', description: err.data?.message || err.message, color: 'error' })
   } finally {
     isSaving.value = false
   }
