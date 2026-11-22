@@ -63,3 +63,6 @@ temp/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# ── Ảnh chụp & tài liệu sinh ra khi kiểm thử tay (không commit) ──────
+docs/screenshots/
