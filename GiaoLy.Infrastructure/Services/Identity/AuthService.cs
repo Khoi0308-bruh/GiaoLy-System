@@ -83,16 +83,19 @@ public class AuthService : IAuthService
         var isPasswordValid = BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash);
         if (!isPasswordValid)
         {
-            var failedCount = user.FailedLoginCount + 1;
-            var lockoutUntil = failedCount >= MaxFailedAttempts
-                ? DateTime.UtcNow.Add(LockoutDuration)
-                : user.LockoutUntil;
+            // Tăng bộ đếm ngay trong câu UPDATE (FailedLoginCount = FailedLoginCount + 1)
+            // thay vì tính từ ảnh chụp đã đọc: nhiều lượt sai mật khẩu song song cùng
+            // tăng thì mọi lượt đều được tính, không ghi đè lẫn nhau nên không thể lách
+            // ngưỡng khóa tài khoản bằng cách gửi dồn dập.
+            var lockoutUntil = DateTime.UtcNow.Add(LockoutDuration);
 
             await _db.Users
                 .Where(u => u.Id == user.Id)
                 .ExecuteUpdateAsync(setters => setters
-                    .SetProperty(u => u.FailedLoginCount, failedCount)
-                    .SetProperty(u => u.LockoutUntil, lockoutUntil), ct);
+                    .SetProperty(u => u.FailedLoginCount, u => u.FailedLoginCount + 1)
+                    .SetProperty(u => u.LockoutUntil, u => u.FailedLoginCount + 1 >= MaxFailedAttempts
+                        ? lockoutUntil
+                        : u.LockoutUntil), ct);
 
             return Result.Failure<AuthResponse>(401, ErrorCodes.AuthInvalidCredentials, "Tên đăng nhập hoặc mật khẩu không chính xác.");
         }
