@@ -63,11 +63,24 @@ function normalize(raw: MeRaw): Me {
   }
 }
 
+function statusOf(error: unknown): number | undefined {
+  const e = error as { status?: number, statusCode?: number, data?: { status?: number } } | null
+  return e?.status ?? e?.statusCode ?? e?.data?.status
+}
+
+/** Lỗi mạng, 429 hay 5xx là tạm thời: chưa thể kết luận người dùng đã mất phiên. */
+function laLoiTamThoi(error: unknown): boolean {
+  const status = statusOf(error)
+  return status === undefined || status === 429 || status >= 500
+}
+
 export const useSessionStore = defineStore('session', () => {
   const config = useRuntimeConfig()
   const accessToken = ref<string | null>(null)
   const me = ref<Me | null>(null)
   const ready = ref(false)
+  /** Đã có refresh token nhưng chưa đọc được hồ sơ vì lỗi tạm thời. */
+  const unavailable = ref(false)
   let refreshing: Promise<boolean> | null = null
 
   const permissions = computed(() => new Set(me.value?.permissions ?? []))
@@ -90,9 +103,7 @@ export const useSessionStore = defineStore('session', () => {
       } catch (e) {
         // Chỉ 401 mới là mất phiên thật. 429 (rate limit), 5xx hay lỗi mạng là
         // tạm thời — xoá phiên ở đây sẽ đá người dùng về trang đăng nhập oan.
-        const status = (e as { status?: number, statusCode?: number } | null)?.status
-          ?? (e as { statusCode?: number } | null)?.statusCode
-        if (status === 401) {
+        if (statusOf(e) === 401) {
           accessToken.value = null
           return false
         }
@@ -114,12 +125,24 @@ export const useSessionStore = defineStore('session', () => {
   }
 
   async function bootstrap() {
+    unavailable.value = false
     try {
       if (await refresh()) {
-        try { await loadMe() } catch { me.value = null }
+        try {
+          await loadMe()
+        } catch (e) {
+          // Đọc hồ sơ hỏng vì lý do tạm thời: giữ nguyên phiên và báo "tạm thời
+          // không kết nối được" thay vì coi như chưa đăng nhập.
+          if (laLoiTamThoi(e)) {
+            unavailable.value = true
+            return
+          }
+          me.value = null
+        }
       }
-    } catch {
+    } catch (e) {
       // Lỗi tạm thời khi refresh: giữ nguyên phiên đang có trong bộ nhớ.
+      if (laLoiTamThoi(e)) unavailable.value = true
     } finally {
       ready.value = true
     }
@@ -155,5 +178,5 @@ export const useSessionStore = defineStore('session', () => {
     me.value = null
   }
 
-  return { accessToken, me, ready, permissions, can, canAny, homePath, refresh, loadMe, bootstrap, login, logout, clear }
+  return { accessToken, me, ready, unavailable, permissions, can, canAny, homePath, refresh, loadMe, bootstrap, login, logout, clear }
 })

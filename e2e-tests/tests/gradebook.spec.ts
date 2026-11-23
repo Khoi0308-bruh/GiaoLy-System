@@ -1,6 +1,6 @@
-import { test, expect, type APIRequestContext, type BrowserContext, type Page } from '@playwright/test'
+import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 import { taoLopCoGhiDanh, dangNhapApi } from './support/api'
-import { API_BASE, dangNhap } from './support/auth'
+import { dangNhap } from './support/auth'
 
 /**
  * Nhập điểm qua UI trên một lớp do test tự dựng (API fixtures) nên chạy được cả
@@ -23,14 +23,6 @@ test.describe('web-admin - sổ điểm', () => {
     await context.close()
   })
 
-  async function diemMiengDaLuu(request: APIRequestContext, token: string, roomId: string) {
-    const res = await request.get(`${API_BASE}/api/v1/classrooms/${roomId}/grades`, {
-      headers: { Authorization: `Bearer ${token}` }
-    })
-    const body = (await res.json()) as { grades: Array<{ oral: number | null }> }
-    return body.grades[0]?.oral ?? null
-  }
-
   test('nhập điểm và lưu vào sổ điểm lớp', async ({ request }) => {
     const token = await dangNhapApi(request)
     const { roomId, studentName } = await taoLopCoGhiDanh(request, token)
@@ -42,16 +34,18 @@ test.describe('web-admin - sổ điểm', () => {
     await expect(oDiemMieng).toBeEnabled({ timeout: 30_000 })
     await oDiemMieng.fill('8.5')
 
-    // Toast thành công tự ẩn khá nhanh nên xác nhận bằng dữ liệu server: bấm Lưu
-    // (bấm lại nếu cú bấm đầu rơi vào lúc nút còn xử lý) rồi đợi API trả về 8.5.
-    const nutLuu = page.getByRole('button', { name: 'Lưu sổ điểm' })
-    await expect(async () => {
-      if ((await diemMiengDaLuu(request, token, roomId)) !== 8.5) await nutLuu.click()
-      expect(await diemMiengDaLuu(request, token, roomId)).toBe(8.5)
-    }).toPass({ timeout: 45_000 })
+    // Chờ đúng phản hồi của lần lưu thay vì hỏi lại API theo vòng lặp: API giới hạn
+    // 120 request/phút mỗi IP, hỏi dồn dập sẽ tự bắn vào hạn mức đó (429) và làm
+    // trang sổ điểm không tải được.
+    const phanHoiLuu = page.waitForResponse(
+      r => r.request().method() === 'PUT' && r.url().endsWith(`/classrooms/${roomId}/grades`),
+      { timeout: 60_000 }
+    )
+    await page.getByRole('button', { name: 'Lưu sổ điểm' }).click()
+    expect((await phanHoiLuu).status(), 'API lưu sổ điểm phải trả về 200').toBe(200)
 
     // Tải lại để chắc giao diện đọc lại điểm từ server chứ không chỉ giữ trong form.
     await page.reload()
-    await expect(page.getByLabel(`Miệng của ${studentName}`)).toHaveValue('8.5', { timeout: 30_000 })
+    await expect(page.getByLabel(`Miệng của ${studentName}`)).toHaveValue('8.5', { timeout: 60_000 })
   })
 })

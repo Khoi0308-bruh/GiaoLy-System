@@ -21,6 +21,15 @@ export default defineNuxtRouteMiddleware(async (to) => {
   if (to.meta.public) return
 
   if (!session.me) {
+    // Refresh token còn nhưng server chưa trả được hồ sơ (429/5xx/mạng): đây là sự
+    // cố tạm thời chứ không phải "chưa đăng nhập", nên đừng đá người dùng về trang
+    // đăng nhập rồi bắt họ nhập lại mật khẩu.
+    if (session.unavailable) {
+      throw createError({
+        statusCode: 503,
+        statusMessage: 'Tạm thời không kết nối được máy chủ. Vui lòng thử lại sau ít phút.'
+      })
+    }
     return navigateTo({ path: '/dang-nhap', query: { quay_lai: to.fullPath } })
   }
 
