@@ -36,7 +36,7 @@ export default defineConfig({
     },
     {
       name: 'admin',
-      testMatch: /(admin|gradebook)\.spec\.ts/,
+      testMatch: /(admin|gradebook|error-pages)\.spec\.ts/,
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], baseURL: ADMIN_BASE }
     },
