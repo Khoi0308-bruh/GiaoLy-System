@@ -68,3 +68,7 @@ desktop.ini
 
 # ── Ảnh chụp & tài liệu sinh ra khi kiểm thử tay (không commit) ──────
 docs/screenshots/
+
+# ── Output của công cụ (sinh lại được, không commit) ─────────────────
+# `node tools/authz-matrix/run-matrix.mjs` sinh lại từ endpoints.json + database.
+tools/authz-matrix/results.json
