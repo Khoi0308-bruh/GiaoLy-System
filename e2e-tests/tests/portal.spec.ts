@@ -31,8 +31,12 @@ test.describe('web-portal', () => {
 
   test('mở được các trang công khai chính', async ({ page }) => {
     for (const [path, heading] of TRANG_CONG_KHAI) {
-      await page.goto(path)
-      await expect(page.locator('h1').first()).toContainText(heading, { timeout: 30_000 })
+      // Dev server vẫn biên dịch lại client bundle sau khi báo "Ready", nên lần mở
+      // đầu có thể bị huỷ navigation (ERR_ABORTED). Nạp lại là xong, không phải lỗi app.
+      await expect(async () => {
+        await page.goto(path)
+        await expect(page.locator('h1').first()).toContainText(heading, { timeout: 20_000 })
+      }).toPass({ timeout: 120_000 })
     }
   })
 
