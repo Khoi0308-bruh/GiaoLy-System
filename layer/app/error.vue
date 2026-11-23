@@ -14,7 +14,7 @@ const tieuDe = computed(() => {
 
 const moTa = computed(() =>
   laLoiTamThoi.value
-    ? 'Máy chủ đang quá tải hoặc tạm giới hạn truy cập. Vui lòng đợi khoảng một phút rồi thử lại — bạn không bị đăng xuất.'
+    ? 'Chưa kết nối được máy chủ: máy chủ có thể đang bảo trì, quá tải hoặc tạm giới hạn truy cập. Vui lòng đợi ít phút rồi thử lại — bạn không bị đăng xuất.'
     : 'Vui lòng kiểm tra lại đường dẫn hoặc quay về trang trước.'
 )
 

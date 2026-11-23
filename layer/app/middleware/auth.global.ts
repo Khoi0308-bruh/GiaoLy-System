@@ -27,7 +27,7 @@ export default defineNuxtRouteMiddleware(async (to) => {
     if (session.unavailable) {
       throw createError({
         statusCode: 503,
-        statusMessage: 'Tạm thời không kết nối được máy chủ. Vui lòng thử lại sau ít phút.'
+        message: 'Không kết nối được máy chủ. Vui lòng thử lại sau ít phút.'
       })
     }
     return navigateTo({ path: '/dang-nhap', query: { quay_lai: to.fullPath } })
