@@ -69,8 +69,9 @@ export async function dangNhapBang(
       .then(() => 'sai-mat-khau' as const)
       .catch(() => 'khong-phan-hoi' as const),
     // API giới hạn 10 lần đăng nhập/phút mỗi IP: báo rõ để helper chờ rồi thử lại.
+    // Câu hiển thị lấy từ ErrorCodes.RATE_LIMITED ở backend.
     page
-      .getByText(/quá nhiều yêu cầu/i)
+      .getByText(/quá nhiều yêu cầu|thao tác quá nhanh/i)
       .first()
       .waitFor({ state: 'visible', timeout: 20_000 })
       .then(() => 'bi-gioi-han' as const)
