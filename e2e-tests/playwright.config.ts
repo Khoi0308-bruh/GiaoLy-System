@@ -54,7 +54,7 @@ export default defineConfig({
     },
     {
       name: 'portal',
-      testMatch: /portal\.spec\.ts/,
+      testMatch: /(portal|error-pages-portal)\.spec\.ts/,
       use: { ...devices['Desktop Chrome'], baseURL: PORTAL_BASE }
     }
   ]
