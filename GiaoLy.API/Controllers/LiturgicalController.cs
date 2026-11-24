@@ -56,6 +56,23 @@ public class LiturgicalController : ControllerBase
         return result.ToActionResult();
     }
 
+    /// <summary>
+    /// Lịch phụng vụ đầy đủ của tháng: mọi ngày trong tháng, tự tính mùa phụng vụ,
+    /// màu phẩm phục và các lễ trọng, có ưu tiên ngày đã được ghi đè trong CSDL.
+    /// </summary>
+    [HttpGet("api/v1/public/liturgical/calendar/{year:int}/{month:int}")]
+    [AllowAnonymous]
+    public async Task<IActionResult> GetCalendar(int year, int month, CancellationToken ct)
+    {
+        if (month < 1 || month > 12)
+        {
+            return BadRequest(new { message = "Tháng phải từ 1 đến 12" });
+        }
+
+        var result = await _liturgicalService.GetCalendarAsync(year, month, ct);
+        return result.ToActionResult();
+    }
+
     [HttpGet("api/v1/liturgical")]
     [RequirePermission(Permissions.Liturgical.View)]
     public async Task<IActionResult> GetAll(
