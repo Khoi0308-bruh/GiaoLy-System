@@ -81,23 +81,47 @@
             class="rounded-full"
           />
 
-          <!-- Profile Link -->
-          <NuxtLink
-            to="/profile"
-            class="flex items-center gap-2 rounded-full pl-1.5 pr-3 py-1.5 transition-all duration-300 border"
-            style="background: rgba(26,58,107,0.06); border-color: rgba(201,169,110,0.2);"
-          >
-            <div
-              class="w-7 h-7 rounded-full flex items-center justify-center shrink-0"
-              style="background: linear-gradient(135deg, #c9a96e, #e8c98a);"
+          <!-- Điều khiển phiên: quản trị (theo quyền) + hồ sơ, hoặc nút đăng nhập -->
+          <template v-if="session.me">
+            <NuxtLink
+              v-if="canManageStudents"
+              :to="adminBase"
+              class="hidden items-center gap-1.5 rounded-full px-3 py-1.5 text-[13px] font-semibold text-white transition-all sm:flex"
+              style="background: #1a3a6b;"
             >
-              <UIcon
-                name="i-heroicons-user"
-                class="w-4 h-4"
-                style="color: #1a3a6b;"
-              />
-            </div>
-            <span class="text-[13px] font-semibold text-stone-700 dark:text-stone-200 hidden lg:inline">Hồ Sơ</span>
+              <UIcon name="i-heroicons-shield-check" class="h-4 w-4" />
+              <span>Quản trị</span>
+            </NuxtLink>
+            <NuxtLink
+              to="/profile"
+              class="flex items-center gap-2 rounded-full border py-1.5 pl-1.5 pr-3 transition-all duration-300"
+              style="background: rgba(26,58,107,0.06); border-color: rgba(201,169,110,0.2);"
+            >
+              <div
+                class="flex size-7 shrink-0 items-center justify-center rounded-full"
+                style="background: linear-gradient(135deg, #c9a96e, #e8c98a);"
+              >
+                <UIcon name="i-heroicons-user" class="h-4 w-4" style="color: #1a3a6b;" />
+              </div>
+              <span class="hidden text-[13px] font-semibold text-stone-700 dark:text-stone-200 lg:inline">Hồ Sơ</span>
+            </NuxtLink>
+            <button
+              type="button"
+              class="rounded-full p-1.5 text-stone-500 hover:bg-stone-100 hover:text-stone-700 dark:hover:bg-stone-800"
+              title="Đăng xuất"
+              aria-label="Đăng xuất"
+              @click="session.logout()"
+            >
+              <UIcon name="i-heroicons-arrow-right-on-rectangle" class="h-4 w-4" />
+            </button>
+          </template>
+          <NuxtLink
+            v-else
+            to="/dang-nhap"
+            class="hidden rounded-full px-3 py-1.5 text-[13px] font-semibold text-white transition-all hover:opacity-90 sm:inline-flex"
+            style="background: #1a3a6b;"
+          >
+            Đăng nhập
           </NuxtLink>
 
           <!-- Mobile Hamburger -->
@@ -287,9 +311,18 @@
 </template>
 
 <script setup lang="ts">
+const session = useSessionStore()
+const adminBase = useRuntimeConfig().public.adminBase as string
+
 // ── Trạng thái mobile menu ──
 const mobileOpen = ref(false)
 const scrolled = ref(false)
+
+// Trang chủ được prerender nên payload mang theo ready=true, me=null của lúc build;
+// client phải tự nạp lại phiên, nếu không header luôn hiện "Đăng nhập" dù đã đăng nhập.
+onMounted(() => {
+  if (!session.me) session.bootstrap()
+})
 
 // Theo dõi scroll để đổi style header
 onMounted(() => {
@@ -311,11 +344,7 @@ const pageLabelMap: Record<string, string> = {
   '/phu-huynh': 'Phụ Huynh',
   '/dang-nhap': 'Đăng Nhập',
   '/doi-mat-khau-lan-dau': 'Đổi Mật Khẩu',
-  '/leadership': 'Ban Điều Hành',
   '/thong-bao': 'Thông Báo',
-  '/news': 'Tin Tức',
-  '/library': 'Tài Liệu',
-  '/liturgical': 'Lịch Phụng Vụ',
   '/verify': 'Tra Cứu',
   '/profile': 'Hồ Sơ Cá Nhân'
 }
@@ -328,53 +357,77 @@ const currentPageLabel = computed(() => {
 
 // ── Nav Items (top bar) ──
 interface NavItem { to: string, icon: string, label: string, badge?: string, external?: boolean }
-const navItems: NavItem[] = [
-  { to: '/', icon: 'i-heroicons-home-solid', label: 'Trang Chủ' },
-  { to: '/leadership', icon: 'i-heroicons-user-group', label: 'Giới Thiệu' },
-  { to: '/thong-bao', icon: 'i-heroicons-bell-alert', label: 'Thông Báo' },
-  { to: '/news', icon: 'i-heroicons-newspaper', label: 'Tin Tức' },
-  { to: useRuntimeConfig().public.adminBase as string, icon: 'i-heroicons-cog-6-tooth', label: 'Quản Lý Đoàn Sinh', external: true },
-  { to: '/library', icon: 'i-heroicons-book-open', label: 'Tài Liệu' }
-]
+
+// Chỉ người đã đăng nhập và có quyền xem đoàn sinh mới thấy lối vào trang quản trị.
+const canManageStudents = computed(() => Boolean(session.me) && session.can('students.view'))
+
+const navItems = computed<NavItem[]>(() => {
+  const items: NavItem[] = [
+    { to: '/', icon: 'i-heroicons-home-solid', label: 'Trang Chủ' },
+    { to: '/ban-huynh-truong', icon: 'i-heroicons-user-group', label: 'Giới Thiệu' },
+    { to: '/thong-bao', icon: 'i-heroicons-bell-alert', label: 'Thông Báo' },
+    { to: '/tin-tuc', icon: 'i-heroicons-newspaper', label: 'Tin Tức' },
+    { to: '/thu-vien', icon: 'i-heroicons-book-open', label: 'Tài Liệu' },
+    { to: '/lich-phung-vu', icon: 'i-heroicons-calendar-days', label: 'Lịch Phụng Vụ' }
+  ]
+  if (canManageStudents.value) {
+    items.push({ to: adminBase, icon: 'i-heroicons-cog-6-tooth', label: 'Quản Lý Đoàn Sinh', external: true })
+  }
+  return items
+})
 
 // ── Sidebar Items (mobile menu) ──
 interface SidebarItem { to: string, label: string, desc: string, icon: string, iconBg: string, iconColor: string, badge?: string, external?: boolean }
-const sidebarItems: SidebarItem[] = [
-  {
-    to: '/', label: 'Trang Chủ', desc: 'Bản tin tổng hợp',
-    icon: 'i-heroicons-home-solid',
-    iconBg: 'bg-blue-100 dark:bg-blue-900/30', iconColor: 'text-blue-700 dark:text-blue-400'
-  },
-  {
-    to: '/leadership', label: 'Ban Điều Hành Xứ', desc: 'Sơ đồ tổ chức Sứ Đoàn',
-    icon: 'i-heroicons-user-group',
-    iconBg: 'bg-purple-100 dark:bg-purple-900/30', iconColor: 'text-purple-700 dark:text-purple-400'
-  },
-  {
-    to: '/thong-bao', label: 'Thông Báo', desc: 'Thông báo từ giáo xứ',
-    icon: 'i-heroicons-bell-alert',
-    iconBg: 'bg-red-100 dark:bg-red-900/30', iconColor: 'text-red-700 dark:text-red-400'
-  },
-  {
-    to: '/news', label: 'Tin Tức', desc: 'Tin tức Công giáo',
-    icon: 'i-heroicons-newspaper',
-    iconBg: 'bg-green-100 dark:bg-green-900/30', iconColor: 'text-green-700 dark:text-green-400'
-  },
-  {
-    to: 'http://localhost:3000', label: 'Quản Lý Đoàn Sinh', desc: 'Dành cho Huynh Trưởng',
-    icon: 'i-heroicons-cog-6-tooth',
-    iconBg: 'bg-stone-200 dark:bg-stone-800', iconColor: 'text-stone-700 dark:text-stone-400',
-    external: true
-  },
-  {
-    to: '/library', label: 'Tài Liệu', desc: 'Tài liệu học tập & biểu mẫu',
-    icon: 'i-heroicons-book-open',
-    iconBg: 'bg-amber-100 dark:bg-amber-900/30', iconColor: 'text-amber-700 dark:text-amber-400'
-  },
-  {
+
+const sidebarItems = computed<SidebarItem[]>(() => {
+  const items: SidebarItem[] = [
+    {
+      to: '/', label: 'Trang Chủ', desc: 'Bản tin tổng hợp',
+      icon: 'i-heroicons-home-solid',
+      iconBg: 'bg-blue-100 dark:bg-blue-900/30', iconColor: 'text-blue-700 dark:text-blue-400'
+    },
+    {
+      to: '/ban-huynh-truong', label: 'Ban Điều Hành Xứ', desc: 'Sơ đồ tổ chức Sứ Đoàn',
+      icon: 'i-heroicons-user-group',
+      iconBg: 'bg-purple-100 dark:bg-purple-900/30', iconColor: 'text-purple-700 dark:text-purple-400'
+    },
+    {
+      to: '/thong-bao', label: 'Thông Báo', desc: 'Thông báo từ giáo xứ',
+      icon: 'i-heroicons-bell-alert',
+      iconBg: 'bg-red-100 dark:bg-red-900/30', iconColor: 'text-red-700 dark:text-red-400'
+    },
+    {
+      to: '/tin-tuc', label: 'Tin Tức', desc: 'Tin tức Công giáo & Giáo xứ',
+      icon: 'i-heroicons-newspaper',
+      iconBg: 'bg-green-100 dark:bg-green-900/30', iconColor: 'text-green-700 dark:text-green-400'
+    },
+    {
+      to: '/thu-vien', label: 'Tài Liệu', desc: 'Tài liệu học tập & biểu mẫu',
+      icon: 'i-heroicons-book-open',
+      iconBg: 'bg-amber-100 dark:bg-amber-900/30', iconColor: 'text-amber-700 dark:text-amber-400'
+    },
+    {
+      to: '/lich-phung-vu', label: 'Lịch Phụng Vụ', desc: 'Lịch lễ & màu phẩm phục',
+      icon: 'i-heroicons-calendar-days',
+      iconBg: 'bg-emerald-100 dark:bg-emerald-900/30', iconColor: 'text-emerald-700 dark:text-emerald-400'
+    }
+  ]
+
+  if (canManageStudents.value) {
+    items.push({
+      to: adminBase, label: 'Quản Lý Đoàn Sinh', desc: 'Dành cho Huynh Trưởng',
+      icon: 'i-heroicons-cog-6-tooth',
+      iconBg: 'bg-stone-200 dark:bg-stone-800', iconColor: 'text-stone-700 dark:text-stone-400',
+      external: true
+    })
+  }
+
+  items.push({
     to: '/profile', label: 'Thông Tin Cá Nhân', desc: 'Hồ sơ, điểm số, điểm danh',
     icon: 'i-heroicons-user',
     iconBg: 'bg-yellow-100 dark:bg-yellow-900/30', iconColor: 'text-yellow-700 dark:text-yellow-400'
-  }
-]
+  })
+
+  return items
+})
 </script>
