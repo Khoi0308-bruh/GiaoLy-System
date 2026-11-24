@@ -7,6 +7,7 @@ using GiaoLy.Application.Common.Results;
 using GiaoLy.Application.Platform.Contracts;
 using GiaoLy.Application.Platform.Dtos;
 using GiaoLy.Domain.Data;
+using GiaoLy.Domain.Rules;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
@@ -124,6 +125,51 @@ public class DataMigrationService : IDataMigrationService
         {
             _logger.LogError(ex, "Lỗi đối chiếu dữ liệu đối soát ETL");
             return Result.BadRequest<ReconciliationReportDto>($"Lỗi đối soát dữ liệu: {ex.Message}");
+        }
+    }
+
+    public async Task<Result<NormalizedStudentNamesResultDto>> NormalizeStudentNamesAsync(CancellationToken ct = default)
+    {
+        try
+        {
+            // Dữ liệu ETL cũ ghi FullNameNormalized = UPPER(FullName) nên còn dấu và chữ HOA,
+            // không khớp với khoá tìm kiếm của ứng dụng. Tính lại bằng đúng hàm chuẩn hoá.
+            const int batchSize = 500;
+            var scanned = 0;
+            var updated = 0;
+
+            for (var page = 0; ; page++)
+            {
+                var batch = await _context.Students
+                    .IgnoreQueryFilters()
+                    .OrderBy(s => s.Id)
+                    .Skip(page * batchSize)
+                    .Take(batchSize)
+                    .ToListAsync(ct);
+
+                if (batch.Count == 0) break;
+
+                foreach (var student in batch)
+                {
+                    scanned++;
+                    var expected = VietnameseNormalizer.NormalizeName(student.FullName);
+                    if (!string.Equals(student.FullNameNormalized, expected, StringComparison.Ordinal))
+                    {
+                        student.FullNameNormalized = expected;
+                        updated++;
+                    }
+                }
+
+                if (updated > 0) await _context.SaveChangesAsync(ct);
+            }
+
+            _logger.LogInformation("Chuẩn hoá FullNameNormalized: đã quét {Scanned}, cập nhật {Updated}", scanned, updated);
+            return Result.Ok(new NormalizedStudentNamesResultDto(scanned, updated));
+        }
+        catch (Exception ex)
+        {
+            _logger.LogError(ex, "Lỗi chuẩn hoá FullNameNormalized");
+            return Result.BadRequest<NormalizedStudentNamesResultDto>($"Lỗi chuẩn hoá họ tên: {ex.Message}");
         }
     }
 

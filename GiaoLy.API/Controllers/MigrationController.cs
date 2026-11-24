@@ -33,4 +33,16 @@ public class MigrationController : ControllerBase
         var result = await _migrationService.GetReconciliationReportAsync(ct);
         return result.ToActionResult();
     }
+
+    /// <summary>
+    /// Dữ liệu nạp từ ETL cũ lưu FullNameNormalized dạng HOA-còn-dấu; endpoint này tính lại
+    /// bằng đúng hàm chuẩn hoá của ứng dụng. Chạy lại nhiều lần vô hại.
+    /// </summary>
+    [HttpPost("api/v1/system/maintenance/normalize-student-names")]
+    [RequirePermission(Permissions.Platform.SettingsManage)]
+    public async Task<IActionResult> NormalizeStudentNames(CancellationToken ct)
+    {
+        var result = await _migrationService.NormalizeStudentNamesAsync(ct);
+        return result.ToActionResult();
+    }
 }

@@ -72,17 +72,10 @@ public class PublicStudentsController : ControllerBase
             var from = birth.ToDateTime(TimeOnly.MinValue);
             var to = birth.AddDays(1).ToDateTime(TimeOnly.MinValue);
 
-            // Lọc theo ngày sinh trong SQL, rồi so khớp họ tên ở bộ nhớ bằng cùng hàm chuẩn hoá:
-            // dữ liệu cũ có FullNameNormalized lưu theo chuẩn khác nên không thể so trực tiếp trong DB.
-            var candidates = await query
-                .Where(s => s.BirthDate >= from && s.BirthDate < to)
-                .Take(50)
-                .ToListAsync(ct);
-
-            matches = candidates
-                .Where(s => VietnameseNormalizer.NormalizeName(s.FullName) == normalizedName)
+            matches = await query
+                .Where(s => s.BirthDate >= from && s.BirthDate < to && s.FullNameNormalized == normalizedName)
                 .Take(2)
-                .ToList();
+                .ToListAsync(ct);
         }
 
         if (matches.Count == 0)

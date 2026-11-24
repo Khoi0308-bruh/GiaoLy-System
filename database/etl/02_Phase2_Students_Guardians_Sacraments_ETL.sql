@@ -10,7 +10,9 @@ PRINT N'>> Bắt đầu Đợt 2: Đoàn sinh, Phụ huynh và Bí tích...';
 
 -- 2.1 Chuẩn hóa FullNameNormalized cho toàn bộ đoàn sinh
 PRINT N'2.1 Chuẩn hóa FullNameNormalized...';
--- Cập nhật cơ bản trên SQL cho các em chưa có FullNameNormalized
+-- SQL không bỏ được dấu tiếng Việt nên bước này chỉ là giá trị tạm.
+-- Sau khi chạy ETL, gọi endpoint chuẩn hoá của ứng dụng để tính lại bằng đúng hàm của hệ thống:
+--   POST /api/v1/system/maintenance/normalize-student-names
 UPDATE dbo.Students
 SET FullNameNormalized = UPPER(RTRIM(LTRIM(FullName)))
 WHERE FullNameNormalized IS NULL OR FullNameNormalized = '';
