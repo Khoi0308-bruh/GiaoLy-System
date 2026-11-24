@@ -1,21 +1,9 @@
 <script setup lang="ts">
 import { ApiError } from '../../composables/useApi'
+import { liturgicalDisplayColor, type LiturgicalDisplayColor, type LiturgicalEventDto } from '../../composables/useLiturgical'
 
 definePageMeta({ public: true })
 useHead({ title: 'Lịch Phụng Vụ – Thiếu Nhi Thánh Thể' })
-
-interface LiturgicalDay {
-  id: string
-  eventDate: string
-  title: string
-  color: string
-  colorNameVi: string
-  level: string
-  description?: string | null
-  isOverride: boolean
-  wordOfGodOverride?: string | null
-  wordOfGodReference?: string | null
-}
 
 const api = useApi()
 
@@ -23,14 +11,23 @@ const now = new Date()
 const selectedYear = ref(now.getFullYear())
 const selectedMonth = ref(now.getMonth() + 1)
 
-const days = ref<LiturgicalDay[]>([])
-const today = ref<LiturgicalDay | null>(null)
-const selected = ref<LiturgicalDay | null>(null)
+const days = ref<LiturgicalEventDto[]>([])
+const today = ref<LiturgicalEventDto | null>(null)
+const selected = ref<LiturgicalEventDto | null>(null)
 const loading = ref(false)
 const error = ref<ApiError | null>(null)
 
 /** Bảng màu phẩm phục dùng chung cho ô lịch, huy hiệu và chi tiết. */
-const COLOR_MAP: Record<string, { label: string, cell: string, dot: string, badge: string, accent: string }> = {
+interface ColorStyle { label: string, cell: string, dot: string, badge: string, accent: string }
+
+const COLOR_MAP: Record<LiturgicalDisplayColor, ColorStyle> = {
+  Violet: {
+    label: 'Tím',
+    cell: 'bg-purple-50 border-purple-200 hover:border-purple-400',
+    dot: 'bg-purple-500',
+    badge: 'bg-purple-50 text-purple-700 border-purple-200',
+    accent: '#7c3aed'
+  },
   White: {
     label: 'Trắng',
     cell: 'bg-stone-50 border-stone-200 hover:border-stone-400',
@@ -52,20 +49,6 @@ const COLOR_MAP: Record<string, { label: string, cell: string, dot: string, badg
     badge: 'bg-emerald-50 text-emerald-700 border-emerald-200',
     accent: '#059669'
   },
-  Purple: {
-    label: 'Tím',
-    cell: 'bg-purple-50 border-purple-200 hover:border-purple-400',
-    dot: 'bg-purple-500',
-    badge: 'bg-purple-50 text-purple-700 border-purple-200',
-    accent: '#7c3aed'
-  },
-  Violet: {
-    label: 'Tím',
-    cell: 'bg-purple-50 border-purple-200 hover:border-purple-400',
-    dot: 'bg-purple-500',
-    badge: 'bg-purple-50 text-purple-700 border-purple-200',
-    accent: '#7c3aed'
-  },
   Rose: {
     label: 'Hồng',
     cell: 'bg-pink-50 border-pink-200 hover:border-pink-400',
@@ -82,17 +65,7 @@ const COLOR_MAP: Record<string, { label: string, cell: string, dot: string, badg
   }
 }
 
-function normalizeColor(color?: string | null) {
-  const c = (color ?? '').toLowerCase()
-  if (/purple|violet|tím/.test(c)) return 'Purple'
-  if (/white|trắng/.test(c)) return 'White'
-  if (/red|đỏ/.test(c)) return 'Red'
-  if (/rose|hồng|pink/.test(c)) return 'Rose'
-  if (/gold|vàng/.test(c)) return 'Gold'
-  return 'Green'
-}
-
-const colorOf = (color?: string | null) => COLOR_MAP[normalizeColor(color)] ?? COLOR_MAP.Green!
+const colorOf = (color?: string | null) => COLOR_MAP[liturgicalDisplayColor(color)]
 
 function formatDate(dateStr: string) {
   const [y, m, d] = dateStr.slice(0, 10).split('-').map(Number)
@@ -149,7 +122,7 @@ const legend = [
 
 async function fetchToday() {
   try {
-    today.value = await api.get<LiturgicalDay>('/public/liturgical/today')
+    today.value = await api.get<LiturgicalEventDto>('/public/liturgical/today')
   } catch {
     today.value = null
   }
@@ -159,7 +132,7 @@ async function fetchMonth() {
   loading.value = true
   error.value = null
   try {
-    const res = await api.get<LiturgicalDay[]>(
+    const res = await api.get<LiturgicalEventDto[]>(
       `/public/liturgical/calendar/${selectedYear.value}/${selectedMonth.value}`
     )
     days.value = Array.isArray(res) ? res : []
@@ -193,7 +166,7 @@ function goToToday() {
   fetchMonth()
 }
 
-function selectDay(day: LiturgicalDay) {
+function selectDay(day: LiturgicalEventDto) {
   selected.value = day
 }
 

@@ -318,17 +318,16 @@ const adminBase = useRuntimeConfig().public.adminBase as string
 const mobileOpen = ref(false)
 const scrolled = ref(false)
 
-// Trang chủ được prerender nên payload mang theo ready=true, me=null của lúc build;
-// client phải tự nạp lại phiên, nếu không header luôn hiện "Đăng nhập" dù đã đăng nhập.
 onMounted(() => {
+  // Trang chủ được prerender nên payload mang theo ready=true, me=null của lúc build;
+  // client phải tự nạp lại phiên, nếu không header luôn hiện "Đăng nhập" dù đã đăng nhập.
   if (!session.me) session.bootstrap()
-})
 
-// Theo dõi scroll để đổi style header
-onMounted(() => {
+  // Theo dõi scroll để đổi style header
   const handleScroll = () => {
     scrolled.value = window.scrollY > 20
   }
+  handleScroll()
   window.addEventListener('scroll', handleScroll, { passive: true })
   onUnmounted(() => window.removeEventListener('scroll', handleScroll))
 })

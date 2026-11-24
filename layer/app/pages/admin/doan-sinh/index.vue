@@ -197,16 +197,6 @@ const branchOptions = computed(() => [
   ...branches.value.map(b => ({ label: `Ngành ${b.name}`, value: String(b.id) }))
 ])
 
-// Danh sách cột dùng cho bảng chuyên biệt ở các màn hình khác (giữ nguyên hợp đồng cũ).
-const columns = [
-  { accessorKey: 'code', header: 'Mã' },
-  { accessorKey: 'fullName', header: 'Họ và tên' },
-  { accessorKey: 'birthDate', header: 'Tuổi' },
-  { accessorKey: 'className', header: 'Ngành › Lớp' },
-  { accessorKey: 'area', header: 'Giáo họ' },
-  { accessorKey: 'primaryGuardianName', header: 'Phụ huynh' },
-  { accessorKey: 'status', header: 'Trạng thái' }
-]
 </script>
 
 <template>
