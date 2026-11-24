@@ -47,8 +47,9 @@ const permissions = usePermissions()
 
 // Filter states
 const search = ref('')
-const selectedStatus = ref<string>('')
-const selectedBranchId = ref<number | ''>('')
+// USelect của Nuxt UI không nhận giá trị rỗng, nên 'all' là sentinel gửi lên API thành "không lọc".
+const selectedStatus = ref<string>('all')
+const selectedBranchId = ref<string>('all')
 const tab = ref<'all' | 'unassigned'>('all')
 const page = ref(1)
 const pageSize = 20
@@ -102,8 +103,8 @@ async function load() {
       page: page.value,
       pageSize,
       search: search.value || undefined,
-      status: selectedStatus.value || undefined,
-      branchId: selectedBranchId.value || undefined
+      status: selectedStatus.value === 'all' ? undefined : selectedStatus.value,
+      branchId: selectedBranchId.value === 'all' ? undefined : Number(selectedBranchId.value)
     })
     if (Array.isArray(res)) {
       // /students/unassigned trả về mảng phẳng (không phân trang) nên tự cắt trang.
@@ -144,10 +145,19 @@ async function exportExcel() {
   }
 }
 
+// Gõ tìm kiếm không bắn một request cho mỗi phím: gộp trong 300ms.
+let searchTimer: ReturnType<typeof setTimeout> | null = null
 watch(search, () => {
-  page.value = 1
-  load()
+  if (searchTimer) clearTimeout(searchTimer)
+  searchTimer = setTimeout(() => {
+    page.value = 1
+    load()
+  }, 300)
 })
+onUnmounted(() => {
+  if (searchTimer) clearTimeout(searchTimer)
+})
+
 watch([tab, selectedStatus, selectedBranchId, page], load)
 
 onMounted(() => {
@@ -155,6 +165,11 @@ onMounted(() => {
   loadStats()
   loadReferences()
 })
+
+/** Hồ sơ cũ có thể thiếu mã hoặc họ tên; hiển thị nhãn thay vì ô trống. */
+const tenHienThi = (row: StudentRow) => row.fullName?.trim() || '(Chưa có tên)'
+const maHienThi = (row: StudentRow) => row.code?.trim() || '—'
+const chuDau = (row: StudentRow) => (row.fullName?.trim().charAt(0) || '?').toUpperCase()
 
 /** Tuổi hiện tại tính từ ngày sinh; trả null khi thiếu ngày sinh hợp lệ. */
 function ageOf(birthDate?: string | null): number | null {
@@ -169,6 +184,20 @@ function ageOf(birthDate?: string | null): number | null {
   return age >= 0 ? age : null
 }
 
+const statusOptions = [
+  { label: 'Mọi trạng thái', value: 'all' },
+  { label: 'Đang học', value: 'Active' },
+  { label: 'Tạm nghỉ', value: 'Paused' },
+  { label: 'Đã nghỉ', value: 'Left' },
+  { label: 'Đã tốt nghiệp', value: 'Graduated' }
+]
+
+const branchOptions = computed(() => [
+  { label: 'Mọi ngành', value: 'all' },
+  ...branches.value.map(b => ({ label: `Ngành ${b.name}`, value: String(b.id) }))
+])
+
+// Danh sách cột dùng cho bảng chuyên biệt ở các màn hình khác (giữ nguyên hợp đồng cũ).
 const columns = [
   { accessorKey: 'code', header: 'Mã' },
   { accessorKey: 'fullName', header: 'Họ và tên' },
@@ -227,38 +256,29 @@ const columns = [
     </div>
 
     <!-- Thanh tìm kiếm & Bộ lọc -->
-    <div class="flex flex-wrap items-center gap-3 rounded-xl border border-stone-200 bg-white p-3 shadow-xs dark:border-stone-800 dark:bg-stone-900">
-      <div class="min-w-64 flex-1">
+    <div class="rounded-xl border border-stone-200 bg-white p-3 shadow-xs dark:border-stone-800 dark:bg-stone-900">
+      <div class="flex flex-wrap items-center gap-3">
         <UInput
           v-model="search"
           icon="i-lucide-search"
           placeholder="Tìm theo tên thánh, họ tên hoặc mã đoàn sinh..."
-          class="w-full"
+          class="min-w-56 flex-1"
+        />
+
+        <USelect
+          v-model="selectedBranchId"
+          :items="branchOptions"
+          class="w-44"
+          aria-label="Lọc theo ngành"
+        />
+
+        <USelect
+          v-model="selectedStatus"
+          :items="statusOptions"
+          class="w-44"
+          aria-label="Lọc theo trạng thái"
         />
       </div>
-
-      <select
-        v-model="selectedBranchId"
-        class="rounded-md border border-stone-300 bg-white p-2 text-sm dark:border-stone-700 dark:bg-stone-900 dark:text-white"
-        aria-label="Lọc theo ngành"
-      >
-        <option value="">-- Mọi ngành --</option>
-        <option v-for="b in branches" :key="b.id" :value="b.id">
-          Ngành {{ b.name }}
-        </option>
-      </select>
-
-      <select
-        v-model="selectedStatus"
-        class="rounded-md border border-stone-300 bg-white p-2 text-sm dark:border-stone-700 dark:bg-stone-900 dark:text-white"
-        aria-label="Lọc theo trạng thái"
-      >
-        <option value="">-- Mọi trạng thái --</option>
-        <option value="Active">Đang học</option>
-        <option value="Paused">Tạm nghỉ</option>
-        <option value="Left">Đã nghỉ</option>
-        <option value="Graduated">Đã tốt nghiệp</option>
-      </select>
     </div>
 
     <!-- Tabs chuyển đổi Tất cả vs Chưa xếp lớp -->
@@ -287,28 +307,27 @@ const columns = [
 
     <!-- Bảng đoàn sinh -->
     <div class="overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-xs dark:border-stone-800 dark:bg-stone-900">
-      <table class="w-full text-left text-sm">
-        <thead class="border-b border-stone-200 bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-400">
+      <table class="w-full min-w-[860px] text-left text-sm">
+        <thead class="border-b border-stone-200 bg-stone-50 text-[11px] font-semibold tracking-wide text-stone-500 uppercase dark:border-stone-800 dark:bg-stone-950 dark:text-stone-400">
           <tr>
             <th class="px-4 py-3">Mã</th>
-            <th class="px-4 py-3">Họ và tên</th>
+            <th class="px-4 py-3">Đoàn sinh</th>
             <th class="px-4 py-3 text-center">Tuổi</th>
             <th class="px-4 py-3">Ngành › Lớp</th>
-            <th class="px-4 py-3">Giáo họ</th>
             <th class="px-4 py-3">Phụ huynh</th>
             <th class="px-4 py-3">Trạng thái</th>
-            <th class="px-4 py-3 text-right">Chi tiết</th>
+            <th class="px-3 py-3"><span class="sr-only">Chi tiết</span></th>
           </tr>
         </thead>
         <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
           <tr v-if="loading">
-            <td colspan="8" class="p-8 text-center text-stone-500">
+            <td colspan="7" class="p-8 text-center text-stone-500">
               <UIcon name="i-lucide-loader-2" class="size-6 animate-spin mx-auto mb-2 text-marian-600" />
               <span>Đang tải danh sách đoàn sinh...</span>
             </td>
           </tr>
           <tr v-else-if="rows.length === 0">
-            <td colspan="8" class="p-8">
+            <td colspan="7" class="p-8">
               <EmptyState
                 title="Không tìm thấy đoàn sinh nào"
                 description="Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái. Bạn chỉ thấy đoàn sinh trong phạm vi phân công của mình."
@@ -319,31 +338,35 @@ const columns = [
             v-for="row in rows"
             v-else
             :key="row.id"
-            class="hover:bg-stone-50/80 cursor-pointer dark:hover:bg-stone-800/50"
+            class="cursor-pointer transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
             @click="navigateTo(`/admin/doan-sinh/${row.id}`)"
           >
-            <td class="px-4 py-3 font-mono text-xs font-bold text-marian-700 dark:text-marian-400">
-              {{ row.code }}
+            <td class="px-4 py-3 font-mono text-xs font-bold whitespace-nowrap text-marian-700 dark:text-marian-400">
+              {{ maHienThi(row) }}
             </td>
             <td class="px-4 py-3">
-              <span v-if="row.holyName" class="text-xs text-vatican-600 font-semibold dark:text-vatican-400 block">
-                {{ row.holyName }}
-              </span>
-              <strong class="text-stone-900 dark:text-white">{{ row.fullName }}</strong>
+              <div class="flex items-center gap-3">
+                <span class="grid size-9 shrink-0 place-items-center rounded-full bg-marian-50 text-xs font-bold text-marian-700 dark:bg-marian-950 dark:text-marian-300">
+                  {{ chuDau(row) }}
+                </span>
+                <span class="min-w-0">
+                  <span v-if="row.holyName" class="mb-0.5 block text-[11px] font-semibold text-vatican-600 dark:text-vatican-400">
+                    {{ row.holyName }}
+                  </span>
+                  <strong class="block truncate text-stone-900 dark:text-white">{{ tenHienThi(row) }}</strong>
+                </span>
+              </div>
             </td>
-            <td class="px-4 py-3 text-center text-xs">
+            <td class="px-4 py-3 text-center text-xs tabular-nums">
               {{ ageOf(row.birthDate) ?? '–' }}
             </td>
             <td class="px-4 py-3 text-xs">
-              <span v-if="row.className" class="font-medium">
+              <span v-if="row.className" class="rounded bg-stone-100 px-2 py-0.5 font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-200">
                 {{ row.branchName ? `${row.branchName} › ` : '' }}{{ row.className }}
               </span>
               <span v-else class="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
                 Chưa xếp lớp
               </span>
-            </td>
-            <td class="px-4 py-3 text-xs text-stone-600 dark:text-stone-400">
-              {{ row.area || '–' }}
             </td>
             <td class="px-4 py-3 text-xs">
               <div class="font-medium text-stone-800 dark:text-stone-200">
@@ -354,11 +377,14 @@ const columns = [
                 :permission="PERMISSIONS.Students.ViewContact"
                 placeholder="Đã ẩn SĐT"
               />
+              <div v-if="row.area" class="mt-0.5 text-[11px] text-stone-400">
+                Giáo họ {{ row.area }}
+              </div>
             </td>
             <td class="px-4 py-3">
               <StatusChip domain="student" :value="row.status" />
             </td>
-            <td class="px-4 py-3 text-right">
+            <td class="px-3 py-3 text-right">
               <UButton
                 size="xs"
                 variant="ghost"
@@ -382,7 +408,7 @@ const columns = [
             icon="i-lucide-chevron-left"
             @click="page--"
           />
-          <span class="px-2 py-1 font-semibold">Trang {{ page }}</span>
+          <span class="px-2 py-1 font-semibold tabular-nums">Trang {{ page }} / {{ Math.max(1, Math.ceil(total / pageSize)) }}</span>
           <UButton
             size="xs"
             variant="outline"

@@ -57,7 +57,7 @@ async function signOut() {
 
     <!-- Sidebar Desktop & Mobile Off-canvas -->
     <aside
-      class="fixed inset-y-0 left-0 z-50 w-[260px] transform bg-gradient-to-b from-marian-800 to-marian-700 p-3 text-stone-100 transition-transform duration-200 ease-in-out lg:static lg:block lg:h-screen lg:w-auto lg:overflow-y-auto lg:translate-x-0 no-print"
+      class="fixed inset-y-0 left-0 z-50 w-[260px] transform overflow-y-auto bg-gradient-to-b from-marian-800 to-marian-700 p-3 text-stone-100 transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:block lg:h-screen lg:w-auto lg:translate-x-0 no-print"
       :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
     >
       <div class="mb-3 flex items-center justify-between border-b border-vatican-400/40 px-2 pb-4">
@@ -120,7 +120,7 @@ async function signOut() {
         </div>
       </div>
 
-      <main class="w-full max-w-[1180px] flex-1 px-4 py-6 sm:px-6">
+      <main class="mx-auto w-full max-w-[1180px] flex-1 px-4 py-6 sm:px-6">
         <ScopeBanner />
         <slot />
       </main>
