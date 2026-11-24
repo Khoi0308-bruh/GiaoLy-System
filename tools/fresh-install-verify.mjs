@@ -129,6 +129,15 @@ async function main() {
   const classRoomId = classRoom.data?.id;
   log('8. POST /academic-years/{id}/classrooms', `HTTP ${classRoom.status}, id=${classRoomId}, ten=${classRoom.data?.className}`);
 
+  // 8b. Cài mới đã seed sẵn một niên khóa đang hoạt động, mà hệ thống chỉ cho phép
+  // một niên khóa hoạt động tại một thời điểm — phải chốt niên khóa cũ trước.
+  const active = await call('GET', '/api/v1/academic-years/active', { token });
+  if (active.ok && active.data?.id) {
+    const closed = await call('POST', `/api/v1/academic-years/${active.data.id}/close`, { token });
+    expect('8b. Chốt niên khóa đang hoạt động', closed, [200]);
+    log('8b. POST /academic-years/{id}/close', `HTTP ${closed.status}, id=${active.data.id}`);
+  }
+
   // 9. Kích hoạt niên khóa (yêu cầu đã có lớp)
   const activate = await call('POST', `/api/v1/academic-years/${yearId}/activate`, { token });
   expect('9. Kích hoạt niên khóa', activate, [200]);
