@@ -1,13 +1,24 @@
 <script setup lang="ts">
 const currentYear = new Date().getFullYear()
 
-const quickLinks = [
-  { label: 'Tin Tức Mới', to: '/news' },
-  { label: 'Thông Báo Sứ Đoàn', to: '/thong-bao' },
-  { label: 'Ban Điều Hành', to: '/leadership' },
-  { label: 'Tài Liệu Giáo Lý', to: '/library' },
-  { label: 'Quản Lý Đoàn Sinh', to: 'http://localhost:3000', external: true }
-]
+const session = useSessionStore()
+const adminBase = useRuntimeConfig().public.adminBase as string
+
+// Lối vào trang quản trị chỉ dành cho người đã đăng nhập và có quyền xem đoàn sinh.
+const canManageStudents = computed(() => Boolean(session.me) && session.can('students.view'))
+
+const quickLinks = computed(() => {
+  const links = [
+    { label: 'Tin Tức Mới', to: '/tin-tuc', external: false },
+    { label: 'Thông Báo Sứ Đoàn', to: '/thong-bao', external: false },
+    { label: 'Ban Điều Hành', to: '/ban-huynh-truong', external: false },
+    { label: 'Tài Liệu Giáo Lý', to: '/thu-vien', external: false }
+  ]
+  if (canManageStudents.value) {
+    links.push({ label: 'Quản Lý Đoàn Sinh', to: adminBase, external: true })
+  }
+  return links
+})
 </script>
 
 <template>

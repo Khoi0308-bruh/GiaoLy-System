@@ -60,7 +60,7 @@ const formatAnnouncementDate = (value?: string | null) => {
           </div>
         </div>
         <NuxtLink
-          to="/news"
+          to="/tin-tuc"
           class="inline-flex items-center gap-1.5 text-sm font-bold transition-all duration-300 hover:-translate-x-0.5 group"
           style="color: #c9a96e;"
         >
@@ -79,7 +79,7 @@ const formatAnnouncementDate = (value?: string | null) => {
       >
         <!-- Bài viết nổi bật (Featured - chiếm 2 cột) -->
         <NuxtLink
-          :to="`/news`"
+          to="/tin-tuc"
           class="md:col-span-2 group cursor-pointer relative rounded-3xl overflow-hidden block"
           style="height: 380px; box-shadow: 0 8px 30px rgba(26,58,107,0.12);"
         >
@@ -133,7 +133,7 @@ const formatAnnouncementDate = (value?: string | null) => {
           <NuxtLink
             v-for="item in news.slice(1, 4)"
             :key="item.id"
-            to="/news"
+            to="/tin-tuc"
             class="group flex gap-4 rounded-2xl border border-transparent p-3 transition-all duration-300 hover:border-gold/20 hover:-translate-y-0.5 cursor-pointer"
             style="background: white; box-shadow: 0 2px 12px rgba(26,58,107,0.06);"
           >

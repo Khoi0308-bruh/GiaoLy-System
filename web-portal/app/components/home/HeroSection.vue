@@ -177,7 +177,7 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
                 </NuxtLink>
 
                 <NuxtLink
-                  to="/leadership"
+                  to="/ban-huynh-truong"
                   class="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm text-white border border-white/30 backdrop-blur-sm hover:bg-white/15 transition-all duration-300"
                 >
                   Về Ban Điều Hành

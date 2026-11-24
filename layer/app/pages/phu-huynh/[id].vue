@@ -194,8 +194,7 @@ onMounted(() => {
 </script>
 
 <template>
-  <PortalShell>
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8 space-y-6">
+  <div class="mx-auto w-full max-w-7xl space-y-6">
       <!-- Breadcrumb / Back button -->
       <div class="flex items-center gap-2 text-xs text-stone-500">
         <NuxtLink to="/phu-huynh" class="hover:text-[#1D3A73] flex items-center gap-1">
@@ -432,6 +431,5 @@ onMounted(() => {
           </div>
         </div>
       </div>
-    </div>
-  </PortalShell>
+  </div>
 </template>

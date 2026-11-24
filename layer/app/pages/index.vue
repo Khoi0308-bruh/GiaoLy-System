@@ -98,7 +98,7 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
 </script>
 
 <template>
-  <PortalShell>
+  <div>
     <!-- Phụng vụ hôm nay Strip -->
     <div v-if="liturgicalToday" class="bg-stone-900 text-white text-xs border-b border-stone-800">
       <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-2.5 flex flex-wrap items-center justify-between gap-3">
@@ -379,5 +379,5 @@ const COLOR_MAP: Record<string, { label: string, badge: string, border: string }
         </div>
       </div>
     </section>
-  </PortalShell>
+  </div>
 </template>

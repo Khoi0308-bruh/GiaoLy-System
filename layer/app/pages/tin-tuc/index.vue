@@ -5,6 +5,7 @@ definePageMeta({ public: true })
 
 const api = useApi()
 const { sanitize } = useSafeHtml()
+const apiBase = useRuntimeConfig().public.apiBase
 
 interface NewsArticle {
   id: string
@@ -12,6 +13,7 @@ interface NewsArticle {
   summary?: string | null
   content?: string | null
   imageUrl?: string | null
+  link?: string | null
   sourceName?: string | null
   sourceUrl?: string | null
   publishedAt: string
@@ -25,11 +27,13 @@ const searchQuery = ref('')
 const selectedCategory = ref('all')
 const selectedArticle = ref<NewsArticle | null>(null)
 const modalOpen = ref(false)
+const articleLink = computed(() => selectedArticle.value?.link || selectedArticle.value?.sourceUrl || null)
 
 function getSafeImageUrl(rawUrl?: string | null) {
   if (!rawUrl) return ''
-  // Nếu là url bên ngoài, dùng proxy ảnh an toàn của hệ thống qua endpoint /public/news/image
-  return `/api/v1/public/news/image?url=${encodeURIComponent(rawUrl)}`
+  // Nếu là url bên ngoài, dùng proxy ảnh an toàn của hệ thống qua endpoint /public/news/image.
+  // Proxy nằm ở máy chủ API, không phải máy chủ Nuxt, nên phải ghép apiBase.
+  return `${apiBase}/api/v1/public/news/image?url=${encodeURIComponent(rawUrl)}`
 }
 
 async function fetchNews() {
@@ -84,8 +88,7 @@ function openArticle(article: NewsArticle) {
 </script>
 
 <template>
-  <PortalShell>
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+  <div class="mx-auto w-full max-w-7xl space-y-8">
       <!-- Header -->
       <div class="border-b border-stone-200 pb-5">
         <div class="flex flex-wrap items-center justify-between gap-4">
@@ -138,103 +141,114 @@ function openArticle(article: NewsArticle) {
         <article
           v-for="item in filteredArticles"
           :key="item.id"
-          class="group rounded-xl border border-stone-200 bg-white overflow-hidden shadow-xs hover:shadow-md transition-shadow flex flex-col justify-between cursor-pointer"
+          class="group flex cursor-pointer flex-col overflow-hidden rounded-xl border border-stone-200 bg-white shadow-xs transition-shadow hover:shadow-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1D3A73]"
+          tabindex="0"
+          role="button"
           @click="openArticle(item)"
+          @keydown.enter="openArticle(item)"
+          @keydown.space.prevent="openArticle(item)"
         >
-          <div>
-            <div class="aspect-video w-full bg-stone-100 overflow-hidden relative">
-              <img
-                v-if="item.imageUrl"
-                :src="getSafeImageUrl(item.imageUrl)"
-                :alt="item.title"
-                class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-300"
-                loading="lazy"
-              >
-              <div v-else class="h-full w-full flex items-center justify-center text-stone-400 bg-stone-50">
-                <UIcon name="i-heroicons-photo" class="h-10 w-10 text-stone-300" />
-              </div>
-              <span
-                v-if="item.category"
-                class="absolute top-2.5 left-2.5 rounded bg-[#1D3A73]/90 text-white text-[10px] font-semibold px-2 py-0.5 backdrop-blur-xs"
-              >
-                {{ item.category }}
-              </span>
-            </div>
-
-            <div class="p-5 space-y-2">
-              <div class="flex items-center justify-between text-[11px] text-stone-400">
-                <span>{{ formatDate(item.publishedAt) }}</span>
-                <span v-if="item.sourceName" class="font-medium text-stone-600">{{ item.sourceName }}</span>
-              </div>
-              <h2 class="font-serif text-base font-bold text-stone-900 group-hover:text-[#1D3A73] transition-colors line-clamp-2">
-                {{ item.title }}
-              </h2>
-              <p v-if="item.summary" class="text-xs text-stone-600 line-clamp-3 leading-relaxed">
-                {{ item.summary }}
-              </p>
-            </div>
+          <!-- Ảnh chỉ hiện khi bài viết có ảnh; không có ảnh thì dồn thẳng vào nội dung. -->
+          <div v-if="item.imageUrl" class="relative aspect-video w-full overflow-hidden bg-stone-100">
+            <img
+              :src="getSafeImageUrl(item.imageUrl)"
+              :alt="item.title"
+              class="h-full w-full object-cover transition-transform duration-300 group-hover:scale-105"
+              loading="lazy"
+            >
+            <span
+              v-if="item.category"
+              class="absolute top-2.5 left-2.5 rounded bg-[#1D3A73]/90 px-2 py-0.5 text-[10px] font-semibold text-white backdrop-blur-xs"
+            >
+              {{ item.category }}
+            </span>
           </div>
 
-          <div class="p-5 pt-0 flex items-center justify-between border-t border-stone-100 text-xs font-semibold text-[#1D3A73]">
+          <div class="flex-1 space-y-2 p-5">
+            <div class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-stone-400">
+              <span v-if="!item.imageUrl && item.category" class="rounded bg-[#1D3A73]/10 px-2 py-0.5 font-semibold text-[#1D3A73]">
+                {{ item.category }}
+              </span>
+              <span>{{ formatDate(item.publishedAt) }}</span>
+              <span v-if="item.sourceName && item.sourceName !== item.category" class="font-medium text-stone-600">
+                • {{ item.sourceName }}
+              </span>
+            </div>
+            <h2 class="line-clamp-3 font-serif text-base font-bold leading-snug text-stone-900 transition-colors group-hover:text-[#1D3A73]">
+              {{ item.title }}
+            </h2>
+            <p v-if="item.summary" class="line-clamp-3 text-xs leading-relaxed text-stone-600">
+              {{ item.summary }}
+            </p>
+          </div>
+
+          <div class="flex items-center justify-between border-t border-stone-100 px-5 py-3 text-xs font-semibold text-[#1D3A73]">
             <span>Xem chi tiết</span>
-            <UIcon name="i-heroicons-arrow-right" class="h-4 w-4 group-hover:translate-x-1 transition-transform" />
+            <UIcon name="i-heroicons-arrow-right" class="h-4 w-4 transition-transform group-hover:translate-x-1" />
           </div>
         </article>
       </div>
 
       <!-- Modal Chi tiết bài viết -->
-      <UModal v-model="modalOpen" :ui="{ content: 'sm:max-w-3xl' }">
-        <div v-if="selectedArticle" class="p-6 space-y-4">
-          <div class="flex items-start justify-between gap-4">
-            <div>
-              <span
-                v-if="selectedArticle.category"
-                class="inline-block rounded bg-[#1D3A73]/10 text-[#1D3A73] text-xs font-semibold px-2.5 py-0.5 mb-2"
-              >
-                {{ selectedArticle.category }}
-              </span>
-              <h3 class="font-serif text-2xl font-bold text-stone-900">
-                {{ selectedArticle.title }}
-              </h3>
-              <div class="text-xs text-stone-500 mt-1 flex items-center gap-3">
-                <span>Ngày đăng: {{ formatDateTime(selectedArticle.publishedAt) }}</span>
+      <UModal v-model:open="modalOpen" :ui="{ content: 'sm:max-w-3xl' }">
+        <template #body>
+          <article v-if="selectedArticle" class="space-y-4">
+            <header class="space-y-2 border-b border-stone-200 pb-4">
+              <div class="flex flex-wrap items-center gap-2 text-[11px] text-stone-500">
+                <span
+                  v-if="selectedArticle.category"
+                  class="rounded bg-[#1D3A73]/10 px-2 py-0.5 font-semibold text-[#1D3A73]"
+                >
+                  {{ selectedArticle.category }}
+                </span>
+                <span>{{ formatDateTime(selectedArticle.publishedAt) }}</span>
                 <span v-if="selectedArticle.sourceName">• Nguồn: {{ selectedArticle.sourceName }}</span>
               </div>
-            </div>
-            <UButton
-              color="neutral"
-              variant="ghost"
-              icon="i-heroicons-x-mark"
-              size="sm"
-              @click="modalOpen = false"
-            />
-          </div>
+              <h3 class="font-serif text-xl font-bold leading-snug text-stone-900 sm:text-2xl">
+                {{ selectedArticle.title }}
+              </h3>
+            </header>
 
-          <div v-if="selectedArticle.imageUrl" class="aspect-video w-full rounded-xl overflow-hidden bg-stone-100">
             <img
+              v-if="selectedArticle.imageUrl"
               :src="getSafeImageUrl(selectedArticle.imageUrl)"
               :alt="selectedArticle.title"
-              class="h-full w-full object-cover"
+              class="aspect-video w-full rounded-xl bg-stone-100 object-cover"
             >
-          </div>
 
-          <p v-if="selectedArticle.summary" class="text-sm font-medium text-stone-700 italic border-l-2 border-[#A8812A] pl-3 py-1">
-            {{ selectedArticle.summary }}
-          </p>
+            <p v-if="selectedArticle.summary" class="border-l-2 border-[#A8812A] py-1 pl-3 text-sm font-medium text-stone-700 italic">
+              {{ selectedArticle.summary }}
+            </p>
 
-          <div
-            v-if="selectedArticle.content"
-            class="prose prose-stone max-w-none text-xs sm:text-sm text-stone-800 leading-relaxed"
-            v-html="sanitize(selectedArticle.content)"
-          />
+            <div
+              v-if="selectedArticle.content"
+              class="prose prose-stone max-w-none text-xs leading-relaxed text-stone-800 sm:text-sm"
+              v-html="sanitize(selectedArticle.content)"
+            />
 
-          <div class="pt-4 border-t border-stone-200 flex justify-end">
-            <UButton variant="outline" color="neutral" @click="modalOpen = false">
+            <p v-else-if="!selectedArticle.summary" class="rounded-lg bg-stone-50 p-3 text-xs text-stone-500">
+              Bản tin chưa có nội dung tóm tắt. Vui lòng mở bài viết gốc để đọc đầy đủ.
+            </p>
+          </article>
+        </template>
+
+        <template #footer>
+          <div class="flex w-full flex-wrap items-center justify-between gap-3">
+            <UButton
+              v-if="articleLink"
+              :to="articleLink ?? '#'"
+              target="_blank"
+              rel="noopener noreferrer"
+              size="sm"
+              icon="i-heroicons-arrow-top-right-on-square"
+            >
+              Đọc bài gốc
+            </UButton>
+            <UButton variant="outline" color="neutral" size="sm" @click="modalOpen = false">
               Đóng lại
             </UButton>
           </div>
-        </div>
+        </template>
       </UModal>
-    </div>
-  </PortalShell>
+  </div>
 </template>

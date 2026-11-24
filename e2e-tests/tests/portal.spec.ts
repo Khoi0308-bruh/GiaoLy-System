@@ -11,12 +11,17 @@ async function choHydration(page: Page) {
   }, undefined, { timeout: 30_000 })
 }
 
-/** Các trang công khai của web-portal: tiêu đề phải render được. */
+/**
+ * Các trang công khai của web-portal: tiêu đề phải render được.
+ * Dùng đường dẫn hợp nhất (/tin-tuc, /thu-vien, /lich-phung-vu, /ban-huynh-truong);
+ * các đường dẫn cũ /news, /library… chỉ còn là chuyển hướng.
+ */
 const TRANG_CONG_KHAI: Array<[string, RegExp]> = [
-  ['/news', /Tin Tức Công Giáo/],
-  ['/library', /Thư Viện Tài Liệu/],
-  ['/liturgical', /Lịch Phụng Vụ/],
-  ['/leadership', /Sơ Đồ Tổ Chức/]
+  ['/tin-tuc', /Tin Tức Giáo Hội/],
+  ['/thong-bao', /Thông Báo Giáo Xứ/],
+  ['/thu-vien', /Thư Viện Tài Liệu/],
+  ['/lich-phung-vu', /Lịch Phụng Vụ/],
+  ['/ban-huynh-truong', /Ban Huynh Trưởng/]
 ]
 
 test.describe('web-portal', () => {

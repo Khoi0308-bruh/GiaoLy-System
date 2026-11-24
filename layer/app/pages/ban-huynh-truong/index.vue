@@ -61,8 +61,7 @@ const filteredLeaders = computed(() => {
 </script>
 
 <template>
-  <PortalShell>
-    <div class="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-10 space-y-8">
+  <div class="mx-auto w-full max-w-7xl space-y-8">
       <!-- Header -->
       <div class="border-b border-stone-200 pb-5">
         <div class="flex flex-wrap items-center justify-between gap-4">
@@ -142,6 +141,5 @@ const filteredLeaders = computed(() => {
           </div>
         </div>
       </div>
-    </div>
-  </PortalShell>
+  </div>
 </template>
