@@ -82,6 +82,11 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 // ── 8. CORS ──────────────────────────────────────────────────────────────────
+// Danh sách origin lấy từ 'Cors:AllowedOrigins'. Môi trường Development khai báo sẵn 4 cổng
+// (3000/3001 cho `pnpm dev`, 4000/4001 cho bản build) trong appsettings.Development.json;
+// muốn thêm cổng khác thì đặt biến môi trường, ví dụ Cors__AllowedOrigins__4=http://localhost:5002.
+// Fallback dưới đây chỉ để chạy được khi thiếu hẳn cấu hình (Development), Production bắt buộc
+// phải khai báo tường minh — xem ConfigurationValidator.
 var allowedOrigins = config.GetSection("Cors:AllowedOrigins").Get<string[]>() 
                      ?? new[] { "http://localhost:3000", "http://localhost:3001" };
 

@@ -34,6 +34,28 @@ Khi triển khai trên máy chủ Production, **tuyệt đối không lưu mật
 
 ---
 
+### 2.1 Cổng và CORS khi phát triển cục bộ
+
+| Thành phần | Cổng | Cách chạy |
+| :--- | :--- | :--- |
+| API | `5000` | `ASPNETCORE_URLS=http://localhost:5000` |
+| web-admin (dev) | `3000` | `pnpm dev` |
+| web-portal (dev) | `3001` | `pnpm dev` |
+| web-admin (bản build) | `4000` | `nuxt build` → `PORT=4000 node .output/server/index.mjs` |
+| web-portal (bản build) | `4001` | `nuxt build` → `PORT=4001 node .output/server/index.mjs` |
+
+`appsettings.Development.json` khai báo sẵn cả bốn origin `http://localhost:3000`, `3001`, `4000`,
+`4001` trong `Cors:AllowedOrigins`. Nếu chạy app ở cổng khác, trình duyệt sẽ bị CORS chặn và trang
+đăng nhập chỉ báo lỗi chung chung (console hiện *blocked by CORS policy*). Thêm cổng đó bằng biến
+môi trường, không cần sửa mã:
+
+```bash
+Cors__AllowedOrigins__4=http://localhost:5002
+```
+
+Ở Production, danh sách này bắt buộc là URL HTTPS thật và không được trỏ về `localhost` —
+`ConfigurationValidator` sẽ dừng khởi động nếu vi phạm.
+
 ## 3. CÁC PHƯƠNG THỨC TRIỂN KHAI (DEPLOYMENT)
 
 ### Cách 1: Triển khai với Docker & Docker Compose (Khuyến nghị cho Linux)
