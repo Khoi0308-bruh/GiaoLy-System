@@ -193,6 +193,19 @@ public class LiturgicalService : ILiturgicalService
         [(12, 25)] = ("Chúa Giáng Sinh", "White", "Lễ trọng")
     };
 
+    /// <summary>Lễ di động: khoá là số ngày lệch so với Chúa Nhật Phục Sinh.</summary>
+    private static readonly Dictionary<int, (string Title, string Color, string Level)> MovableFeasts = new()
+    {
+        [-46] = ("Thứ Tư Lễ Tro", "Purple", "Lễ"),
+        [-7] = ("Chúa Nhật Lễ Lá", "Red", "Lễ trọng"),
+        [-3] = ("Thứ Năm Tuần Thánh", "White", "Lễ trọng"),
+        [-2] = ("Thứ Sáu Tuần Thánh", "Red", "Lễ trọng"),
+        [-1] = ("Thứ Bảy Tuần Thánh", "Purple", "Lễ trọng"),
+        [0] = ("Chúa Nhật Phục Sinh", "White", "Lễ trọng"),
+        [39] = ("Lễ Chúa Giêsu Lên Trời", "White", "Lễ trọng"),
+        [49] = ("Lễ Chúa Thánh Thần Hiện Xuống", "Red", "Lễ trọng")
+    };
+
     private static LiturgicalEventDto ComputeDay(DateOnly date)
     {
         var season = SeasonOf(date);
@@ -204,57 +217,11 @@ public class LiturgicalService : ILiturgicalService
 
         if (FixedFeasts.TryGetValue((date.Month, date.Day), out var feast))
         {
-            title = feast.Title;
-            color = feast.Color;
-            level = feast.Level;
+            (title, color, level) = feast;
         }
-        else if (date == easter)
+        else if (MovableFeasts.TryGetValue(date.DayNumber - easter.DayNumber, out var movable))
         {
-            title = "Chúa Nhật Phục Sinh";
-            color = "White";
-            level = "Lễ trọng";
-        }
-        else if (date == easter.AddDays(-7))
-        {
-            title = "Chúa Nhật Lễ Lá";
-            color = "Red";
-            level = "Lễ trọng";
-        }
-        else if (date == easter.AddDays(-3))
-        {
-            title = "Thứ Năm Tuần Thánh";
-            color = "White";
-            level = "Lễ trọng";
-        }
-        else if (date == easter.AddDays(-2))
-        {
-            title = "Thứ Sáu Tuần Thánh";
-            color = "Red";
-            level = "Lễ trọng";
-        }
-        else if (date == easter.AddDays(-1))
-        {
-            title = "Thứ Bảy Tuần Thánh";
-            color = "Purple";
-            level = "Lễ trọng";
-        }
-        else if (date == easter.AddDays(-46))
-        {
-            title = "Thứ Tư Lễ Tro";
-            color = "Purple";
-            level = "Lễ";
-        }
-        else if (date == easter.AddDays(39))
-        {
-            title = "Lễ Chúa Giêsu Lên Trời";
-            color = "White";
-            level = "Lễ trọng";
-        }
-        else if (date == easter.AddDays(49))
-        {
-            title = "Lễ Chúa Thánh Thần Hiện Xuống";
-            color = "Red";
-            level = "Lễ trọng";
+            (title, color, level) = movable;
         }
         else if (date.DayOfWeek == DayOfWeek.Sunday)
         {

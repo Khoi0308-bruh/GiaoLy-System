@@ -64,11 +64,7 @@ public class LiturgicalController : ControllerBase
     [AllowAnonymous]
     public async Task<IActionResult> GetCalendar(int year, int month, CancellationToken ct)
     {
-        if (month < 1 || month > 12)
-        {
-            return BadRequest(new { message = "Tháng phải từ 1 đến 12" });
-        }
-
+        // Tháng không hợp lệ do service trả về lỗi 400 theo đúng chuẩn Result.
         var result = await _liturgicalService.GetCalendarAsync(year, month, ct);
         return result.ToActionResult();
     }

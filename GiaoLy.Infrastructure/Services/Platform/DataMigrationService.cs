@@ -149,18 +149,19 @@ public class DataMigrationService : IDataMigrationService
 
                 if (batch.Count == 0) break;
 
+                var changedInBatch = 0;
                 foreach (var student in batch)
                 {
                     scanned++;
                     var expected = VietnameseNormalizer.NormalizeName(student.FullName);
-                    if (!string.Equals(student.FullNameNormalized, expected, StringComparison.Ordinal))
-                    {
-                        student.FullNameNormalized = expected;
-                        updated++;
-                    }
+                    if (string.Equals(student.FullNameNormalized, expected, StringComparison.Ordinal)) continue;
+
+                    student.FullNameNormalized = expected;
+                    changedInBatch++;
                 }
 
-                if (updated > 0) await _context.SaveChangesAsync(ct);
+                updated += changedInBatch;
+                if (changedInBatch > 0) await _context.SaveChangesAsync(ct);
             }
 
             _logger.LogInformation("Chuẩn hoá FullNameNormalized: đã quét {Scanned}, cập nhật {Updated}", scanned, updated);
