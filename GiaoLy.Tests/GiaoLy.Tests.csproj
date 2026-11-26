@@ -20,4 +20,9 @@
     <ProjectReference Include="..\GiaoLy.Infrastructure\GiaoLy.Infrastructure.csproj" />
   </ItemGroup>
 
+  <!-- Cùng một tệp mẫu với bộ e2e để test tích hợp và e2e kiểm đúng một bộ dữ liệu. -->
+  <ItemGroup>
+    <None Include="..\docs\fixtures\nhap-doan-sinh-co-loi.xlsx" Link="Fixtures\nhap-doan-sinh-co-loi.xlsx" CopyToOutputDirectory="PreserveNewest" />
+  </ItemGroup>
+
 </Project>
