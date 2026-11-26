@@ -15,14 +15,15 @@ export async function taoBanner(
   request: APIRequestContext,
   headers: Record<string, string>,
   dangBat: boolean,
-  tienTo = 'E2E Banner'
+  tienTo = 'E2E Banner',
+  lienKet: string | null = null
 ): Promise<BannerDto> {
   const res = await request.post(`${API_BASE}/api/v1/banners`, {
     headers,
     data: {
       title: `${tienTo} ${Date.now().toString().slice(-6)}${++dem}`,
       imageUrl: 'https://example.com/e2e-banner.jpg',
-      linkUrl: null,
+      linkUrl: lienKet,
       orderIndex: 99,
       isActive: dangBat
     }

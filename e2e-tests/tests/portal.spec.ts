@@ -49,7 +49,8 @@ test.describe('web-portal', () => {
 
   test('trang chủ chỉ hiện banner đang bật', async ({ page, request }) => {
     const headers = { Authorization: `Bearer ${await dangNhapApi(request)}` }
-    const dangBat = await taoBanner(request, headers, true, 'E2E Portal Bật')
+    const lienKet = 'https://example.com/lien-ket-e2e'
+    const dangBat = await taoBanner(request, headers, true, 'E2E Portal Bật', lienKet)
     const dangTat = await taoBanner(request, headers, false, 'E2E Portal Tắt')
 
     try {
@@ -63,6 +64,12 @@ test.describe('web-portal', () => {
         page.getByRole('heading', { name: dangTat.title }),
         'banner đang tắt không được lên trang chủ'
       ).toHaveCount(0)
+
+      // Banner có "Liên kết" phải hiện nút CTA trỏ đúng linkUrl của API.
+      await expect(
+        page.locator(`a[href="${lienKet}"]`).first(),
+        'nút "Xem Chi Tiết" phải trỏ đúng linkUrl của banner'
+      ).toContainText('Xem Chi Tiết')
     } finally {
       await xoaBanner(request, headers, dangBat.id)
       await xoaBanner(request, headers, dangTat.id)
