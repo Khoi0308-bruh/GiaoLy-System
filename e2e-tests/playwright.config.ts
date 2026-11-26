@@ -36,7 +36,7 @@ export default defineConfig({
     },
     {
       name: 'admin',
-      testMatch: /(admin|gradebook|nhap-excel|error-pages)\.spec\.ts/,
+      testMatch: /(admin|banner|gradebook|nhap-excel|error-pages)\.spec\.ts/,
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], baseURL: ADMIN_BASE }
     },

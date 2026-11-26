@@ -215,6 +215,7 @@ async function handleDeleteBanner() {
             variant="ghost"
             color="neutral"
             icon="i-lucide-pencil"
+            aria-label="Sửa banner"
             @click="openEditModal(b)"
           />
           <UButton
@@ -222,6 +223,7 @@ async function handleDeleteBanner() {
             variant="ghost"
             color="error"
             icon="i-lucide-trash-2"
+            aria-label="Xóa banner"
             @click="openDeleteModal(b)"
           />
         </div>
