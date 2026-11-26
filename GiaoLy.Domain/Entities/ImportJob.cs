@@ -4,8 +4,6 @@ public class ImportJob
 {
     public const string StatusValidated = "Validated";
     public const string StatusApplied = "Applied";
-    public const string StatusFailed = "Failed";
-    public const string StatusCancelled = "Cancelled";
 
     public Guid Id { get; set; } = Guid.NewGuid();
     public string ImportType { get; set; } = "Students";
