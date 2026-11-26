@@ -5,7 +5,7 @@ import { defineConfig, devices } from '@playwright/test'
  *
  * - Project `setup` đăng nhập một lần và xử lý luồng đổi mật khẩu lần đầu, để các
  *   project sau chỉ còn phải đăng nhập bằng mật khẩu đã biết.
- * - Project `admin` chạy các luồng quản trị trên web-admin.
+ * - Project `admin` chạy các luồng quản trị trên web-admin (gồm nhập Excel).
  * - Project `permission` đăng nhập bằng một vai trò hạn chế và kiểm tra bị chặn.
  * - Project `portal` chạy trên web-portal, các trang công khai.
  */
@@ -36,7 +36,7 @@ export default defineConfig({
     },
     {
       name: 'admin',
-      testMatch: /(admin|gradebook|error-pages)\.spec\.ts/,
+      testMatch: /(admin|gradebook|nhap-excel|error-pages)\.spec\.ts/,
       dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], baseURL: ADMIN_BASE }
     },
