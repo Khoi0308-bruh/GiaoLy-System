@@ -43,7 +43,8 @@ async function loadData() {
   loading.value = true
   error.value = null
   try {
-    const res = await api.get<BannerItem[]>('/public/banners')
+    // Danh sách quản trị: gồm cả banner đang tắt để bật lại; endpoint công khai chỉ trả banner đang hiển thị.
+    const res = await api.get<BannerItem[]>('/banners')
     banners.value = (res || []).sort((a, b) => a.orderIndex - b.orderIndex)
   } catch (e) {
     error.value = e as ApiError
