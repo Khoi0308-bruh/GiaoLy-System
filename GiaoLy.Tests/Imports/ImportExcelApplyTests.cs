@@ -5,6 +5,7 @@ using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 using GiaoLy.Application.Common.Interfaces;
+using GiaoLy.Application.Imports.Dtos;
 using GiaoLy.Domain.Data;
 using GiaoLy.Domain.Entities;
 using GiaoLy.Infrastructure.Services.Imports;
@@ -44,24 +45,33 @@ public class ImportExcelApplyTests
     private static Stream OpenTepMau() =>
         File.OpenRead(Path.Combine(AppContext.BaseDirectory, TepMau));
 
+    /// <summary>Upload tệp mẫu rồi bấm "Xác nhận lưu", trả về báo cáo và kết quả áp dụng.</summary>
+    private static async Task<(ImportJobDetailResponse XemTruoc, ApplyImportResult KetQua)> NhapVaApDungAsync(
+        ImportExportService service)
+    {
+        await using var tep = OpenTepMau();
+        var xemTruoc = await service.UploadAndValidateStudentsAsync(tep, TenTep);
+        Assert.True(xemTruoc.IsSuccess);
+
+        var ketQua = await service.ApplyImportJobAsync(xemTruoc.Value!.Id);
+        Assert.True(ketQua.IsSuccess);
+
+        return (xemTruoc.Value, ketQua.Value!);
+    }
+
     [Fact]
     public async Task Apply_TaoDungMotDoanSinhTuDongHopLe()
     {
         await using var db = NewDb();
         var service = NewService(db);
 
-        await using var tep = OpenTepMau();
-        var xemTruoc = await service.UploadAndValidateStudentsAsync(tep, TenTep);
-        Assert.True(xemTruoc.IsSuccess);
-        Assert.Equal(5, xemTruoc.Value!.TotalRows);
-        Assert.Equal(1, xemTruoc.Value.ValidRows);
-        Assert.Equal(4, xemTruoc.Value.ErrorRows);
+        var (xemTruoc, ketQua) = await NhapVaApDungAsync(service);
 
-        var ketQua = await service.ApplyImportJobAsync(xemTruoc.Value.Id);
-
-        Assert.True(ketQua.IsSuccess);
-        Assert.Equal(1, ketQua.Value!.InsertedCount);
-        Assert.Equal(0, ketQua.Value.UpdatedCount);
+        Assert.Equal(5, xemTruoc.TotalRows);
+        Assert.Equal(1, xemTruoc.ValidRows);
+        Assert.Equal(4, xemTruoc.ErrorRows);
+        Assert.Equal(1, ketQua.InsertedCount);
+        Assert.Equal(0, ketQua.UpdatedCount);
 
         var doanSinh = await db.Students.SingleAsync();
         Assert.Equal("Excel Hợp Lệ Mẫu", doanSinh.FullName);
@@ -84,11 +94,9 @@ public class ImportExcelApplyTests
         await using var db = NewDb();
         var service = NewService(db);
 
-        await using var tep = OpenTepMau();
-        var xemTruoc = await service.UploadAndValidateStudentsAsync(tep, TenTep);
-        await service.ApplyImportJobAsync(xemTruoc.Value!.Id);
+        var (xemTruoc, _) = await NhapVaApDungAsync(service);
 
-        var lanHai = await service.ApplyImportJobAsync(xemTruoc.Value.Id);
+        var lanHai = await service.ApplyImportJobAsync(xemTruoc.Id);
 
         Assert.False(lanHai.IsSuccess);
         Assert.Equal(409, lanHai.StatusCode);
@@ -101,9 +109,7 @@ public class ImportExcelApplyTests
         await using var db = NewDb();
         var service = NewService(db);
 
-        await using var tep = OpenTepMau();
-        var xemTruoc = await service.UploadAndValidateStudentsAsync(tep, TenTep);
-        await service.ApplyImportJobAsync(xemTruoc.Value!.Id);
+        await NhapVaApDungAsync(service);
 
         // Chốt an toàn theo FileSha256 dùng chung toàn hệ thống: đây cũng là lý do
         // bộ e2e không bấm "Xác nhận lưu" với tệp fixture thật.
