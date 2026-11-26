@@ -6,7 +6,8 @@ interface BannerItem {
   tag?: string
   tagColor?: string
   imageUrl: string
-  link?: string
+  // API công khai trả `linkUrl` (BannerDto), không phải `link`.
+  linkUrl?: string | null
   ctaText?: string
   orderIndex?: number
   isActive?: boolean
@@ -28,7 +29,7 @@ const fallbackBanners: BannerItem[] = [
     tag: '✨ NĂM HỌC MỚI',
     tagColor: 'warning',
     imageUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=2071&auto=format&fit=crop',
-    link: '/tin-tuc',
+    linkUrl: '/tin-tuc',
     ctaText: 'Khám Phá Ngay'
   }
 ]
@@ -165,8 +166,8 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
               <!-- Nút CTA -->
               <div class="flex items-center gap-3 flex-wrap">
                 <NuxtLink
-                  v-if="item.link"
-                  :to="item.link"
+                  v-if="item.linkUrl"
+                  :to="item.linkUrl"
                   class="gold-btn"
                 >
                   {{ item.ctaText || 'Xem Chi Tiết' }}
