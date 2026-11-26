@@ -736,6 +736,33 @@ public class ImportExportService : IImportExportService
         }
     }
 
+    /// <summary>
+    /// Hủy một đợt nhập còn chờ áp dụng. Bước kiểm tra chưa ghi đoàn sinh nào nên
+    /// không có dữ liệu nghiệp vụ phải hoàn tác: xóa hẳn bản ghi của đợt nhập để
+    /// không để lại rác trong lịch sử nhập tệp.
+    /// </summary>
+    public async Task<Result<bool>> CancelImportJobAsync(Guid id, CancellationToken ct = default)
+    {
+        var job = await _db.ImportJobs.FirstOrDefaultAsync(j => j.Id == id, ct);
+        if (job == null)
+        {
+            return Result.NotFound<bool>($"Không tìm thấy phiên nhập dữ liệu với Id '{id}'.");
+        }
+
+        // Đợt đã áp dụng đã ghi đoàn sinh vào dữ liệu, phải giữ lại làm dấu vết.
+        if (job.Status != ImportJob.StatusValidated)
+        {
+            return Result.Conflict<bool>($"Chỉ có thể hủy phiên nhập đang chờ áp dụng. Trạng thái hiện tại: '{job.Status}'.");
+        }
+
+        _db.ImportJobs.Remove(job);
+        await _db.SaveChangesAsync(ct);
+
+        _logger.LogInformation("Đã hủy phiên nhập tệp {File} ({JobId})", job.FileName, job.Id);
+
+        return Result.Ok(true);
+    }
+
     public async Task<Result<IReadOnlyList<ImportJobSummaryResponse>>> GetImportHistoryAsync(string? importType = null, CancellationToken ct = default)
     {
         var query = _db.ImportJobs.AsNoTracking();

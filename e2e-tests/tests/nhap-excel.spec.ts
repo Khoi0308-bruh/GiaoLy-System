@@ -1,12 +1,14 @@
 import path from 'node:path'
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
-import { dangNhap } from './support/auth'
+import { API_BASE, dangNhap } from './support/auth'
+import { dangNhapApi } from './support/api'
 
 /**
  * Fixture `docs/fixtures/nhap-doan-sinh-co-loi.xlsx` có 5 dòng dữ liệu: dòng Excel
  * 2–5 sai (thiếu họ tên, thiếu ngày sinh, ngày sinh ở tương lai, mã cấp lớp không
  * tồn tại) và dòng 6 hợp lệ. Test chỉ chạy bước xem trước (POST /imports/students),
- * không bấm "Xác nhận lưu" nên không ghi đoàn sinh nào vào database.
+ * không bấm "Xác nhận lưu" nên không ghi đoàn sinh nào vào database, rồi hủy đợt
+ * xem trước ở cuối để không để lại bản ghi ImportJobs nào.
  */
 const FILE_LOI = path.resolve(__dirname, '../../docs/fixtures/nhap-doan-sinh-co-loi.xlsx')
 
@@ -35,7 +37,7 @@ test.describe('web-admin - nhập đoàn sinh từ Excel', () => {
     await context.close()
   })
 
-  test('tệp có lỗi: bảng và thẻ mobile hiện đủ 4 dòng lỗi', async () => {
+  test('tệp có lỗi: bảng và thẻ mobile hiện đủ 4 dòng lỗi, hủy đợt xem trước', async ({ request }) => {
     await page.goto('/admin/doan-sinh/nhap-excel')
     await expect(page.locator('h1').first()).toContainText('Nhập đoàn sinh từ Excel', { timeout: 30_000 })
 
@@ -49,7 +51,9 @@ test.describe('web-admin - nhập đoàn sinh từ Excel', () => {
       { timeout: 60_000 }
     )
     await page.getByRole('button', { name: 'Kiểm tra dữ liệu (Xem trước)' }).click()
-    expect((await phanHoiXemTruoc).status(), 'API phải nhận tệp và trả báo cáo xem trước').toBe(200)
+    const xemTruoc = await phanHoiXemTruoc
+    expect(xemTruoc.status(), 'API phải nhận tệp và trả báo cáo xem trước').toBe(200)
+    const { id: maDoanNhap } = (await xemTruoc.json()) as { id: string }
 
     await expect(page.getByText('Chi tiết các dòng bị lỗi (4 lỗi):')).toBeVisible({ timeout: 30_000 })
 
@@ -80,5 +84,20 @@ test.describe('web-admin - nhập đoàn sinh từ Excel', () => {
       // Mô tả lỗi nằm ngay trong thẻ của dòng đó, không phải chỉ ở bảng đang ẩn.
       await expect(the.locator('xpath=..')).toContainText(loi)
     }
+
+    // Hủy đợt xem trước: quay lại bước 1 và bản ghi ImportJobs biến mất khỏi API.
+    const phanHoiHuy = page.waitForResponse(
+      r => r.request().method() === 'POST' && r.url().endsWith(`/imports/${maDoanNhap}/cancel`),
+      { timeout: 60_000 }
+    )
+    await page.getByRole('button', { name: 'Hủy đợt nhập' }).click()
+    expect((await phanHoiHuy).status(), 'API phải hủy được đợt xem trước').toBe(200)
+    await expect(page.getByText('Bước 1: Chọn tệp Excel dữ liệu đoàn sinh')).toBeVisible()
+
+    const token = await dangNhapApi(request)
+    const conLai = await request.get(`${API_BASE}/api/v1/imports/${maDoanNhap}`, {
+      headers: { Authorization: `Bearer ${token}` }
+    })
+    expect(conLai.status(), 'đợt nhập đã hủy không còn trong database').toBe(404)
   })
 })

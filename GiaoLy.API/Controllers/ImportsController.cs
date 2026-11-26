@@ -68,6 +68,14 @@ public class ImportsController : ControllerBase
         return result.ToActionResult();
     }
 
+    [HttpPost("api/v1/imports/{id:guid}/cancel")]
+    [RequirePermission(Permissions.Students.Import)]
+    public async Task<IActionResult> CancelImportJob(Guid id, CancellationToken ct)
+    {
+        var result = await _importExportService.CancelImportJobAsync(id, ct);
+        return result.ToActionResult();
+    }
+
     [HttpGet("api/v1/imports")]
     [RequirePermission(Permissions.Students.Import)]
     public async Task<IActionResult> GetImportHistory([FromQuery] string? type, CancellationToken ct)
