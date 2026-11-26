@@ -30,7 +30,10 @@ test.describe('web-admin - banner trang chủ', () => {
     await context.close()
   })
 
-  async function taoBanner(request: APIRequestContext, headers: object, isActive: boolean) {
+  /** Thẻ banner trong lưới quản trị; locator tự tìm lại sau mỗi lần tải danh sách. */
+  const theBanner = (tieuDe: string) => page.locator('div.group', { hasText: tieuDe })
+
+  async function taoBanner(request: APIRequestContext, headers: Record<string, string>, isActive: boolean) {
     const res = await request.post(`${API_BASE}/api/v1/banners`, {
       headers,
       data: {
@@ -45,7 +48,7 @@ test.describe('web-admin - banner trang chủ', () => {
     return (await res.json()) as BannerDto
   }
 
-  async function xoaBanner(request: APIRequestContext, headers: object, id: string) {
+  async function xoaBanner(request: APIRequestContext, headers: Record<string, string>, id: string) {
     const res = await request.delete(`${API_BASE}/api/v1/banners/${id}`, { headers })
     expect(res.status(), 'dọn banner test').toBe(200)
 
@@ -63,25 +66,31 @@ test.describe('web-admin - banner trang chủ', () => {
     expect((await choDanhSach).status(), 'API danh sách quản trị phải trả 200').toBe(200)
   }
 
-  /** Mở modal sửa của banner theo tiêu đề, trả về ô "Kích hoạt hiển thị". */
+  /** Mở modal sửa của banner, trả về ô "Kích hoạt hiển thị". */
   async function moModalSua(tieuDe: string) {
-    const theBanner = page.locator('div.group', { hasText: tieuDe })
-    await expect(theBanner).toBeVisible({ timeout: 30_000 })
-    await theBanner.getByRole('button', { name: 'Sửa banner' }).click()
+    await theBanner(tieuDe).getByRole('button', { name: 'Sửa banner' }).click()
 
     const oKichHoat = page.locator('#bannerActiveCheck')
     await expect(oKichHoat).toBeVisible()
-    return { theBanner, oKichHoat }
+    return oKichHoat
   }
 
-  /** Bấm "Cập nhật" và chờ đúng phản hồi PUT của banner. */
+  /**
+   * Bấm "Cập nhật", chờ phản hồi PUT rồi chờ danh sách **quản trị** được tải lại —
+   * nếu trang quay lại dùng endpoint công khai thì bước chờ này timeout.
+   */
   async function luuBanner(id: string) {
     const choLuu = page.waitForResponse(
       r => r.request().method() === 'PUT' && r.url().endsWith(`/api/v1/banners/${id}`),
       { timeout: 60_000 }
     )
+    const choTaiLai = page.waitForResponse(
+      r => r.request().method() === 'GET' && r.url().endsWith('/api/v1/banners'),
+      { timeout: 60_000 }
+    )
     await page.getByRole('button', { name: 'Cập nhật' }).click()
     expect((await choLuu).status(), 'API phải lưu được thay đổi').toBe(200)
+    expect((await choTaiLai).status(), 'lưu xong phải tải lại danh sách quản trị').toBe(200)
   }
 
   async function danhSachCongKhai(request: APIRequestContext) {
@@ -92,33 +101,30 @@ test.describe('web-admin - banner trang chủ', () => {
     const headers = { Authorization: `Bearer ${await dangNhapApi(request)}` }
     const banner = await taoBanner(request, headers, false)
 
+    // Ghi lại nếu trang gọi endpoint công khai thay vì danh sách quản trị.
+    const goiCongKhai: string[] = []
+    const ghiNhan = (r: { url(): string }) => {
+      if (r.url().includes('/api/v1/public/banners')) goiCongKhai.push(r.url())
+    }
+    page.on('request', ghiNhan)
+
     try {
-      // Ghi lại đường dẫn API banner mà trang gọi, để chắc không quay lại endpoint công khai.
-      const daGoi = new Set<string>()
-      page.on('request', (r) => {
-        const duongDan = new URL(r.url()).pathname
-        if (duongDan.includes('/banners')) daGoi.add(duongDan)
-      })
-
       await moTrangBanner()
+      await expect(theBanner(banner.title)).toContainText('Tạm ẩn', { timeout: 30_000 })
+      expect(goiCongKhai, 'trang phải dùng API quản trị, không gọi endpoint công khai').toEqual([])
 
-      const { theBanner, oKichHoat } = await moModalSua(banner.title)
-      await expect(theBanner).toContainText('Tạm ẩn')
-      expect(
-        [...daGoi],
-        'trang phải dùng API quản trị, không gọi endpoint công khai'
-      ).not.toContain('/api/v1/public/banners')
-
+      const oKichHoat = await moModalSua(banner.title)
       await expect(oKichHoat).not.toBeChecked()
       await oKichHoat.check()
       await luuBanner(banner.id)
 
-      await expect(page.locator('div.group', { hasText: banner.title })).toContainText('Hiển thị', { timeout: 30_000 })
+      await expect(theBanner(banner.title)).toContainText('Hiển thị', { timeout: 30_000 })
 
       // Bật xong thì banner phải xuất hiện ở danh sách công khai.
       const congKhai = await danhSachCongKhai(request)
       expect(congKhai.some(b => b.id === banner.id), 'banner đã bật phải có trong danh sách công khai').toBe(true)
     } finally {
+      page.off('request', ghiNhan)
       await xoaBanner(request, headers, banner.id)
     }
   })
@@ -129,15 +135,14 @@ test.describe('web-admin - banner trang chủ', () => {
 
     try {
       await moTrangBanner()
+      await expect(theBanner(banner.title)).toContainText('Hiển thị', { timeout: 30_000 })
 
-      const { theBanner, oKichHoat } = await moModalSua(banner.title)
-      await expect(theBanner).toContainText('Hiển thị')
+      const oKichHoat = await moModalSua(banner.title)
       await expect(oKichHoat).toBeChecked()
-
       await oKichHoat.uncheck()
       await luuBanner(banner.id)
 
-      await expect(page.locator('div.group', { hasText: banner.title })).toContainText('Tạm ẩn', { timeout: 30_000 })
+      await expect(theBanner(banner.title)).toContainText('Tạm ẩn', { timeout: 30_000 })
 
       const congKhai = await danhSachCongKhai(request)
       expect(congKhai.some(b => b.id === banner.id), 'banner đã tắt không còn trong danh sách công khai').toBe(false)
