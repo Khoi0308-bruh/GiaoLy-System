@@ -50,7 +50,8 @@ test.describe('web-admin - banner trang chủ', () => {
 
   async function xoaBanner(request: APIRequestContext, headers: Record<string, string>, id: string) {
     const res = await request.delete(`${API_BASE}/api/v1/banners/${id}`, { headers })
-    expect(res.status(), 'dọn banner test').toBe(200)
+    // 404 khi chính test đã xoá banner trước đó rồi.
+    expect([200, 404], 'dọn banner test').toContain(res.status())
 
     const conLai = (await (await request.get(`${API_BASE}/api/v1/banners`, { headers })).json()) as BannerDto[]
     expect(conLai.some(b => b.id === id), 'banner test không còn trong danh sách').toBe(false)
@@ -125,6 +126,41 @@ test.describe('web-admin - banner trang chủ', () => {
       expect(congKhai.some(b => b.id === banner.id), 'banner đã bật phải có trong danh sách công khai').toBe(true)
     } finally {
       page.off('request', ghiNhan)
+      await xoaBanner(request, headers, banner.id)
+    }
+  })
+
+  test('xoá banner: xác nhận trong modal, banner biến khỏi cả hai danh sách', async ({ request }) => {
+    const headers = { Authorization: `Bearer ${await dangNhapApi(request)}` }
+    const banner = await taoBanner(request, headers, true)
+
+    try {
+      await moTrangBanner()
+      await expect(theBanner(banner.title)).toContainText('Hiển thị', { timeout: 30_000 })
+
+      await theBanner(banner.title).getByRole('button', { name: 'Xóa banner' }).click()
+      await expect(page.getByText('Xác nhận xóa banner')).toBeVisible()
+
+      const nutXacNhan = page.getByRole('button', { name: 'Xác nhận xóa' })
+      const choXoa = page.waitForResponse(
+        r => r.request().method() === 'DELETE' && r.url().endsWith(`/api/v1/banners/${banner.id}`),
+        { timeout: 60_000 }
+      )
+      const choTaiLai = page.waitForResponse(
+        r => r.request().method() === 'GET' && r.url().endsWith('/api/v1/banners'),
+        { timeout: 60_000 }
+      )
+      await nutXacNhan.click()
+      expect((await choXoa).status(), 'API phải xoá được banner').toBe(200)
+      expect((await choTaiLai).status(), 'xoá xong phải tải lại danh sách quản trị').toBe(200)
+
+      await expect(theBanner(banner.title)).toHaveCount(0, { timeout: 30_000 })
+
+      const quanTri = (await (await request.get(`${API_BASE}/api/v1/banners`, { headers })).json()) as BannerDto[]
+      expect(quanTri.some(b => b.id === banner.id), 'banner đã xoá không còn trong danh sách quản trị').toBe(false)
+      const congKhai = await danhSachCongKhai(request)
+      expect(congKhai.some(b => b.id === banner.id), 'banner đã xoá không còn trong danh sách công khai').toBe(false)
+    } finally {
       await xoaBanner(request, headers, banner.id)
     }
   })

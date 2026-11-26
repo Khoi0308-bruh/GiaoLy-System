@@ -1,14 +1,37 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 import { dangNhap } from './support/auth'
 
-/** Các trang quản trị chính: tiêu đề phải đúng, không lọt banner lỗi/quyền. */
+/**
+ * Các trang quản trị tĩnh: tiêu đề phải đúng, không lọt banner lỗi/quyền.
+ * Bỏ qua trang cần tham số (:id) và trang dev (/admin/dev/*).
+ */
 const TRANG_CHINH: Array<[string, RegExp]> = [
   ['/admin', /Bảng điều khiển Trung tâm/],
   ['/admin/doan-sinh', /Danh sách đoàn sinh/],
+  ['/admin/doan-sinh/them', /Thêm đoàn sinh mới/],
+  ['/admin/doan-sinh/nhap-excel', /Nhập đoàn sinh từ Excel/],
+  ['/admin/doan-sinh/yeu-cau-bi-tich', /Yêu cầu chuẩn bị Bí tích/],
   ['/admin/lop', /Danh sách Lớp học/],
   ['/admin/nien-khoa', /Niên khóa/],
+  ['/admin/len-lop', /Đợt xét Lên lớp/],
   ['/admin/vai-tro', /Vai trò & Ma trận Phân quyền/],
-  ['/admin/nguoi-dung', /Quản trị Người dùng & Tài khoản/]
+  ['/admin/nguoi-dung', /Quản trị Người dùng & Tài khoản/],
+  ['/admin/tai-khoan', /Hồ sơ cá nhân/],
+  ['/admin/banner', /Banner Trang chủ/],
+  ['/admin/thong-bao', /Bản tin & Thông báo/],
+  ['/admin/tin-tuc', /Tin tức & Dòng sự kiện/],
+  ['/admin/giao-an', /Kho Giáo án & Bài giảng/],
+  ['/admin/tai-lieu', /Kho Tài liệu & Biểu mẫu/],
+  ['/admin/huynh-truong', /Ban Huynh Trưởng/],
+  ['/admin/gia-dinh', /Gia đình thiếu nhi/],
+  ['/admin/to-chuc', /Ngành & Cấp lớp/],
+  ['/admin/truc-lop', /Phân công Trực lớp/],
+  ['/admin/trai', /Sự kiện & Hội trại/],
+  ['/admin/lich-phung-vu', /Lịch Phụng Vụ Giáo Xứ/],
+  ['/admin/bao-cao', /Trung Tâm Báo Cáo/],
+  ['/admin/cau-hinh', /Cấu hình Nghiệp vụ Hệ thống/],
+  ['/admin/nhat-ky', /Nhật Ký Kiểm Toán Hệ Thống/],
+  ['/admin/tac-vu', /Tác Vụ Nền/]
 ]
 
 async function khongCoLoiTrenTrang(page: Page) {
@@ -36,9 +59,12 @@ test.describe('web-admin', () => {
 
   test('mở được các trang quản trị chính', async () => {
     for (const [path, heading] of TRANG_CHINH) {
-      await page.goto(path)
-      await expect(page.locator('h1').first()).toContainText(heading, { timeout: 30_000 })
-      await khongCoLoiTrenTrang(page)
+      // Tách từng trang thành một step để báo lỗi nêu đúng đường dẫn.
+      await test.step(path, async () => {
+        await page.goto(path)
+        await expect(page.locator('h1').first()).toContainText(heading, { timeout: 30_000 })
+        await khongCoLoiTrenTrang(page)
+      })
     }
   })
 
