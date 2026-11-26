@@ -1,12 +1,7 @@
 import { test, expect, type APIRequestContext, type BrowserContext, type Page } from '@playwright/test'
 import { API_BASE, dangNhap } from './support/auth'
 import { dangNhapApi } from './support/api'
-
-interface BannerDto {
-  id: string
-  title: string
-  isActive: boolean
-}
+import { taoBanner, xoaBanner, type BannerDto } from './support/banners'
 
 /**
  * Trang quản trị banner phải đọc danh sách quản trị (`GET /api/v1/banners`, gồm
@@ -32,30 +27,6 @@ test.describe('web-admin - banner trang chủ', () => {
 
   /** Thẻ banner trong lưới quản trị; locator tự tìm lại sau mỗi lần tải danh sách. */
   const theBanner = (tieuDe: string) => page.locator('div.group', { hasText: tieuDe })
-
-  async function taoBanner(request: APIRequestContext, headers: Record<string, string>, isActive: boolean) {
-    const res = await request.post(`${API_BASE}/api/v1/banners`, {
-      headers,
-      data: {
-        title: `E2E Banner ${Date.now().toString().slice(-6)}`,
-        imageUrl: 'https://example.com/e2e-banner.jpg',
-        linkUrl: null,
-        orderIndex: 99,
-        isActive
-      }
-    })
-    expect(res.status(), 'tạo banner cho test').toBe(200)
-    return (await res.json()) as BannerDto
-  }
-
-  async function xoaBanner(request: APIRequestContext, headers: Record<string, string>, id: string) {
-    const res = await request.delete(`${API_BASE}/api/v1/banners/${id}`, { headers })
-    // 404 khi chính test đã xoá banner trước đó rồi.
-    expect([200, 404], 'dọn banner test').toContain(res.status())
-
-    const conLai = (await (await request.get(`${API_BASE}/api/v1/banners`, { headers })).json()) as BannerDto[]
-    expect(conLai.some(b => b.id === id), 'banner test không còn trong danh sách').toBe(false)
-  }
 
   /** Mở trang quản trị và chờ đúng phản hồi của danh sách quản trị. */
   async function moTrangBanner() {

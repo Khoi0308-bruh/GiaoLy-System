@@ -55,6 +55,8 @@ export default defineConfig({
     {
       name: 'portal',
       testMatch: /(portal|error-pages-portal)\.spec\.ts/,
+      // Test banner của trang chủ cần token API, tức cần mật khẩu đã chốt ở project setup.
+      dependencies: ['setup'],
       use: { ...devices['Desktop Chrome'], baseURL: PORTAL_BASE }
     }
   ]

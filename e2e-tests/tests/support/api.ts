@@ -25,8 +25,21 @@ async function docJson<T>(res: APIResponse, moTa: string): Promise<T> {
   return (await res.json()) as T
 }
 
+// API giới hạn 10 lượt đăng nhập/phút mỗi IP và bộ e2e chạy workers: 1, nên giữ
+// token trong tiến trình worker để các test sau dùng lại thay vì đăng nhập lại.
+let tokenTrongWorker: string | null = null
+
+async function tokenConHieuLuc(request: APIRequestContext, token: string): Promise<boolean> {
+  const res = await request.get(`${API_BASE}/api/v1/auth/me`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  return res.ok()
+}
+
 /** Đăng nhập qua API và trả access token (chờ qua cửa sổ giới hạn 10 lần/phút nếu cần). */
 export async function dangNhapApi(request: APIRequestContext): Promise<string> {
+  if (tokenTrongWorker && await tokenConHieuLuc(request, tokenTrongWorker)) return tokenTrongWorker
+
   for (const password of cacMatKhaUThu()) {
     for (let lan = 0; lan < 4; lan++) {
       const res = await request.post(`${API_BASE}/api/v1/auth/login`, {
@@ -34,7 +47,9 @@ export async function dangNhapApi(request: APIRequestContext): Promise<string> {
       })
       if (res.ok()) {
         luuMatKhauDaDung(password)
-        return ((await res.json()) as { accessToken: string }).accessToken
+        const token = ((await res.json()) as { accessToken: string }).accessToken
+        tokenTrongWorker = token
+        return token
       }
       if (res.status() !== 429) break
       await new Promise(resolve => setTimeout(resolve, 20_000))

@@ -1,4 +1,6 @@
 import { test, expect, type Page } from '@playwright/test'
+import { dangNhapApi } from './support/api'
+import { taoBanner, xoaBanner } from './support/banners'
 
 /**
  * Chờ Nuxt mount xong (SSR chỉ trả HTML tĩnh, submit form trước khi hydrate sẽ
@@ -42,6 +44,28 @@ test.describe('web-portal', () => {
         await page.goto(path)
         await expect(page.locator('h1').first()).toContainText(heading, { timeout: 20_000 })
       }).toPass({ timeout: 120_000 })
+    }
+  })
+
+  test('trang chủ chỉ hiện banner đang bật', async ({ page, request }) => {
+    const headers = { Authorization: `Bearer ${await dangNhapApi(request)}` }
+    const dangBat = await taoBanner(request, headers, true, 'E2E Portal Bật')
+    const dangTat = await taoBanner(request, headers, false, 'E2E Portal Tắt')
+
+    try {
+      // Trang chủ fetch banner khi render ở server; nạp lại nếu dev server huỷ navigation lần đầu.
+      await expect(async () => {
+        await page.goto('/')
+        await expect(page.getByRole('heading', { name: dangBat.title }).first()).toBeVisible({ timeout: 20_000 })
+      }).toPass({ timeout: 120_000 })
+
+      await expect(
+        page.getByRole('heading', { name: dangTat.title }),
+        'banner đang tắt không được lên trang chủ'
+      ).toHaveCount(0)
+    } finally {
+      await xoaBanner(request, headers, dangBat.id)
+      await xoaBanner(request, headers, dangTat.id)
     }
   })
 
