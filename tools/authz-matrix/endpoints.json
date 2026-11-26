@@ -1,111 +1,10 @@
 [
   {
-    "controller": "AcademicYear",
-    "action": "GetYears",
-    "file": "AcademicYearController.cs",
-    "method": "GET",
-    "path": "/api/AcademicYear",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "GetActiveYear",
-    "file": "AcademicYearController.cs",
-    "method": "GET",
-    "path": "/api/AcademicYear/active",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "CreateYear",
-    "file": "AcademicYearController.cs",
-    "method": "POST",
-    "path": "/api/AcademicYear",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "ActivateNewYear",
-    "file": "AcademicYearController.cs",
-    "method": "POST",
-    "path": "/api/AcademicYear/activate-new-year",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "DeleteYear",
-    "file": "AcademicYearController.cs",
-    "method": "DELETE",
-    "path": "/api/AcademicYear/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "CloneFromOldYear",
-    "file": "AcademicYearController.cs",
-    "method": "POST",
-    "path": "/api/AcademicYear/clone",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "GetClassRooms",
-    "file": "AcademicYearController.cs",
-    "method": "GET",
-    "path": "/api/AcademicYear/00000000-0000-0000-0000-000000000001/classrooms",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "CreateClassRoom",
-    "file": "AcademicYearController.cs",
-    "method": "POST",
-    "path": "/api/AcademicYear/00000000-0000-0000-0000-000000000001/classrooms",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "DeleteClassRoom",
-    "file": "AcademicYearController.cs",
-    "method": "DELETE",
-    "path": "/api/AcademicYear/classrooms/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYear",
-    "action": "UpdateClassRoom",
-    "file": "AcademicYearController.cs",
-    "method": "PUT",
-    "path": "/api/AcademicYear/classrooms/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
     "controller": "AcademicYears",
     "action": "GetAcademicYears",
     "file": "AcademicYearsController.cs",
     "method": "GET",
     "path": "/api/v1/academic-years",
-    "permissions": [
-      "academic.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
-    "action": "GetAcademicYears",
-    "file": "AcademicYearsController.cs",
-    "method": "GET",
-    "path": "/api/academic-years",
     "permissions": [
       "academic.view"
     ],
@@ -124,32 +23,10 @@
   },
   {
     "controller": "AcademicYears",
-    "action": "GetActiveAcademicYear",
-    "file": "AcademicYearsController.cs",
-    "method": "GET",
-    "path": "/api/academic-years/active",
-    "permissions": [
-      "academic.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
     "action": "GetAcademicYearById",
     "file": "AcademicYearsController.cs",
     "method": "GET",
     "path": "/api/v1/academic-years/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "academic.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
-    "action": "GetAcademicYearById",
-    "file": "AcademicYearsController.cs",
-    "method": "GET",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "academic.view"
     ],
@@ -168,17 +45,6 @@
   },
   {
     "controller": "AcademicYears",
-    "action": "CreateAcademicYear",
-    "file": "AcademicYearsController.cs",
-    "method": "POST",
-    "path": "/api/academic-years",
-    "permissions": [
-      "academic.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
     "action": "UpdateAcademicYear",
     "file": "AcademicYearsController.cs",
     "method": "PUT",
@@ -190,32 +56,10 @@
   },
   {
     "controller": "AcademicYears",
-    "action": "UpdateAcademicYear",
-    "file": "AcademicYearsController.cs",
-    "method": "PUT",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "academic.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
     "action": "DeleteAcademicYear",
     "file": "AcademicYearsController.cs",
     "method": "DELETE",
     "path": "/api/v1/academic-years/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "academic.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
-    "action": "DeleteAcademicYear",
-    "file": "AcademicYearsController.cs",
-    "method": "DELETE",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "academic.delete"
     ],
@@ -234,32 +78,10 @@
   },
   {
     "controller": "AcademicYears",
-    "action": "ActivateAcademicYear",
-    "file": "AcademicYearsController.cs",
-    "method": "POST",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001/activate",
-    "permissions": [
-      "academic.lifecycle"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
     "action": "CloseAcademicYear",
     "file": "AcademicYearsController.cs",
     "method": "POST",
     "path": "/api/v1/academic-years/00000000-0000-0000-0000-000000000001/close",
-    "permissions": [
-      "academic.lifecycle"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
-    "action": "CloseAcademicYear",
-    "file": "AcademicYearsController.cs",
-    "method": "POST",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001/close",
     "permissions": [
       "academic.lifecycle"
     ],
@@ -278,32 +100,10 @@
   },
   {
     "controller": "AcademicYears",
-    "action": "ArchiveAcademicYear",
-    "file": "AcademicYearsController.cs",
-    "method": "POST",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001/archive",
-    "permissions": [
-      "academic.lifecycle"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
     "action": "ReopenAcademicYear",
     "file": "AcademicYearsController.cs",
     "method": "POST",
     "path": "/api/v1/academic-years/00000000-0000-0000-0000-000000000001/reopen",
-    "permissions": [
-      "academic.lifecycle"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
-    "action": "ReopenAcademicYear",
-    "file": "AcademicYearsController.cs",
-    "method": "POST",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001/reopen",
     "permissions": [
       "academic.lifecycle"
     ],
@@ -322,17 +122,6 @@
   },
   {
     "controller": "AcademicYears",
-    "action": "CloneStructure",
-    "file": "AcademicYearsController.cs",
-    "method": "POST",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001/clone-structure",
-    "permissions": [
-      "academic.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
     "action": "GetClassRoomsByYear",
     "file": "AcademicYearsController.cs",
     "method": "GET",
@@ -344,32 +133,10 @@
   },
   {
     "controller": "AcademicYears",
-    "action": "GetClassRoomsByYear",
-    "file": "AcademicYearsController.cs",
-    "method": "GET",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001/classrooms",
-    "permissions": [
-      "academic.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
     "action": "CreateClassRoom",
     "file": "AcademicYearsController.cs",
     "method": "POST",
     "path": "/api/v1/academic-years/00000000-0000-0000-0000-000000000001/classrooms",
-    "permissions": [
-      "academic.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "AcademicYears",
-    "action": "CreateClassRoom",
-    "file": "AcademicYearsController.cs",
-    "method": "POST",
-    "path": "/api/academic-years/00000000-0000-0000-0000-000000000001/classrooms",
     "permissions": [
       "academic.create"
     ],
@@ -386,30 +153,10 @@
   },
   {
     "controller": "Announcements",
-    "action": "GetPublicAnnouncements",
-    "file": "AnnouncementsController.cs",
-    "method": "GET",
-    "path": "/api/public/announcements",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Announcements",
     "action": "GetMyAnnouncements",
     "file": "AnnouncementsController.cs",
     "method": "GET",
     "path": "/api/v1/announcements",
-    "permissions": [
-      "announcements.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Announcements",
-    "action": "GetMyAnnouncements",
-    "file": "AnnouncementsController.cs",
-    "method": "GET",
-    "path": "/api/Announcement",
     "permissions": [
       "announcements.view"
     ],
@@ -428,17 +175,6 @@
   },
   {
     "controller": "Announcements",
-    "action": "GetAnnouncementById",
-    "file": "AnnouncementsController.cs",
-    "method": "GET",
-    "path": "/api/Announcement/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "announcements.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Announcements",
     "action": "CreateAnnouncement",
     "file": "AnnouncementsController.cs",
     "method": "POST",
@@ -450,17 +186,6 @@
   },
   {
     "controller": "Announcements",
-    "action": "CreateAnnouncement",
-    "file": "AnnouncementsController.cs",
-    "method": "POST",
-    "path": "/api/Announcement",
-    "permissions": [
-      "announcements.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Announcements",
     "action": "UpdateAnnouncement",
     "file": "AnnouncementsController.cs",
     "method": "PUT",
@@ -472,32 +197,10 @@
   },
   {
     "controller": "Announcements",
-    "action": "UpdateAnnouncement",
-    "file": "AnnouncementsController.cs",
-    "method": "PUT",
-    "path": "/api/Announcement/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "announcements.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Announcements",
     "action": "DeleteAnnouncement",
     "file": "AnnouncementsController.cs",
     "method": "DELETE",
     "path": "/api/v1/announcements/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "announcements.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Announcements",
-    "action": "DeleteAnnouncement",
-    "file": "AnnouncementsController.cs",
-    "method": "DELETE",
-    "path": "/api/Announcement/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "announcements.delete"
     ],
@@ -570,30 +273,10 @@
   },
   {
     "controller": "Banners",
-    "action": "GetPublicBanners",
-    "file": "BannersController.cs",
-    "method": "GET",
-    "path": "/api/banners/active",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Banners",
     "action": "GetAllBanners",
     "file": "BannersController.cs",
     "method": "GET",
     "path": "/api/v1/banners",
-    "permissions": [
-      "banners.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Banners",
-    "action": "GetAllBanners",
-    "file": "BannersController.cs",
-    "method": "GET",
-    "path": "/api/banners",
     "permissions": [
       "banners.manage"
     ],
@@ -623,17 +306,6 @@
   },
   {
     "controller": "Banners",
-    "action": "CreateBanner",
-    "file": "BannersController.cs",
-    "method": "POST",
-    "path": "/api/banners",
-    "permissions": [
-      "banners.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Banners",
     "action": "UpdateBanner",
     "file": "BannersController.cs",
     "method": "PUT",
@@ -645,32 +317,10 @@
   },
   {
     "controller": "Banners",
-    "action": "UpdateBanner",
-    "file": "BannersController.cs",
-    "method": "PUT",
-    "path": "/api/banners/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "banners.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Banners",
     "action": "DeleteBanner",
     "file": "BannersController.cs",
     "method": "DELETE",
     "path": "/api/v1/banners/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "banners.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Banners",
-    "action": "DeleteBanner",
-    "file": "BannersController.cs",
-    "method": "DELETE",
-    "path": "/api/banners/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "banners.manage"
     ],
@@ -682,17 +332,6 @@
     "file": "BouquetsController.cs",
     "method": "GET",
     "path": "/api/v1/classrooms/00000000-0000-0000-0000-000000000001/bouquets",
-    "permissions": [
-      "bouquets.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Bouquets",
-    "action": "GetClassBouquets",
-    "file": "BouquetsController.cs",
-    "method": "GET",
-    "path": "/api/SpiritualBouquet/classroom/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "bouquets.view"
     ],
@@ -742,30 +381,10 @@
   },
   {
     "controller": "Branches",
-    "action": "GetBranches",
-    "file": "BranchesController.cs",
-    "method": "GET",
-    "path": "/api/branches",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Branches",
     "action": "CreateBranch",
     "file": "BranchesController.cs",
     "method": "POST",
     "path": "/api/v1/branches",
-    "permissions": [
-      "org.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Branches",
-    "action": "CreateBranch",
-    "file": "BranchesController.cs",
-    "method": "POST",
-    "path": "/api/branches",
     "permissions": [
       "org.manage"
     ],
@@ -783,33 +402,11 @@
     "allowAnonymous": false
   },
   {
-    "controller": "Branches",
-    "action": "UpdateBranch",
-    "file": "BranchesController.cs",
-    "method": "PUT",
-    "path": "/api/branches/1",
-    "permissions": [
-      "org.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
     "controller": "Camps",
     "action": "GetEvents",
     "file": "CampsController.cs",
     "method": "GET",
     "path": "/api/v1/camps",
-    "permissions": [
-      "camps.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
-    "action": "GetEvents",
-    "file": "CampsController.cs",
-    "method": "GET",
-    "path": "/api/CampEvent",
     "permissions": [
       "camps.view"
     ],
@@ -828,17 +425,6 @@
   },
   {
     "controller": "Camps",
-    "action": "GetEventById",
-    "file": "CampsController.cs",
-    "method": "GET",
-    "path": "/api/CampEvent/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "camps.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
     "action": "CreateEvent",
     "file": "CampsController.cs",
     "method": "POST",
@@ -850,32 +436,10 @@
   },
   {
     "controller": "Camps",
-    "action": "CreateEvent",
-    "file": "CampsController.cs",
-    "method": "POST",
-    "path": "/api/CampEvent",
-    "permissions": [
-      "camps.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
     "action": "UpdateEvent",
     "file": "CampsController.cs",
     "method": "PUT",
     "path": "/api/v1/camps/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "camps.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
-    "action": "UpdateEvent",
-    "file": "CampsController.cs",
-    "method": "PUT",
-    "path": "/api/CampEvent/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "camps.manage"
     ],
@@ -894,32 +458,10 @@
   },
   {
     "controller": "Camps",
-    "action": "DeleteEvent",
-    "file": "CampsController.cs",
-    "method": "DELETE",
-    "path": "/api/CampEvent/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "camps.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
     "action": "GetRegistrations",
     "file": "CampsController.cs",
     "method": "GET",
     "path": "/api/v1/camps/00000000-0000-0000-0000-000000000001/registrations",
-    "permissions": [
-      "camps.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
-    "action": "GetRegistrations",
-    "file": "CampsController.cs",
-    "method": "GET",
-    "path": "/api/CampEvent/00000000-0000-0000-0000-000000000001/registrations",
     "permissions": [
       "camps.view"
     ],
@@ -938,17 +480,6 @@
   },
   {
     "controller": "Camps",
-    "action": "RegisterStudent",
-    "file": "CampsController.cs",
-    "method": "POST",
-    "path": "/api/CampEvent/00000000-0000-0000-0000-000000000001/registrations",
-    "permissions": [
-      "camps.register"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
     "action": "UpdateRegistration",
     "file": "CampsController.cs",
     "method": "PUT",
@@ -960,32 +491,10 @@
   },
   {
     "controller": "Camps",
-    "action": "UpdateRegistration",
-    "file": "CampsController.cs",
-    "method": "PUT",
-    "path": "/api/CampEvent/00000000-0000-0000-0000-000000000001/registrations/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "camps.register"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
     "action": "CancelRegistration",
     "file": "CampsController.cs",
     "method": "DELETE",
     "path": "/api/v1/camps/00000000-0000-0000-0000-000000000001/registrations/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "camps.register"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Camps",
-    "action": "CancelRegistration",
-    "file": "CampsController.cs",
-    "method": "DELETE",
-    "path": "/api/CampEvent/00000000-0000-0000-0000-000000000001/registrations/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "camps.register"
     ],
@@ -1025,51 +534,6 @@
     "allowAnonymous": false
   },
   {
-    "controller": "Certificate",
-    "action": "VerifyCertificate",
-    "file": "CertificateController.cs",
-    "method": "GET",
-    "path": "/api/Certificate/verify/test",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Certificate",
-    "action": "GetStudentCertificates",
-    "file": "CertificateController.cs",
-    "method": "GET",
-    "path": "/api/Certificate/student/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Certificate",
-    "action": "DownloadCertificatePdf",
-    "file": "CertificateController.cs",
-    "method": "GET",
-    "path": "/api/Certificate/download/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Certificate",
-    "action": "IssueCertificate",
-    "file": "CertificateController.cs",
-    "method": "POST",
-    "path": "/api/Certificate/issue",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Certificate",
-    "action": "RevokeCertificate",
-    "file": "CertificateController.cs",
-    "method": "DELETE",
-    "path": "/api/Certificate/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
     "controller": "Certificates",
     "action": "GetStudentCertificates",
     "file": "CertificatesController.cs",
@@ -1082,32 +546,10 @@
   },
   {
     "controller": "Certificates",
-    "action": "GetStudentCertificates",
-    "file": "CertificatesController.cs",
-    "method": "GET",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/certificates",
-    "permissions": [
-      "certificates.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Certificates",
     "action": "IssueCertificate",
     "file": "CertificatesController.cs",
     "method": "POST",
     "path": "/api/v1/students/00000000-0000-0000-0000-000000000001/certificates",
-    "permissions": [
-      "certificates.issue"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Certificates",
-    "action": "IssueCertificate",
-    "file": "CertificatesController.cs",
-    "method": "POST",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/certificates",
     "permissions": [
       "certificates.issue"
     ],
@@ -1126,32 +568,10 @@
   },
   {
     "controller": "Certificates",
-    "action": "RevokeCertificate",
-    "file": "CertificatesController.cs",
-    "method": "POST",
-    "path": "/api/certificates/00000000-0000-0000-0000-000000000001/revoke",
-    "permissions": [
-      "certificates.revoke"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Certificates",
     "action": "GetCertificatePdf",
     "file": "CertificatesController.cs",
     "method": "GET",
     "path": "/api/v1/certificates/00000000-0000-0000-0000-000000000001/pdf",
-    "permissions": [
-      "certificates.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Certificates",
-    "action": "GetCertificatePdf",
-    "file": "CertificatesController.cs",
-    "method": "GET",
-    "path": "/api/certificates/00000000-0000-0000-0000-000000000001/pdf",
     "permissions": [
       "certificates.view"
     ],
@@ -1168,15 +588,6 @@
   },
   {
     "controller": "Certificates",
-    "action": "VerifyPublicCertificate",
-    "file": "CertificatesController.cs",
-    "method": "GET",
-    "path": "/api/public/certificates/verify",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Certificates",
     "action": "GetPublicCertificatePdf",
     "file": "CertificatesController.cs",
     "method": "GET",
@@ -1185,15 +596,6 @@
     "allowAnonymous": true
   },
   {
-    "controller": "Certificates",
-    "action": "GetPublicCertificatePdf",
-    "file": "CertificatesController.cs",
-    "method": "GET",
-    "path": "/api/public/certificates/pdf",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
     "controller": "ClassLevels",
     "action": "GetClassLevels",
     "file": "ClassLevelsController.cs",
@@ -1204,30 +606,10 @@
   },
   {
     "controller": "ClassLevels",
-    "action": "GetClassLevels",
-    "file": "ClassLevelsController.cs",
-    "method": "GET",
-    "path": "/api/class-levels",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "ClassLevels",
     "action": "CreateClassLevel",
     "file": "ClassLevelsController.cs",
     "method": "POST",
     "path": "/api/v1/class-levels",
-    "permissions": [
-      "org.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "ClassLevels",
-    "action": "CreateClassLevel",
-    "file": "ClassLevelsController.cs",
-    "method": "POST",
-    "path": "/api/class-levels",
     "permissions": [
       "org.manage"
     ],
@@ -1245,33 +627,11 @@
     "allowAnonymous": false
   },
   {
-    "controller": "ClassLevels",
-    "action": "UpdateClassLevel",
-    "file": "ClassLevelsController.cs",
-    "method": "PUT",
-    "path": "/api/class-levels/1",
-    "permissions": [
-      "org.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
     "controller": "ClassRooms",
     "action": "GetClassRoomById",
     "file": "ClassRoomsController.cs",
     "method": "GET",
     "path": "/api/v1/classrooms/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "academic.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "ClassRooms",
-    "action": "GetClassRoomById",
-    "file": "ClassRoomsController.cs",
-    "method": "GET",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "academic.view"
     ],
@@ -1290,32 +650,10 @@
   },
   {
     "controller": "ClassRooms",
-    "action": "UpdateClassRoom",
-    "file": "ClassRoomsController.cs",
-    "method": "PUT",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "academic.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "ClassRooms",
     "action": "DeleteClassRoom",
     "file": "ClassRoomsController.cs",
     "method": "DELETE",
     "path": "/api/v1/classrooms/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "academic.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "ClassRooms",
-    "action": "DeleteClassRoom",
-    "file": "ClassRoomsController.cs",
-    "method": "DELETE",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "academic.delete"
     ],
@@ -1334,32 +672,10 @@
   },
   {
     "controller": "ClassRooms",
-    "action": "AssignTeachers",
-    "file": "ClassRoomsController.cs",
-    "method": "PUT",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/teachers",
-    "permissions": [
-      "classrooms.assign-teachers"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "ClassRooms",
     "action": "GetClassRoster",
     "file": "ClassRoomsController.cs",
     "method": "GET",
     "path": "/api/v1/classrooms/00000000-0000-0000-0000-000000000001/roster",
-    "permissions": [
-      "students.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "ClassRooms",
-    "action": "GetClassRoster",
-    "file": "ClassRoomsController.cs",
-    "method": "GET",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/roster",
     "permissions": [
       "students.view"
     ],
@@ -1376,15 +692,6 @@
   },
   {
     "controller": "Documents",
-    "action": "GetPublicDocuments",
-    "file": "DocumentsController.cs",
-    "method": "GET",
-    "path": "/api/public/documents",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Documents",
     "action": "DownloadPublicDocument",
     "file": "DocumentsController.cs",
     "method": "GET",
@@ -1394,30 +701,10 @@
   },
   {
     "controller": "Documents",
-    "action": "DownloadPublicDocument",
-    "file": "DocumentsController.cs",
-    "method": "GET",
-    "path": "/api/public/documents/00000000-0000-0000-0000-000000000001/download",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Documents",
     "action": "GetInternalDocuments",
     "file": "DocumentsController.cs",
     "method": "GET",
     "path": "/api/v1/documents",
-    "permissions": [
-      "documents.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Documents",
-    "action": "GetInternalDocuments",
-    "file": "DocumentsController.cs",
-    "method": "GET",
-    "path": "/api/Document",
     "permissions": [
       "documents.view"
     ],
@@ -1436,17 +723,6 @@
   },
   {
     "controller": "Documents",
-    "action": "DownloadInternalDocument",
-    "file": "DocumentsController.cs",
-    "method": "GET",
-    "path": "/api/Document/00000000-0000-0000-0000-000000000001/download",
-    "permissions": [
-      "documents.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Documents",
     "action": "UploadDocument",
     "file": "DocumentsController.cs",
     "method": "POST",
@@ -1458,32 +734,10 @@
   },
   {
     "controller": "Documents",
-    "action": "UploadDocument",
-    "file": "DocumentsController.cs",
-    "method": "POST",
-    "path": "/api/Document/upload",
-    "permissions": [
-      "documents.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Documents",
     "action": "UpdateDocument",
     "file": "DocumentsController.cs",
     "method": "PUT",
     "path": "/api/v1/documents/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "documents.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Documents",
-    "action": "UpdateDocument",
-    "file": "DocumentsController.cs",
-    "method": "PUT",
-    "path": "/api/Document/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "documents.update"
     ],
@@ -1498,62 +752,6 @@
     "permissions": [
       "documents.delete"
     ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Documents",
-    "action": "DeleteDocument",
-    "file": "DocumentsController.cs",
-    "method": "DELETE",
-    "path": "/api/Document/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "documents.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DraftAction",
-    "action": "GetDrafts",
-    "file": "DraftActionController.cs",
-    "method": "GET",
-    "path": "/api/DraftAction/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DraftAction",
-    "action": "ApproveDraft",
-    "file": "DraftActionController.cs",
-    "method": "POST",
-    "path": "/api/DraftAction/approve/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DraftAction",
-    "action": "RejectDraft",
-    "file": "DraftActionController.cs",
-    "method": "POST",
-    "path": "/api/DraftAction/reject/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DraftAction",
-    "action": "BulkApprove",
-    "file": "DraftActionController.cs",
-    "method": "POST",
-    "path": "/api/DraftAction/bulk-approve/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DraftAction",
-    "action": "BulkReject",
-    "file": "DraftActionController.cs",
-    "method": "POST",
-    "path": "/api/DraftAction/bulk-reject/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
     "allowAnonymous": false
   },
   {
@@ -1562,17 +760,6 @@
     "file": "DutyAssignmentsController.cs",
     "method": "GET",
     "path": "/api/v1/duty-assignments",
-    "permissions": [
-      "duty.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DutyAssignments",
-    "action": "GetAssignments",
-    "file": "DutyAssignmentsController.cs",
-    "method": "GET",
-    "path": "/api/DutyAssignment",
     "permissions": [
       "duty.view"
     ],
@@ -1591,32 +778,10 @@
   },
   {
     "controller": "DutyAssignments",
-    "action": "GetByClassRoom",
-    "file": "DutyAssignmentsController.cs",
-    "method": "GET",
-    "path": "/api/DutyAssignment/classroom/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "duty.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DutyAssignments",
     "action": "GetAssignmentById",
     "file": "DutyAssignmentsController.cs",
     "method": "GET",
     "path": "/api/v1/duty-assignments/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "duty.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DutyAssignments",
-    "action": "GetAssignmentById",
-    "file": "DutyAssignmentsController.cs",
-    "method": "GET",
-    "path": "/api/DutyAssignment/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "duty.view"
     ],
@@ -1635,32 +800,10 @@
   },
   {
     "controller": "DutyAssignments",
-    "action": "CreateAssignment",
-    "file": "DutyAssignmentsController.cs",
-    "method": "POST",
-    "path": "/api/DutyAssignment",
-    "permissions": [
-      "duty.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DutyAssignments",
     "action": "UpdateAssignment",
     "file": "DutyAssignmentsController.cs",
     "method": "PUT",
     "path": "/api/v1/duty-assignments/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "duty.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "DutyAssignments",
-    "action": "UpdateAssignment",
-    "file": "DutyAssignmentsController.cs",
-    "method": "PUT",
-    "path": "/api/DutyAssignment/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "duty.manage"
     ],
@@ -1678,62 +821,6 @@
     "allowAnonymous": false
   },
   {
-    "controller": "DutyAssignments",
-    "action": "DeleteAssignment",
-    "file": "DutyAssignmentsController.cs",
-    "method": "DELETE",
-    "path": "/api/DutyAssignment/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "duty.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollment",
-    "action": "GetClassRoomEnrollments",
-    "file": "EnrollmentController.cs",
-    "method": "GET",
-    "path": "/api/Enrollment/classroom/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollment",
-    "action": "GetUnassignedStudents",
-    "file": "EnrollmentController.cs",
-    "method": "GET",
-    "path": "/api/Enrollment/unassigned/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollment",
-    "action": "EnrollStudents",
-    "file": "EnrollmentController.cs",
-    "method": "POST",
-    "path": "/api/Enrollment",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollment",
-    "action": "UnenrollStudent",
-    "file": "EnrollmentController.cs",
-    "method": "DELETE",
-    "path": "/api/Enrollment/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollment",
-    "action": "PromoteStudents",
-    "file": "EnrollmentController.cs",
-    "method": "POST",
-    "path": "/api/Enrollment/promote",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
     "controller": "Enrollments",
     "action": "GetClassRoomEnrollments",
     "file": "EnrollmentsController.cs",
@@ -1746,32 +833,10 @@
   },
   {
     "controller": "Enrollments",
-    "action": "GetClassRoomEnrollments",
-    "file": "EnrollmentsController.cs",
-    "method": "GET",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/enrollments",
-    "permissions": [
-      "enrollments.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollments",
     "action": "EnrollStudents",
     "file": "EnrollmentsController.cs",
     "method": "POST",
     "path": "/api/v1/classrooms/00000000-0000-0000-0000-000000000001/enrollments",
-    "permissions": [
-      "enrollments.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollments",
-    "action": "EnrollStudents",
-    "file": "EnrollmentsController.cs",
-    "method": "POST",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/enrollments",
     "permissions": [
       "enrollments.manage"
     ],
@@ -1790,32 +855,10 @@
   },
   {
     "controller": "Enrollments",
-    "action": "TransferEnrollment",
-    "file": "EnrollmentsController.cs",
-    "method": "POST",
-    "path": "/api/enrollments/00000000-0000-0000-0000-000000000001/transfer",
-    "permissions": [
-      "enrollments.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollments",
     "action": "WithdrawEnrollment",
     "file": "EnrollmentsController.cs",
     "method": "POST",
     "path": "/api/v1/enrollments/00000000-0000-0000-0000-000000000001/withdraw",
-    "permissions": [
-      "enrollments.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Enrollments",
-    "action": "WithdrawEnrollment",
-    "file": "EnrollmentsController.cs",
-    "method": "POST",
-    "path": "/api/enrollments/00000000-0000-0000-0000-000000000001/withdraw",
     "permissions": [
       "enrollments.manage"
     ],
@@ -1833,33 +876,11 @@
     "allowAnonymous": false
   },
   {
-    "controller": "Enrollments",
-    "action": "GetStudentEnrollments",
-    "file": "EnrollmentsController.cs",
-    "method": "GET",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/enrollments",
-    "permissions": [
-      "enrollments.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
     "controller": "Families",
     "action": "GetFamilies",
     "file": "FamiliesController.cs",
     "method": "GET",
     "path": "/api/v1/families",
-    "permissions": [
-      "students.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Families",
-    "action": "GetFamilies",
-    "file": "FamiliesController.cs",
-    "method": "GET",
-    "path": "/api/families",
     "permissions": [
       "students.view"
     ],
@@ -1878,17 +899,6 @@
   },
   {
     "controller": "Families",
-    "action": "CreateFamily",
-    "file": "FamiliesController.cs",
-    "method": "POST",
-    "path": "/api/families",
-    "permissions": [
-      "families.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Families",
     "action": "UpdateFamily",
     "file": "FamiliesController.cs",
     "method": "PUT",
@@ -1900,32 +910,10 @@
   },
   {
     "controller": "Families",
-    "action": "UpdateFamily",
-    "file": "FamiliesController.cs",
-    "method": "PUT",
-    "path": "/api/families/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "families.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Families",
     "action": "DeleteFamily",
     "file": "FamiliesController.cs",
     "method": "DELETE",
     "path": "/api/v1/families/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "families.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Families",
-    "action": "DeleteFamily",
-    "file": "FamiliesController.cs",
-    "method": "DELETE",
-    "path": "/api/families/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "families.manage"
     ],
@@ -1943,53 +931,6 @@
     "allowAnonymous": false
   },
   {
-    "controller": "Families",
-    "action": "AssignFamilyMembers",
-    "file": "FamiliesController.cs",
-    "method": "PUT",
-    "path": "/api/families/00000000-0000-0000-0000-000000000001/members",
-    "permissions": [
-      "families.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grade",
-    "action": "GetClassRoomGrades",
-    "file": "GradeController.cs",
-    "method": "GET",
-    "path": "/api/Grade/classroom/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grade",
-    "action": "SaveGrades",
-    "file": "GradeController.cs",
-    "method": "POST",
-    "path": "/api/Grade/save/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grade",
-    "action": "ExportClassGrades",
-    "file": "GradeController.cs",
-    "method": "GET",
-    "path": "/api/Grade/classroom/00000000-0000-0000-0000-000000000001/export",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grade",
-    "action": "ExportClassGradesPdf",
-    "file": "GradeController.cs",
-    "method": "GET",
-    "path": "/api/Grade/classroom/00000000-0000-0000-0000-000000000001/export-pdf",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
     "controller": "Grades",
     "action": "GetClassRoomGrades",
     "file": "GradesController.cs",
@@ -2002,32 +943,10 @@
   },
   {
     "controller": "Grades",
-    "action": "GetClassRoomGrades",
-    "file": "GradesController.cs",
-    "method": "GET",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/grades",
-    "permissions": [
-      "grades.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grades",
     "action": "UpdateClassRoomGrades",
     "file": "GradesController.cs",
     "method": "PUT",
     "path": "/api/v1/classrooms/00000000-0000-0000-0000-000000000001/grades",
-    "permissions": [
-      "grades.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grades",
-    "action": "UpdateClassRoomGrades",
-    "file": "GradesController.cs",
-    "method": "PUT",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/grades",
     "permissions": [
       "grades.update"
     ],
@@ -2046,17 +965,6 @@
   },
   {
     "controller": "Grades",
-    "action": "GetEnrollmentGrade",
-    "file": "GradesController.cs",
-    "method": "GET",
-    "path": "/api/enrollments/00000000-0000-0000-0000-000000000001/grade",
-    "permissions": [
-      "grades.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grades",
     "action": "CreateGradeUnlock",
     "file": "GradesController.cs",
     "method": "POST",
@@ -2068,32 +976,10 @@
   },
   {
     "controller": "Grades",
-    "action": "CreateGradeUnlock",
-    "file": "GradesController.cs",
-    "method": "POST",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/grade-unlocks",
-    "permissions": [
-      "grades.unlock"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grades",
     "action": "GetGradeUnlocks",
     "file": "GradesController.cs",
     "method": "GET",
     "path": "/api/v1/classrooms/00000000-0000-0000-0000-000000000001/grade-unlocks",
-    "permissions": [
-      "grades.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grades",
-    "action": "GetGradeUnlocks",
-    "file": "GradesController.cs",
-    "method": "GET",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/grade-unlocks",
     "permissions": [
       "grades.view"
     ],
@@ -2105,17 +991,6 @@
     "file": "GradesController.cs",
     "method": "GET",
     "path": "/api/v1/classrooms/00000000-0000-0000-0000-000000000001/grades/export",
-    "permissions": [
-      "grades.export"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Grades",
-    "action": "ExportClassRoomGrades",
-    "file": "GradesController.cs",
-    "method": "GET",
-    "path": "/api/classrooms/00000000-0000-0000-0000-000000000001/grades/export",
     "permissions": [
       "grades.export"
     ],
@@ -2203,32 +1078,10 @@
   },
   {
     "controller": "Imports",
-    "action": "DownloadStudentTemplate",
-    "file": "ImportsController.cs",
-    "method": "GET",
-    "path": "/api/imports/students/template",
-    "permissions": [
-      "students.import"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Imports",
     "action": "UploadAndValidateStudents",
     "file": "ImportsController.cs",
     "method": "POST",
     "path": "/api/v1/imports/students",
-    "permissions": [
-      "students.import"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Imports",
-    "action": "UploadAndValidateStudents",
-    "file": "ImportsController.cs",
-    "method": "POST",
-    "path": "/api/imports/students",
     "permissions": [
       "students.import"
     ],
@@ -2247,17 +1100,6 @@
   },
   {
     "controller": "Imports",
-    "action": "GetImportJob",
-    "file": "ImportsController.cs",
-    "method": "GET",
-    "path": "/api/imports/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "students.import"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Imports",
     "action": "ApplyImportJob",
     "file": "ImportsController.cs",
     "method": "POST",
@@ -2269,10 +1111,10 @@
   },
   {
     "controller": "Imports",
-    "action": "ApplyImportJob",
+    "action": "CancelImportJob",
     "file": "ImportsController.cs",
     "method": "POST",
-    "path": "/api/imports/00000000-0000-0000-0000-000000000001/apply",
+    "path": "/api/v1/imports/00000000-0000-0000-0000-000000000001/cancel",
     "permissions": [
       "students.import"
     ],
@@ -2284,17 +1126,6 @@
     "file": "ImportsController.cs",
     "method": "GET",
     "path": "/api/v1/imports",
-    "permissions": [
-      "students.import"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Imports",
-    "action": "GetImportHistory",
-    "file": "ImportsController.cs",
-    "method": "GET",
-    "path": "/api/imports",
     "permissions": [
       "students.import"
     ],
@@ -2331,15 +1162,6 @@
   },
   {
     "controller": "Leaders",
-    "action": "GetPublicLeaders",
-    "file": "LeadersController.cs",
-    "method": "GET",
-    "path": "/api/Leader",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Leaders",
     "action": "GetAllLeaders",
     "file": "LeadersController.cs",
     "method": "GET",
@@ -2362,17 +1184,6 @@
   },
   {
     "controller": "Leaders",
-    "action": "GetLeaderById",
-    "file": "LeadersController.cs",
-    "method": "GET",
-    "path": "/api/Leader/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "leaders.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Leaders",
     "action": "CreateLeader",
     "file": "LeadersController.cs",
     "method": "POST",
@@ -2384,17 +1195,6 @@
   },
   {
     "controller": "Leaders",
-    "action": "CreateLeader",
-    "file": "LeadersController.cs",
-    "method": "POST",
-    "path": "/api/Leader",
-    "permissions": [
-      "leaders.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Leaders",
     "action": "UpdateLeader",
     "file": "LeadersController.cs",
     "method": "PUT",
@@ -2406,32 +1206,10 @@
   },
   {
     "controller": "Leaders",
-    "action": "UpdateLeader",
-    "file": "LeadersController.cs",
-    "method": "PUT",
-    "path": "/api/Leader/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "leaders.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Leaders",
     "action": "DeleteLeader",
     "file": "LeadersController.cs",
     "method": "DELETE",
     "path": "/api/v1/leaders/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "leaders.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Leaders",
-    "action": "DeleteLeader",
-    "file": "LeadersController.cs",
-    "method": "DELETE",
-    "path": "/api/Leader/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "leaders.delete"
     ],
@@ -2450,32 +1228,10 @@
   },
   {
     "controller": "LessonPlans",
-    "action": "GetLessonPlans",
-    "file": "LessonPlansController.cs",
-    "method": "GET",
-    "path": "/api/LessonPlan",
-    "permissions": [
-      "lessonplans.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "LessonPlans",
     "action": "GetLessonPlanById",
     "file": "LessonPlansController.cs",
     "method": "GET",
     "path": "/api/v1/lesson-plans/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "lessonplans.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "LessonPlans",
-    "action": "GetLessonPlanById",
-    "file": "LessonPlansController.cs",
-    "method": "GET",
-    "path": "/api/LessonPlan/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "lessonplans.view"
     ],
@@ -2494,17 +1250,6 @@
   },
   {
     "controller": "LessonPlans",
-    "action": "CreateLessonPlan",
-    "file": "LessonPlansController.cs",
-    "method": "POST",
-    "path": "/api/LessonPlan",
-    "permissions": [
-      "lessonplans.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "LessonPlans",
     "action": "UpdateLessonPlan",
     "file": "LessonPlansController.cs",
     "method": "PUT",
@@ -2516,32 +1261,10 @@
   },
   {
     "controller": "LessonPlans",
-    "action": "UpdateLessonPlan",
-    "file": "LessonPlansController.cs",
-    "method": "PUT",
-    "path": "/api/LessonPlan/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "lessonplans.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "LessonPlans",
     "action": "DeleteLessonPlan",
     "file": "LessonPlansController.cs",
     "method": "DELETE",
     "path": "/api/v1/lesson-plans/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "lessonplans.manage"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "LessonPlans",
-    "action": "DeleteLessonPlan",
-    "file": "LessonPlansController.cs",
-    "method": "DELETE",
-    "path": "/api/LessonPlan/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "lessonplans.manage"
     ],
@@ -2558,15 +1281,6 @@
   },
   {
     "controller": "Liturgical",
-    "action": "GetToday",
-    "file": "LiturgicalController.cs",
-    "method": "GET",
-    "path": "/api/Liturgical/today",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Liturgical",
     "action": "GetByDate",
     "file": "LiturgicalController.cs",
     "method": "GET",
@@ -2576,19 +1290,19 @@
   },
   {
     "controller": "Liturgical",
-    "action": "GetByDate",
+    "action": "GetMonth",
     "file": "LiturgicalController.cs",
     "method": "GET",
-    "path": "/api/Liturgical/test",
+    "path": "/api/v1/public/liturgical/month/1/1",
     "permissions": [],
     "allowAnonymous": true
   },
   {
     "controller": "Liturgical",
-    "action": "GetMonth",
+    "action": "GetCalendar",
     "file": "LiturgicalController.cs",
     "method": "GET",
-    "path": "/api/v1/public/liturgical/month/1/1",
+    "path": "/api/v1/public/liturgical/calendar/1/1",
     "permissions": [],
     "allowAnonymous": true
   },
@@ -2637,20 +1351,22 @@
     "allowAnonymous": false
   },
   {
-    "controller": "News",
-    "action": "GetPublicNews",
-    "file": "NewsController.cs",
-    "method": "GET",
-    "path": "/api/v1/public/news",
-    "permissions": [],
-    "allowAnonymous": true
+    "controller": "Migration",
+    "action": "NormalizeStudentNames",
+    "file": "MigrationController.cs",
+    "method": "POST",
+    "path": "/api/v1/system/maintenance/normalize-student-names",
+    "permissions": [
+      "settings.manage"
+    ],
+    "allowAnonymous": false
   },
   {
     "controller": "News",
     "action": "GetPublicNews",
     "file": "NewsController.cs",
     "method": "GET",
-    "path": "/api/News/catholic",
+    "path": "/api/v1/public/news",
     "permissions": [],
     "allowAnonymous": true
   },
@@ -2665,21 +1381,23 @@
   },
   {
     "controller": "News",
-    "action": "ProxyImage",
+    "action": "GetAdminNews",
     "file": "NewsController.cs",
     "method": "GET",
-    "path": "/api/News/proxy-image",
-    "permissions": [],
-    "allowAnonymous": true
+    "path": "/api/v1/news/articles",
+    "permissions": [
+      "news.view"
+    ],
+    "allowAnonymous": false
   },
   {
     "controller": "News",
-    "action": "GetNewsSources",
+    "action": "SyncNews",
     "file": "NewsController.cs",
-    "method": "GET",
-    "path": "/api/v1/news/sources",
+    "method": "POST",
+    "path": "/api/v1/news/sync",
     "permissions": [
-      "news.view"
+      "news.update"
     ],
     "allowAnonymous": false
   },
@@ -2688,7 +1406,7 @@
     "action": "GetNewsSources",
     "file": "NewsController.cs",
     "method": "GET",
-    "path": "/api/News/sources",
+    "path": "/api/v1/news/sources",
     "permissions": [
       "news.view"
     ],
@@ -2707,17 +1425,6 @@
   },
   {
     "controller": "News",
-    "action": "CreateNewsSource",
-    "file": "NewsController.cs",
-    "method": "POST",
-    "path": "/api/News/sources",
-    "permissions": [
-      "news.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "News",
     "action": "UpdateNewsSource",
     "file": "NewsController.cs",
     "method": "PUT",
@@ -2729,32 +1436,10 @@
   },
   {
     "controller": "News",
-    "action": "UpdateNewsSource",
-    "file": "NewsController.cs",
-    "method": "PUT",
-    "path": "/api/News/sources/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "news.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "News",
     "action": "DeleteNewsSource",
     "file": "NewsController.cs",
     "method": "DELETE",
     "path": "/api/v1/news/sources/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "news.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "News",
-    "action": "DeleteNewsSource",
-    "file": "NewsController.cs",
-    "method": "DELETE",
-    "path": "/api/News/sources/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "news.delete"
     ],
@@ -2868,32 +1553,10 @@
   },
   {
     "controller": "Promotion",
-    "action": "GetBatches",
-    "file": "PromotionController.cs",
-    "method": "GET",
-    "path": "/api/promotion-batches",
-    "permissions": [
-      "promotion.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
     "action": "CreateOrGetBatch",
     "file": "PromotionController.cs",
     "method": "POST",
     "path": "/api/v1/promotion-batches",
-    "permissions": [
-      "promotion.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
-    "action": "CreateOrGetBatch",
-    "file": "PromotionController.cs",
-    "method": "POST",
-    "path": "/api/promotion-batches",
     "permissions": [
       "promotion.create"
     ],
@@ -2912,32 +1575,10 @@
   },
   {
     "controller": "Promotion",
-    "action": "GetBatchById",
-    "file": "PromotionController.cs",
-    "method": "GET",
-    "path": "/api/promotion-batches/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "promotion.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
     "action": "GetBatchDrafts",
     "file": "PromotionController.cs",
     "method": "GET",
     "path": "/api/v1/promotion-batches/00000000-0000-0000-0000-000000000001/drafts",
-    "permissions": [
-      "promotion.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
-    "action": "GetBatchDrafts",
-    "file": "PromotionController.cs",
-    "method": "GET",
-    "path": "/api/promotion-batches/00000000-0000-0000-0000-000000000001/drafts",
     "permissions": [
       "promotion.view"
     ],
@@ -2956,32 +1597,10 @@
   },
   {
     "controller": "Promotion",
-    "action": "ApproveDraft",
-    "file": "PromotionController.cs",
-    "method": "POST",
-    "path": "/api/promotion-drafts/00000000-0000-0000-0000-000000000001/approve",
-    "permissions": [
-      "promotion.decide"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
     "action": "RejectDraft",
     "file": "PromotionController.cs",
     "method": "POST",
     "path": "/api/v1/promotion-drafts/00000000-0000-0000-0000-000000000001/reject",
-    "permissions": [
-      "promotion.decide"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
-    "action": "RejectDraft",
-    "file": "PromotionController.cs",
-    "method": "POST",
-    "path": "/api/promotion-drafts/00000000-0000-0000-0000-000000000001/reject",
     "permissions": [
       "promotion.decide"
     ],
@@ -3000,32 +1619,10 @@
   },
   {
     "controller": "Promotion",
-    "action": "UpdateDraftTargetClass",
-    "file": "PromotionController.cs",
-    "method": "PUT",
-    "path": "/api/promotion-drafts/00000000-0000-0000-0000-000000000001/target-class",
-    "permissions": [
-      "promotion.decide"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
     "action": "ApproveQualifiedDrafts",
     "file": "PromotionController.cs",
     "method": "POST",
     "path": "/api/v1/promotion-batches/00000000-0000-0000-0000-000000000001/approve-qualified",
-    "permissions": [
-      "promotion.decide"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
-    "action": "ApproveQualifiedDrafts",
-    "file": "PromotionController.cs",
-    "method": "POST",
-    "path": "/api/promotion-batches/00000000-0000-0000-0000-000000000001/approve-qualified",
     "permissions": [
       "promotion.decide"
     ],
@@ -3044,32 +1641,10 @@
   },
   {
     "controller": "Promotion",
-    "action": "ApplyBatch",
-    "file": "PromotionController.cs",
-    "method": "POST",
-    "path": "/api/promotion-batches/00000000-0000-0000-0000-000000000001/apply",
-    "permissions": [
-      "promotion.apply"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
     "action": "CancelBatch",
     "file": "PromotionController.cs",
     "method": "POST",
     "path": "/api/v1/promotion-batches/00000000-0000-0000-0000-000000000001/cancel",
-    "permissions": [
-      "promotion.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Promotion",
-    "action": "CancelBatch",
-    "file": "PromotionController.cs",
-    "method": "POST",
-    "path": "/api/promotion-batches/00000000-0000-0000-0000-000000000001/cancel",
     "permissions": [
       "promotion.create"
     ],
@@ -3163,17 +1738,6 @@
   },
   {
     "controller": "Roles",
-    "action": "GetRoles",
-    "file": "RolesController.cs",
-    "method": "GET",
-    "path": "/api/roles",
-    "permissions": [
-      "roles.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Roles",
     "action": "CreateRole",
     "file": "RolesController.cs",
     "method": "POST",
@@ -3185,17 +1749,6 @@
   },
   {
     "controller": "Roles",
-    "action": "CreateRole",
-    "file": "RolesController.cs",
-    "method": "POST",
-    "path": "/api/roles",
-    "permissions": [
-      "roles.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Roles",
     "action": "UpdateRole",
     "file": "RolesController.cs",
     "method": "PUT",
@@ -3207,32 +1760,10 @@
   },
   {
     "controller": "Roles",
-    "action": "UpdateRole",
-    "file": "RolesController.cs",
-    "method": "PUT",
-    "path": "/api/roles/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "roles.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Roles",
     "action": "DeleteRole",
     "file": "RolesController.cs",
     "method": "DELETE",
     "path": "/api/v1/roles/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "roles.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Roles",
-    "action": "DeleteRole",
-    "file": "RolesController.cs",
-    "method": "DELETE",
-    "path": "/api/roles/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "roles.delete"
     ],
@@ -3251,17 +1782,6 @@
   },
   {
     "controller": "Roles",
-    "action": "GetPermissions",
-    "file": "RolesController.cs",
-    "method": "GET",
-    "path": "/api/permissions",
-    "permissions": [
-      "roles.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Roles",
     "action": "AssignPermissions",
     "file": "RolesController.cs",
     "method": "PUT",
@@ -3269,44 +1789,6 @@
     "permissions": [
       "roles.assign"
     ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Roles",
-    "action": "AssignPermissions",
-    "file": "RolesController.cs",
-    "method": "PUT",
-    "path": "/api/roles/00000000-0000-0000-0000-000000000001/permissions",
-    "permissions": [
-      "roles.assign"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacrament",
-    "action": "GetRequirements",
-    "file": "SacramentController.cs",
-    "method": "GET",
-    "path": "/api/Sacrament/requirements",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacrament",
-    "action": "GetRecords",
-    "file": "SacramentController.cs",
-    "method": "GET",
-    "path": "/api/Sacrament/records/student/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacrament",
-    "action": "SaveRecord",
-    "file": "SacramentController.cs",
-    "method": "POST",
-    "path": "/api/Sacrament/records",
-    "permissions": [],
     "allowAnonymous": false
   },
   {
@@ -3322,32 +1804,10 @@
   },
   {
     "controller": "Sacraments",
-    "action": "GetStudentSacraments",
-    "file": "SacramentsController.cs",
-    "method": "GET",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/sacraments",
-    "permissions": [
-      "sacraments.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacraments",
     "action": "UpsertStudentSacrament",
     "file": "SacramentsController.cs",
     "method": "PUT",
     "path": "/api/v1/students/00000000-0000-0000-0000-000000000001/sacraments/test",
-    "permissions": [
-      "sacraments.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacraments",
-    "action": "UpsertStudentSacrament",
-    "file": "SacramentsController.cs",
-    "method": "PUT",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/sacraments/test",
     "permissions": [
       "sacraments.update"
     ],
@@ -3366,17 +1826,6 @@
   },
   {
     "controller": "Sacraments",
-    "action": "DeleteStudentSacrament",
-    "file": "SacramentsController.cs",
-    "method": "DELETE",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/sacraments/test",
-    "permissions": [
-      "sacraments.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacraments",
     "action": "GetRequirements",
     "file": "SacramentsController.cs",
     "method": "GET",
@@ -3388,32 +1837,10 @@
   },
   {
     "controller": "Sacraments",
-    "action": "GetRequirements",
-    "file": "SacramentsController.cs",
-    "method": "GET",
-    "path": "/api/sacrament-requirements",
-    "permissions": [
-      "sacraments.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacraments",
     "action": "CreateRequirement",
     "file": "SacramentsController.cs",
     "method": "POST",
     "path": "/api/v1/sacrament-requirements",
-    "permissions": [
-      "sacraments.manage-requirements"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacraments",
-    "action": "CreateRequirement",
-    "file": "SacramentsController.cs",
-    "method": "POST",
-    "path": "/api/sacrament-requirements",
     "permissions": [
       "sacraments.manage-requirements"
     ],
@@ -3432,32 +1859,10 @@
   },
   {
     "controller": "Sacraments",
-    "action": "UpdateRequirement",
-    "file": "SacramentsController.cs",
-    "method": "PUT",
-    "path": "/api/sacrament-requirements/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "sacraments.manage-requirements"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacraments",
     "action": "GetRequirementProgress",
     "file": "SacramentsController.cs",
     "method": "GET",
     "path": "/api/v1/students/00000000-0000-0000-0000-000000000001/requirement-progress",
-    "permissions": [
-      "sacraments.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Sacraments",
-    "action": "GetRequirementProgress",
-    "file": "SacramentsController.cs",
-    "method": "GET",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/requirement-progress",
     "permissions": [
       "sacraments.view"
     ],
@@ -3475,17 +1880,6 @@
     "allowAnonymous": false
   },
   {
-    "controller": "Sacraments",
-    "action": "UpdateRequirementProgress",
-    "file": "SacramentsController.cs",
-    "method": "PUT",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/requirement-progress/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "sacraments.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
     "controller": "Stats",
     "action": "GetPublicStats",
     "file": "StatsController.cs",
@@ -3495,157 +1889,11 @@
     "allowAnonymous": true
   },
   {
-    "controller": "Stats",
-    "action": "GetPublicStats",
-    "file": "StatsController.cs",
-    "method": "GET",
-    "path": "/api/Stats/public",
-    "permissions": [],
-    "allowAnonymous": true
-  },
-  {
-    "controller": "Student",
-    "action": "GetStudentsPaged",
-    "file": "StudentController.cs",
-    "method": "GET",
-    "path": "/api/Student/paged",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "CreateStudent",
-    "file": "StudentController.cs",
-    "method": "POST",
-    "path": "/api/Student",
-    "permissions": [
-      "students.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "GetStudentStats",
-    "file": "StudentController.cs",
-    "method": "GET",
-    "path": "/api/Student/stats",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "GetClassesByBranch",
-    "file": "StudentController.cs",
-    "method": "GET",
-    "path": "/api/Student/classes/00000000-0000-0000-0000-000000000001",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "UpdateStudent",
-    "file": "StudentController.cs",
-    "method": "PUT",
-    "path": "/api/Student/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "students.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "DeleteStudent",
-    "file": "StudentController.cs",
-    "method": "DELETE",
-    "path": "/api/Student/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "students.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "ExportExcel",
-    "file": "StudentController.cs",
-    "method": "GET",
-    "path": "/api/Student/export-excel",
-    "permissions": [
-      "students.export"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "ExportTemplate",
-    "file": "StudentController.cs",
-    "method": "GET",
-    "path": "/api/Student/export-template",
-    "permissions": [
-      "students.import"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "CheckDuplicates",
-    "file": "StudentController.cs",
-    "method": "POST",
-    "path": "/api/Student/check-duplicates",
-    "permissions": [
-      "students.import"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "BulkImport",
-    "file": "StudentController.cs",
-    "method": "POST",
-    "path": "/api/Student/bulk",
-    "permissions": [
-      "students.import"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "ImportExcel",
-    "file": "StudentController.cs",
-    "method": "POST",
-    "path": "/api/Student/import-excel",
-    "permissions": [
-      "students.import"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Student",
-    "action": "AssignClasses",
-    "file": "StudentController.cs",
-    "method": "POST",
-    "path": "/api/Student/assign-classes",
-    "permissions": [
-      "students.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
     "controller": "Students",
     "action": "GetStudents",
     "file": "StudentsController.cs",
     "method": "GET",
     "path": "/api/v1/students",
-    "permissions": [
-      "students.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
-    "action": "GetStudents",
-    "file": "StudentsController.cs",
-    "method": "GET",
-    "path": "/api/students",
     "permissions": [
       "students.view"
     ],
@@ -3664,17 +1912,6 @@
   },
   {
     "controller": "Students",
-    "action": "GetStudentById",
-    "file": "StudentsController.cs",
-    "method": "GET",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "students.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "CreateStudent",
     "file": "StudentsController.cs",
     "method": "POST",
@@ -3686,32 +1923,10 @@
   },
   {
     "controller": "Students",
-    "action": "CreateStudent",
-    "file": "StudentsController.cs",
-    "method": "POST",
-    "path": "/api/students",
-    "permissions": [
-      "students.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "UpdateStudent",
     "file": "StudentsController.cs",
     "method": "PATCH",
     "path": "/api/v1/students/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "students.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
-    "action": "UpdateStudent",
-    "file": "StudentsController.cs",
-    "method": "PATCH",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "students.update"
     ],
@@ -3730,32 +1945,10 @@
   },
   {
     "controller": "Students",
-    "action": "ChangeStudentStatus",
-    "file": "StudentsController.cs",
-    "method": "POST",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/status",
-    "permissions": [
-      "students.change-status"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "DeleteStudent",
     "file": "StudentsController.cs",
     "method": "DELETE",
     "path": "/api/v1/students/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "students.delete"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
-    "action": "DeleteStudent",
-    "file": "StudentsController.cs",
-    "method": "DELETE",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001",
     "permissions": [
       "students.delete"
     ],
@@ -3774,17 +1967,6 @@
   },
   {
     "controller": "Students",
-    "action": "RestoreStudent",
-    "file": "StudentsController.cs",
-    "method": "POST",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/restore",
-    "permissions": [
-      "students.restore"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "UploadPhoto",
     "file": "StudentsController.cs",
     "method": "POST",
@@ -3796,32 +1978,10 @@
   },
   {
     "controller": "Students",
-    "action": "UploadPhoto",
-    "file": "StudentsController.cs",
-    "method": "POST",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/photo",
-    "permissions": [
-      "students.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "GetStudentGuardians",
     "file": "StudentsController.cs",
     "method": "GET",
     "path": "/api/v1/students/00000000-0000-0000-0000-000000000001/guardians",
-    "permissions": [
-      "students.view-contact"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
-    "action": "GetStudentGuardians",
-    "file": "StudentsController.cs",
-    "method": "GET",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/guardians",
     "permissions": [
       "students.view-contact"
     ],
@@ -3840,17 +2000,6 @@
   },
   {
     "controller": "Students",
-    "action": "UpdateStudentGuardians",
-    "file": "StudentsController.cs",
-    "method": "PUT",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/guardians",
-    "permissions": [
-      "students.update"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "GetStudentNotes",
     "file": "StudentsController.cs",
     "method": "GET",
@@ -3862,32 +2011,10 @@
   },
   {
     "controller": "Students",
-    "action": "GetStudentNotes",
-    "file": "StudentsController.cs",
-    "method": "GET",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/notes",
-    "permissions": [
-      "students.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "CreateStudentNote",
     "file": "StudentsController.cs",
     "method": "POST",
     "path": "/api/v1/students/00000000-0000-0000-0000-000000000001/notes",
-    "permissions": [
-      "students.notes.write"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
-    "action": "CreateStudentNote",
-    "file": "StudentsController.cs",
-    "method": "POST",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/notes",
     "permissions": [
       "students.notes.write"
     ],
@@ -3906,32 +2033,10 @@
   },
   {
     "controller": "Students",
-    "action": "DeleteStudentNote",
-    "file": "StudentsController.cs",
-    "method": "DELETE",
-    "path": "/api/student-notes/00000000-0000-0000-0000-000000000001",
-    "permissions": [
-      "students.notes.write"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "GetStudentHistory",
     "file": "StudentsController.cs",
     "method": "GET",
     "path": "/api/v1/students/00000000-0000-0000-0000-000000000001/history",
-    "permissions": [
-      "students.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
-    "action": "GetStudentHistory",
-    "file": "StudentsController.cs",
-    "method": "GET",
-    "path": "/api/students/00000000-0000-0000-0000-000000000001/history",
     "permissions": [
       "students.view"
     ],
@@ -3950,32 +2055,10 @@
   },
   {
     "controller": "Students",
-    "action": "CheckDuplicate",
-    "file": "StudentsController.cs",
-    "method": "POST",
-    "path": "/api/students/duplicates/check",
-    "permissions": [
-      "students.create"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "GetUnassignedStudents",
     "file": "StudentsController.cs",
     "method": "GET",
     "path": "/api/v1/students/unassigned",
-    "permissions": [
-      "students.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
-    "action": "GetUnassignedStudents",
-    "file": "StudentsController.cs",
-    "method": "GET",
-    "path": "/api/students/unassigned",
     "permissions": [
       "students.view"
     ],
@@ -3994,17 +2077,6 @@
   },
   {
     "controller": "Students",
-    "action": "GetStudentStats",
-    "file": "StudentsController.cs",
-    "method": "GET",
-    "path": "/api/students/stats",
-    "permissions": [
-      "students.view"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
     "action": "ExportStudents",
     "file": "StudentsController.cs",
     "method": "GET",
@@ -4012,35 +2084,6 @@
     "permissions": [
       "students.export"
     ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "Students",
-    "action": "ExportStudents",
-    "file": "StudentsController.cs",
-    "method": "GET",
-    "path": "/api/students/export",
-    "permissions": [
-      "students.export"
-    ],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "StudentScore",
-    "action": "GetScoresByClass",
-    "file": "StudentScoreController.cs",
-    "method": "GET",
-    "path": "/api/StudentScore/class/test",
-    "permissions": [],
-    "allowAnonymous": false
-  },
-  {
-    "controller": "StudentScore",
-    "action": "SaveScores",
-    "file": "StudentScoreController.cs",
-    "method": "POST",
-    "path": "/api/StudentScore/save",
-    "permissions": [],
     "allowAnonymous": false
   },
   {
