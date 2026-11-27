@@ -76,6 +76,44 @@ test.describe('web-portal', () => {
     }
   })
 
+  test('chỉ banner đang hiển thị nằm trong cây trợ năng', async ({ page, request }) => {
+    const headers = { Authorization: `Bearer ${await dangNhapApi(request)}` }
+    // Hai banner cùng bật: cả hai slide đều nằm trong DOM, chỉ một được phơi ra cho
+    // trình đọc màn hình (slide còn lại có aria-hidden + inert).
+    const mot = await taoBanner(request, headers, true, 'E2E Tro Nang Mot')
+    const hai = await taoBanner(request, headers, true, 'E2E Tro Nang Hai')
+
+    // Đếm qua getByRole: Playwright chỉ thấy phần tử nằm trong cây trợ năng.
+    const demTieuDe = async () =>
+      (await page.getByRole('heading', { name: mot.title }).count()) +
+      (await page.getByRole('heading', { name: hai.title }).count())
+
+    try {
+      // Trang chủ fetch banner khi render ở server; nạp lại nếu dev server huỷ navigation lần đầu.
+      await expect(async () => {
+        await page.goto('/')
+        // Cả hai slide phải có mặt trong DOM, nếu không phép đếm dưới đây đúng một cách vô nghĩa.
+        await expect(page.locator('h2', { hasText: mot.title }), 'slide 1 có trong DOM').toHaveCount(1, { timeout: 20_000 })
+        await expect(page.locator('h2', { hasText: hai.title }), 'slide 2 có trong DOM').toHaveCount(1, { timeout: 20_000 })
+      }).toPass({ timeout: 120_000 })
+
+      // Carousel tự chuyển slide nên chờ tới lúc cây trợ năng ổn định thay vì đọc một lần;
+      // nếu cả hai tiêu đề cùng lộ ra thì vòng này hết giờ và test đỏ.
+      await expect.poll(demTieuDe, {
+        message: 'mỗi thời điểm chỉ một tiêu đề banner trong cây trợ năng',
+        timeout: 20_000
+      }).toBe(1)
+
+      await expect(
+        page.locator('[aria-roledescription="carousel"] [inert]'),
+        'đúng một slide bị ẩn khỏi cây trợ năng'
+      ).toHaveCount(1)
+    } finally {
+      await xoaBanner(request, headers, mot.id)
+      await xoaBanner(request, headers, hai.id)
+    }
+  })
+
   test('tra cứu công khai báo không tìm thấy và nhắc nhập ngày sinh', async ({ page }) => {
     await page.goto('/verify')
     await expect(page.locator('h1').first()).toContainText('Tra Cứu Điểm Giáo Lý')
