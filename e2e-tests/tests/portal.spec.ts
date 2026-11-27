@@ -39,12 +39,10 @@ test.describe('web-portal', () => {
 
   test('mở được các trang công khai chính', async ({ page }) => {
     for (const [path, heading] of TRANG_CONG_KHAI) {
-      // Dev server vẫn biên dịch lại client bundle sau khi báo "Ready", nên lần mở
-      // đầu có thể bị huỷ navigation (ERR_ABORTED). Nạp lại là xong, không phải lỗi app.
-      await expect(async () => {
-        await page.goto(path)
-        await expect(page.locator('h1').first()).toContainText(heading, { timeout: 20_000 })
-      }).toPass({ timeout: 120_000 })
+      // Điều hướng qua helper (chỉ mở lại khi dev server huỷ vì còn biên dịch); khẳng
+      // định tiêu đề nẳm ngoài vòng thử lại nên trang render sai vẫn đỏ ngay.
+      await moTrangChiuNguoi(page, path)
+      await expect(page.locator('h1').first()).toContainText(heading, { timeout: 30_000 })
     }
   })
 
@@ -55,11 +53,12 @@ test.describe('web-portal', () => {
     const dangTat = await taoBanner(request, headers, false, 'E2E Portal Tắt')
 
     try {
-      // Trang chủ fetch banner khi render ở server; nạp lại nếu dev server huỷ navigation lần đầu.
-      await expect(async () => {
-        await page.goto('/')
-        await expect(page.getByRole('heading', { name: dangBat.title }).first()).toBeVisible({ timeout: 20_000 })
-      }).toPass({ timeout: 120_000 })
+      // Trang chủ fetch banner khi render ở server; helper chỉ mở lại khi dev server
+      // huỷ điều hướng, còn không thấy banner thì đỏ ngay ở lần kiểm đầu.
+      await moTrangChiuNguoi(page, '/')
+      await expect(page.getByRole('heading', { name: dangBat.title }).first()).toBeVisible({
+        timeout: 30_000
+      })
 
       await expect(
         page.getByRole('heading', { name: dangTat.title }),
@@ -90,13 +89,12 @@ test.describe('web-portal', () => {
       (await page.getByRole('heading', { name: hai.title }).count())
 
     try {
-      // Trang chủ fetch banner khi render ở server; nạp lại nếu dev server huỷ navigation lần đầu.
-      await expect(async () => {
-        await page.goto('/')
-        // Cả hai slide phải có mặt trong DOM, nếu không phép đếm dưới đây đúng một cách vô nghĩa.
-        await expect(page.locator('h2', { hasText: mot.title }), 'slide 1 có trong DOM').toHaveCount(1)
-        await expect(page.locator('h2', { hasText: hai.title }), 'slide 2 có trong DOM').toHaveCount(1)
-      }).toPass({ timeout: 120_000 })
+      // Trang chủ fetch banner khi render ở server; helper chỉ mở lại khi dev server
+      // huỷ điều hướng, còn thiếu slide trong DOM thì đỏ ngay.
+      await moTrangChiuNguoi(page, '/')
+      // Cả hai slide phải có mặt trong DOM, nếu không phép đếm dưới đây đúng một cách vô nghĩa.
+      await expect(page.locator('h2', { hasText: mot.title }), 'slide 1 có trong DOM').toHaveCount(1)
+      await expect(page.locator('h2', { hasText: hai.title }), 'slide 2 có trong DOM').toHaveCount(1)
 
       // Carousel tự chuyển slide nên chờ tới lúc cây trợ năng ổn định thay vì đọc một lần;
       // nếu cả hai tiêu đề cùng lộ ra thì vòng này hết giờ và test đỏ.
@@ -124,10 +122,11 @@ test.describe('web-portal', () => {
     const nutTimKiem = page.getByRole('button', { name: 'Tìm kiếm' })
 
     // Mã đúng định dạng nhưng chắc chắn không tồn tại. Nếu cú bấm rơi đúng lúc
-    // trang chưa gắn handler (submit native thành GET) thì nạp lại và thử lại.
+    // trang chưa gắn handler (submit native thành GET) thì nạp lại và thử lại — vòng
+    // này giữ lại vì bắt tay hydration, không phải để bỏ qua nội dung trang sai.
     const thongBaoKhongThay = page.getByText('Không tìm thấy hồ sơ đoàn sinh phù hợp.')
     await expect(async () => {
-      if (page.url().includes('?')) await page.goto('/verify')
+      if (page.url().includes('?')) await moTrangChiuNguoi(page, '/verify')
       await oTimKiem.fill('TN999999')
       await nutTimKiem.click()
       await expect(thongBaoKhongThay).toBeVisible({ timeout: 10_000 })
