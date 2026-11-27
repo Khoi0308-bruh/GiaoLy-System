@@ -28,7 +28,8 @@ const TRANG_CONG_KHAI: Array<[string, RegExp]> = [
 ]
 
 test.describe('web-portal', () => {
-  test.describe.configure({ timeout: 120_000 })
+  // Helper điều hướng có thể dùng tới 120s cho lượt nguội, nên chừa thêm chỗ cho khẳng định.
+  test.describe.configure({ timeout: 180_000 })
 
   test('trang chủ hiển thị khối tra cứu học vụ', async ({ page }) => {
     await moTrangChiuNguoi(page, '/')
@@ -39,8 +40,8 @@ test.describe('web-portal', () => {
 
   test('mở được các trang công khai chính', async ({ page }) => {
     for (const [path, heading] of TRANG_CONG_KHAI) {
-      // Điều hướng qua helper (chỉ mở lại khi dev server huỷ vì còn biên dịch); khẳng
-      // định tiêu đề nẳm ngoài vòng thử lại nên trang render sai vẫn đỏ ngay.
+      // Helper chỉ mở lại khi dev server huỷ vì còn biên dịch; khẳng định nằm ngoài
+      // vòng thử lại nên trang render sai vẫn đỏ ngay.
       await moTrangChiuNguoi(page, path)
       await expect(page.locator('h1').first()).toContainText(heading, { timeout: 30_000 })
     }
@@ -53,8 +54,8 @@ test.describe('web-portal', () => {
     const dangTat = await taoBanner(request, headers, false, 'E2E Portal Tắt')
 
     try {
-      // Trang chủ fetch banner khi render ở server; helper chỉ mở lại khi dev server
-      // huỷ điều hướng, còn không thấy banner thì đỏ ngay ở lần kiểm đầu.
+      // Trang chủ lấy banner qua API lúc SSR; helper chỉ mở lại khi dev server huỷ
+      // điều hướng, còn không thấy banner thì đỏ ngay.
       await moTrangChiuNguoi(page, '/')
       await expect(page.getByRole('heading', { name: dangBat.title }).first()).toBeVisible({
         timeout: 30_000
@@ -89,8 +90,6 @@ test.describe('web-portal', () => {
       (await page.getByRole('heading', { name: hai.title }).count())
 
     try {
-      // Trang chủ fetch banner khi render ở server; helper chỉ mở lại khi dev server
-      // huỷ điều hướng, còn thiếu slide trong DOM thì đỏ ngay.
       await moTrangChiuNguoi(page, '/')
       // Cả hai slide phải có mặt trong DOM, nếu không phép đếm dưới đây đúng một cách vô nghĩa.
       await expect(page.locator('h2', { hasText: mot.title }), 'slide 1 có trong DOM').toHaveCount(1)
@@ -121,9 +120,8 @@ test.describe('web-portal', () => {
     const oTimKiem = page.getByPlaceholder('Mã đoàn sinh (VD: TN260001) hoặc họ tên đầy đủ...')
     const nutTimKiem = page.getByRole('button', { name: 'Tìm kiếm' })
 
-    // Mã đúng định dạng nhưng chắc chắn không tồn tại. Nếu cú bấm rơi đúng lúc
-    // trang chưa gắn handler (submit native thành GET) thì nạp lại và thử lại — vòng
-    // này giữ lại vì bắt tay hydration, không phải để bỏ qua nội dung trang sai.
+    // Mã đúng định dạng nhưng chắc chắn không tồn tại. Vòng này bắt tay hydration: nếu cú
+    // bấm rơi lúc trang chưa gắn handler (submit native thành GET) thì nạp lại rồi thử lại.
     const thongBaoKhongThay = page.getByText('Không tìm thấy hồ sơ đoàn sinh phù hợp.')
     await expect(async () => {
       if (page.url().includes('?')) await moTrangChiuNguoi(page, '/verify')
