@@ -27,6 +27,11 @@ const bannerList = computed(() => apiBanners.value ?? [])
 
 // Tự chuyển slide là nội dung động kéo dài quá 5 giây nên phải có cách tạm dừng
 // (WCAG 2.2.2); mặc định đứng yên nếu người dùng bật "giảm chuyển động".
+//
+// Chỉ slide đang hiển thị nằm trong cây trợ năng; các slide còn lại tuy nằm ngoài
+// khung nhìn nhưng vẫn ở trong DOM, nếu không ẩn thì trình đọc màn hình sẽ đọc lần
+// lượt mọi banner và phím Tab còn nhảy vào nút "Xem Chi Tiết" của slide vô hình.
+const dangChon = ref(0)
 const tuDongChay = ref(true)
 onMounted(() => {
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
@@ -97,13 +102,18 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
           // theo tỉ lệ ảnh gốc và phần chữ (absolute inset-0) bị đẩy ra ngoài khung.
           item: 'relative w-full basis-full ps-0 select-none h-[520px] sm:h-[620px] md:h-[680px] lg:h-[740px]'
         }"
-        :indicators="bannerList.length > 1"
+        :dots="bannerList.length > 1"
         :arrows="bannerList.length > 1"
         :autoplay="tuDongChay && bannerList.length > 1 ? { delay: 5500 } : false"
         loop
+        @select="dangChon = $event"
       >
-        <template #default="{ item }">
-          <div class="relative w-full h-full group overflow-hidden">
+        <template #default="{ item, index }">
+          <div
+            class="relative w-full h-full group overflow-hidden"
+            :aria-hidden="dangChon !== index ? 'true' : undefined"
+            :inert="dangChon !== index"
+          >
             <!-- Ảnh nền với hiệu ứng zoom -->
             <img
               :src="item.imageUrl"
