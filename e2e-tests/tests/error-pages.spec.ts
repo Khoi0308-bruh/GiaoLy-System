@@ -12,7 +12,8 @@ import { boChanApi, chanApi, choTrangLoi503, moTrangLoi503, trangLoi } from './s
  *  - route không tồn tại phải là 404 thật, không bị kéo về trang đăng nhập.
  */
 test.describe('web-admin - trang lỗi', () => {
-  test.describe.configure({ timeout: 120_000, mode: 'serial' })
+  // Đủ chỗ cho lần biên dịch nguội route (xem `moTrangLoi503`).
+  test.describe.configure({ timeout: 180_000, mode: 'serial' })
 
   // Dùng chung một phiên: API chỉ cho 10 lần đăng nhập/phút mỗi IP.
   let page: Page

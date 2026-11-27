@@ -9,7 +9,8 @@ import { boChanApi, chanApi, moTrangLoi503 } from './support/error-page'
  * Test không cần đăng nhập: lỗi mạng ở bước đọc phiên đã thuộc loại tạm thời.
  */
 test.describe('web-portal - trang lỗi', () => {
-  test.describe.configure({ timeout: 120_000 })
+  // Đủ chỗ cho lần biên dịch nguội route `/phu-huynh` (xem `moTrangLoi503`).
+  test.describe.configure({ timeout: 240_000 })
 
   test('API không phản hồi thì hiện 503, không đá về trang đăng nhập', async ({ page }) => {
     await chanApi(page)
