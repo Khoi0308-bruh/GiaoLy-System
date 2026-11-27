@@ -1,5 +1,5 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
-import { taoLopCoGhiDanh, dangNhapApi } from './support/api'
+import { taoLopCoGhiDanh, dangNhapApi, donLopCoGhiDanh } from './support/api'
 import { dangNhap } from './support/auth'
 
 /**
@@ -25,27 +25,31 @@ test.describe('web-admin - sổ điểm', () => {
 
   test('nhập điểm và lưu vào sổ điểm lớp', async ({ request }) => {
     const token = await dangNhapApi(request)
-    const { roomId, studentName } = await taoLopCoGhiDanh(request, token)
+    const lop = await taoLopCoGhiDanh(request, token)
 
-    await page.goto(`/admin/lop/${roomId}/diem-so`)
-    await expect(page.locator('h1').first()).toContainText('Sổ điểm lớp', { timeout: 30_000 })
+    try {
+      await page.goto(`/admin/lop/${lop.roomId}/diem-so`)
+      await expect(page.locator('h1').first()).toContainText('Sổ điểm lớp', { timeout: 30_000 })
 
-    const oDiemMieng = page.getByLabel(`Miệng của ${studentName}`)
-    await expect(oDiemMieng).toBeEnabled({ timeout: 30_000 })
-    await oDiemMieng.fill('8.5')
+      const oDiemMieng = page.getByLabel(`Miệng của ${lop.studentName}`)
+      await expect(oDiemMieng).toBeEnabled({ timeout: 30_000 })
+      await oDiemMieng.fill('8.5')
 
-    // Chờ đúng phản hồi của lần lưu thay vì hỏi lại API theo vòng lặp: API giới hạn
-    // 120 request/phút mỗi IP, hỏi dồn dập sẽ tự bắn vào hạn mức đó (429) và làm
-    // trang sổ điểm không tải được.
-    const phanHoiLuu = page.waitForResponse(
-      r => r.request().method() === 'PUT' && r.url().endsWith(`/classrooms/${roomId}/grades`),
-      { timeout: 60_000 }
-    )
-    await page.getByRole('button', { name: 'Lưu sổ điểm' }).click()
-    expect((await phanHoiLuu).status(), 'API lưu sổ điểm phải trả về 200').toBe(200)
+      // Chờ đúng phản hồi của lần lưu thay vì hỏi lại API theo vòng lặp: API giới hạn
+      // 120 request/phút mỗi IP, hỏi dồn dập sẽ tự bắn vào hạn mức đó (429) và làm
+      // trang sổ điểm không tải được.
+      const phanHoiLuu = page.waitForResponse(
+        r => r.request().method() === 'PUT' && r.url().endsWith(`/classrooms/${lop.roomId}/grades`),
+        { timeout: 60_000 }
+      )
+      await page.getByRole('button', { name: 'Lưu sổ điểm' }).click()
+      expect((await phanHoiLuu).status(), 'API lưu sổ điểm phải trả về 200').toBe(200)
 
-    // Tải lại để chắc giao diện đọc lại điểm từ server chứ không chỉ giữ trong form.
-    await page.reload()
-    await expect(page.getByLabel(`Miệng của ${studentName}`)).toHaveValue('8.5', { timeout: 60_000 })
+      // Tải lại để chắc giao diện đọc lại điểm từ server chứ không chỉ giữ trong form.
+      await page.reload()
+      await expect(page.getByLabel(`Miệng của ${lop.studentName}`)).toHaveValue('8.5', { timeout: 60_000 })
+    } finally {
+      await donLopCoGhiDanh(request, token, lop)
+    }
   })
 })

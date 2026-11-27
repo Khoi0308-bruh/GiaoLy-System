@@ -1,5 +1,6 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
-import { dangNhap } from './support/auth'
+import { API_BASE, dangNhap } from './support/auth'
+import { dangNhapApi } from './support/api'
 
 /**
  * Các trang quản trị tĩnh: tiêu đề phải đúng, không lọt banner lỗi/quyền.
@@ -82,24 +83,36 @@ test.describe('web-admin', () => {
     await expect(page.locator('table')).toBeVisible()
   })
 
-  test('tạo đoàn sinh mới', async () => {
+  test('tạo đoàn sinh mới', async ({ request }) => {
     const ten = `E2E Tạo Mới ${Date.now().toString().slice(-6)}`
 
-    await page.goto('/admin/doan-sinh/them')
-    await expect(page.locator('h1').first()).toContainText('Thêm đoàn sinh mới')
+    try {
+      await page.goto('/admin/doan-sinh/them')
+      await expect(page.locator('h1').first()).toContainText('Thêm đoàn sinh mới')
 
-    await page.getByPlaceholder('Nhập họ và tên khai sinh...').fill(ten)
-    await page.locator('input[type="date"]').first().fill('2015-04-12')
+      await page.getByPlaceholder('Nhập họ và tên khai sinh...').fill(ten)
+      await page.locator('input[type="date"]').first().fill('2015-04-12')
 
-    // Nút bị khóa trong lúc kiểm tra trùng lặp, nên bấm lại nếu chỉ mất một nhịp.
-    const nutLuu = page.getByRole('button', { name: 'Lưu hồ sơ đoàn sinh' })
-    await expect(async () => {
-      if (/\/admin\/doan-sinh\/them$/.test(page.url())) await nutLuu.click()
-      // Tạo xong app chuyển sang trang hồ sơ chi tiết của đoàn sinh vừa tạo.
-      await expect(page).toHaveURL(/\/admin\/doan-sinh\/[0-9a-f-]{36}/, { timeout: 10_000 })
-    }).toPass({ timeout: 60_000 })
+      // Nút bị khóa trong lúc kiểm tra trùng lặp, nên bấm lại nếu chỉ mất một nhịp.
+      const nutLuu = page.getByRole('button', { name: 'Lưu hồ sơ đoàn sinh' })
+      await expect(async () => {
+        if (/\/admin\/doan-sinh\/them$/.test(page.url())) await nutLuu.click()
+        // Tạo xong app chuyển sang trang hồ sơ chi tiết của đoàn sinh vừa tạo.
+        await expect(page).toHaveURL(/\/admin\/doan-sinh\/[0-9a-f-]{36}/, { timeout: 10_000 })
+      }).toPass({ timeout: 60_000 })
 
-    await expect(page.locator('h1').first()).toContainText(ten, { timeout: 30_000 })
-    await expect(page.getByText(/Mã đoàn sinh: TN\d+/).first()).toBeVisible()
+      await expect(page.locator('h1').first()).toContainText(ten, { timeout: 30_000 })
+      await expect(page.getByText(/Mã đoàn sinh: TN\d+/).first()).toBeVisible()
+    } finally {
+      // Dọn đoàn sinh vừa tạo qua API (xoá mềm, như cách dọn banner).
+      const idDoanSinh = page.url().match(/\/admin\/doan-sinh\/([0-9a-f-]{36})/)?.[1]
+      if (idDoanSinh) {
+        const token = await dangNhapApi(request)
+        const xoa = await request.delete(`${API_BASE}/api/v1/students/${idDoanSinh}`, {
+          headers: { Authorization: `Bearer ${token}` }
+        })
+        expect([200, 404], 'dọn đoàn sinh vừa tạo').toContain(xoa.status())
+      }
+    }
   })
 })

@@ -1,4 +1,4 @@
-import type { APIRequestContext, APIResponse } from '@playwright/test'
+import { expect, type APIRequestContext, type APIResponse } from '@playwright/test'
 import { API_BASE, USERNAME, cacMatKhaUThu, luuMatKhauDaDung } from './auth'
 
 /**
@@ -10,10 +10,13 @@ import { API_BASE, USERNAME, cacMatKhaUThu, luuMatKhauDaDung } from './auth'
 export interface LopCoGhiDanh {
   roomId: string
   className: string
+  studentId: string
+  enrollmentId: string
   studentName: string
 }
 
 export interface TaiKhoanHanChe {
+  id: string
   username: string
   tempPassword: string
 }
@@ -105,15 +108,43 @@ export async function taoLopCoGhiDanh(
     'Tạo đoàn sinh test'
   )
 
-  await docJson<unknown>(
+  const ghiDanh = await docJson<Array<{ id: string, studentId: string }>>(
     await request.post(`${API_BASE}/api/v1/classrooms/${room.id}/enrollments`, {
       headers,
       data: { studentIds: [student.id] }
     }),
     'Ghi danh đoàn sinh test vào lớp'
   )
+  const cuaBan = ghiDanh.find(g => g.studentId === student.id)
+  if (!cuaBan) throw new Error('Không đọc được ghi danh vừa tạo cho đoàn sinh test')
 
-  return { roomId: room.id, className: room.className, studentName }
+  return { roomId: room.id, className: room.className, studentId: student.id, enrollmentId: cuaBan.id, studentName }
+}
+
+/**
+ * Dọn lớp test đã dựng bằng `taoLopCoGhiDanh`, dùng đúng API như cách dọn banner
+ * (mọi thứ là xoá mềm).
+ *
+ * Lưu ý: lớp học KHÔNG xoá được — `ClassRoomService.DeleteClassRoomAsync` chặn xoá
+ * lớp còn bất kỳ ghi danh nào, kể cả ghi danh đã rút, nên chỉ rút ghi danh rồi xoá
+ * đoàn sinh; lớp ở lại (xem ghi chú trong báo cáo).
+ */
+export async function donLopCoGhiDanh(
+  request: APIRequestContext,
+  token: string,
+  fixture: LopCoGhiDanh
+) {
+  const headers = { Authorization: `Bearer ${token}` }
+
+  const rut = await request.post(`${API_BASE}/api/v1/enrollments/${fixture.enrollmentId}/withdraw`, {
+    headers,
+    data: { reason: 'Dọn dữ liệu e2e' }
+  })
+  // 400 khi ghi danh đã bị rút từ trước (test chạy lại sau lỗi giữa đường).
+  expect([200, 400, 404], 'rút ghi danh test').toContain(rut.status())
+
+  const xoa = await request.delete(`${API_BASE}/api/v1/students/${fixture.studentId}`, { headers })
+  expect([200, 404], 'xoá đoàn sinh test').toContain(xoa.status())
 }
 
 /**
@@ -154,5 +185,20 @@ export async function taoTaiKhoanHanChe(
     'Tạo tài khoản vai trò hạn chế'
   )
 
-  return { username, tempPassword: created.temporaryPassword }
+  return { id: created.user.id, username, tempPassword: created.temporaryPassword }
+}
+
+/**
+ * Dọn tài khoản hạn chế của test. API chưa có xoá người dùng, chỉ có vô hiệu hoá
+ * (`POST /users/{id}/deactivate`), nên dùng đúng đường đó.
+ */
+export async function donTaiKhoanHanChe(
+  request: APIRequestContext,
+  token: string,
+  taiKhoan: TaiKhoanHanChe
+) {
+  const res = await request.post(`${API_BASE}/api/v1/users/${taiKhoan.id}/deactivate`, {
+    headers: { Authorization: `Bearer ${token}` }
+  })
+  expect([200, 404], 'vô hiệu hoá tài khoản hạn chế của test').toContain(res.status())
 }

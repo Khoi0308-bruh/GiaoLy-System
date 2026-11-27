@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test'
-import { dangNhapApi, taoTaiKhoanHanChe } from './support/api'
+import { dangNhapApi, donTaiKhoanHanChe, taoTaiKhoanHanChe } from './support/api'
 import { dangNhapBang, doiMatKhauLanDau } from './support/auth'
 
 /**
@@ -16,19 +16,23 @@ test.describe('web-admin - phân quyền', () => {
 
   test('vai trò hạn chế bị chặn khỏi trang quản trị vai trò', async ({ page, request }) => {
     const token = await dangNhapApi(request)
-    const { username, tempPassword } = await taoTaiKhoanHanChe(request, token)
+    const taiKhoan = await taoTaiKhoanHanChe(request, token)
 
-    // Lần đăng nhập đầu buộc đổi mật khẩu tạm.
-    const vaoLanDau = await dangNhapBang(page, username, tempPassword)
-    expect(vaoLanDau, 'Tài khoản vừa tạo phải đăng nhập được bằng mật khẩu tạm').toBe('vao')
-    await expect(page).toHaveURL(/doi-mat-khau-lan-dau/, { timeout: 30_000 })
-    await doiMatKhauLanDau(page, tempPassword, MAT_KHAU_MOI)
+    try {
+      // Lần đăng nhập đầu buộc đổi mật khẩu tạm.
+      const vaoLanDau = await dangNhapBang(page, taiKhoan.username, taiKhoan.tempPassword)
+      expect(vaoLanDau, 'Tài khoản vừa tạo phải đăng nhập được bằng mật khẩu tạm').toBe('vao')
+      await expect(page).toHaveURL(/doi-mat-khau-lan-dau/, { timeout: 30_000 })
+      await doiMatKhauLanDau(page, taiKhoan.tempPassword, MAT_KHAU_MOI)
 
-    const vaoLai = await dangNhapBang(page, username, MAT_KHAU_MOI)
-    expect(vaoLai, 'Đăng nhập lại bằng mật khẩu mới phải thành công').toBe('vao')
+      const vaoLai = await dangNhapBang(page, taiKhoan.username, MAT_KHAU_MOI)
+      expect(vaoLai, 'Đăng nhập lại bằng mật khẩu mới phải thành công').toBe('vao')
 
-    await page.goto('/admin/vai-tro')
-    await expect(page.getByText(/chưa có quyền truy cập/i).first()).toBeVisible({ timeout: 30_000 })
-    await expect(page.locator('h1').first()).not.toContainText('Vai trò & Ma trận Phân quyền')
+      await page.goto('/admin/vai-tro')
+      await expect(page.getByText(/chưa có quyền truy cập/i).first()).toBeVisible({ timeout: 30_000 })
+      await expect(page.locator('h1').first()).not.toContainText('Vai trò & Ma trận Phân quyền')
+    } finally {
+      await donTaiKhoanHanChe(request, token, taiKhoan)
+    }
   })
 })
