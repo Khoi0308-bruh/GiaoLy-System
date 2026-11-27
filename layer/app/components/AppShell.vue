@@ -7,14 +7,39 @@ const mobileMenuOpen = ref(false)
 
 const groups = computed(() =>
   ADMIN_NAV
-    .map(group => ({
-      ...group,
-      items: group.items.filter(item => !item.permission || session.can(item.permission))
-    }))
+    .map((group) => {
+      const items = group.items.filter(item => !item.permission || session.can(item.permission))
+      return { ...group, items, collapsible: items.length > 1 }
+    })
     .filter(group => group.items.length > 0)
 )
 
 const isActive = (to: string) => to === '/admin' ? route.path === '/admin' : route.path.startsWith(to)
+
+// ── Nhóm điều hướng thu/mở ────────────────────────────────────────────────────
+// Mặc định MỞ HẾT để không mục nào bị giấu sau một nút chưa được khám phá.
+// Chỉ vùng <nav> cuộn (logo cố định phía trên), có scrollbar luôn hiển thị nhờ
+// scrollbar-gutter nên người dùng thấy ngay là còn mục phía dưới. Người dùng
+// vẫn thu gọn được từng nhóm; khi điều hướng vào một trang thuộc nhóm đã thu gọn
+// thì nhóm đó tự mở lại.
+const closedGroups = ref<Record<string, boolean>>({})
+const isGroupOpen = (label: string) => closedGroups.value[label] !== true
+
+function toggleGroup(label: string) {
+  closedGroups.value[label] = isGroupOpen(label)
+}
+
+watch(
+  [() => route.path, groups],
+  () => {
+    for (const group of groups.value) {
+      if (group.items.some(item => isActive(item.to))) {
+        closedGroups.value[group.label] = false
+      }
+    }
+  },
+  { immediate: true }
+)
 
 watch(() => route.path, () => {
   mobileMenuOpen.value = false
@@ -27,7 +52,7 @@ async function signOut() {
 </script>
 
 <template>
-  <div class="grid min-h-screen grid-cols-1 lg:grid-cols-[260px_1fr]">
+  <div class="flex min-h-dvh flex-col lg:flex-row">
     <!-- Mobile top header with hamburger -->
     <header class="flex items-center justify-between border-b border-stone-200 bg-marian-800 px-4 py-2.5 text-white lg:hidden no-print">
       <NuxtLink to="/admin" class="flex items-center gap-2">
@@ -57,10 +82,10 @@ async function signOut() {
 
     <!-- Sidebar Desktop & Mobile Off-canvas -->
     <aside
-      class="fixed inset-y-0 left-0 z-50 w-[260px] transform overflow-y-auto bg-gradient-to-b from-marian-800 to-marian-700 p-3 text-stone-100 transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:block lg:h-screen lg:w-auto lg:translate-x-0 no-print"
+      class="fixed inset-y-0 left-0 z-50 flex w-[260px] transform flex-col bg-gradient-to-b from-marian-800 to-marian-700 p-3 text-stone-100 transition-transform duration-200 ease-in-out lg:sticky lg:top-0 lg:h-dvh lg:shrink-0 no-print"
       :class="mobileMenuOpen ? 'translate-x-0' : '-translate-x-full lg:translate-x-0'"
     >
-      <div class="mb-3 flex items-center justify-between border-b border-vatican-400/40 px-2 pb-4">
+      <div class="mb-3 flex shrink-0 items-center justify-between border-b border-vatican-400/40 px-2 pb-4">
         <NuxtLink to="/admin" class="flex items-center gap-3">
           <span class="arch-frame grid size-9 place-items-center bg-transparent text-vatican-300" aria-hidden="true">✝</span>
           <span>
@@ -78,12 +103,30 @@ async function signOut() {
         </button>
       </div>
 
-      <nav aria-label="Điều hướng chính" class="space-y-4">
+      <!-- Chỉ vùng nav cuộn; logo phía trên luôn cố định -->
+      <nav
+        aria-label="Điều hướng chính"
+        class="min-h-0 flex-1 space-y-2 overflow-y-auto overscroll-contain pr-1 [scrollbar-gutter:stable]"
+      >
         <div v-for="group in groups" :key="group.label">
-          <div class="mx-2 mb-1 text-xs font-semibold tracking-wider text-vatican-300 uppercase">
+          <button
+            v-if="group.collapsible"
+            type="button"
+            class="mb-1 flex w-full items-center justify-between gap-2 px-2 text-xs font-semibold tracking-wider text-vatican-300 uppercase hover:text-vatican-100"
+            :aria-expanded="isGroupOpen(group.label)"
+            @click="toggleGroup(group.label)"
+          >
+            <span>{{ group.label }}</span>
+            <UIcon
+              :name="isGroupOpen(group.label) ? 'i-lucide-chevron-down' : 'i-lucide-chevron-right'"
+              class="size-3.5 shrink-0 opacity-80"
+            />
+          </button>
+          <div v-else class="mb-1 px-2 text-xs font-semibold tracking-wider text-vatican-300 uppercase">
             {{ group.label }}
           </div>
-          <div class="space-y-0.5">
+
+          <div v-if="!group.collapsible || isGroupOpen(group.label)" class="space-y-0.5">
             <NuxtLink
               v-for="item in group.items"
               :key="item.to"
@@ -99,7 +142,7 @@ async function signOut() {
     </aside>
 
     <!-- Main Content Area -->
-    <div class="flex min-w-0 flex-col">
+    <div class="flex min-w-0 flex-1 flex-col">
       <LiturgicalStrip />
 
       <!-- Topbar Desktop -->
