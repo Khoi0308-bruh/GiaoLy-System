@@ -1,3 +1,5 @@
+using GiaoLy.Domain.Entities;
+
 namespace GiaoLy.Domain.Rules;
 
 /// <summary>
@@ -39,6 +41,22 @@ public static class EnrollmentRules
     public static bool IsValidStatus(string status)
     {
         return Statuses.All.Contains(status, StringComparer.OrdinalIgnoreCase);
+    }
+
+    /// <summary>
+    /// Rút khỏi lớp: chuyển sang DropOut, đóng ngày kết thúc và nối lý do vào ghi chú.
+    /// Dùng chung cho rút lớp thủ công và xoá hồ sơ đoàn sinh, để hai đường không lệch nhau.
+    /// </summary>
+    public static void Withdraw(Enrollment enrollment, DateOnly withdrawDate, string reason)
+    {
+        var ghiChu = $"Rút khỏi lớp: {reason.Trim()}";
+
+        enrollment.Status = Statuses.DropOut;
+        enrollment.EndDate = withdrawDate;
+        enrollment.Note = string.IsNullOrWhiteSpace(enrollment.Note)
+            ? ghiChu
+            : $"{enrollment.Note} | {ghiChu}";
+        enrollment.UpdatedAt = DateTime.UtcNow;
     }
 
     /// <summary>

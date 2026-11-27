@@ -246,14 +246,7 @@ public class EnrollmentService : IEnrollmentService
         }
 
         var withdrawDate = request.WithdrawDate ?? DateOnly.FromDateTime(DateTime.UtcNow);
-
-        enrollment.Status = EnrollmentRules.Statuses.DropOut;
-        enrollment.EndDate = withdrawDate;
-        var withdrawNote = $"Rút khỏi lớp: {request.Reason.Trim()}";
-        enrollment.Note = string.IsNullOrWhiteSpace(enrollment.Note)
-            ? withdrawNote
-            : $"{enrollment.Note} | {withdrawNote}";
-        enrollment.UpdatedAt = DateTime.UtcNow;
+        EnrollmentRules.Withdraw(enrollment, withdrawDate, request.Reason);
 
         await _context.SaveChangesAsync(ct);
 

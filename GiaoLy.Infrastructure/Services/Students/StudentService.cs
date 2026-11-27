@@ -540,13 +540,7 @@ public class StudentService : IStudentService
         var ngayXoa = DateOnly.FromDateTime(DateTime.UtcNow);
         foreach (var ghiDanh in ghiDanhDangHoc)
         {
-            const string lyDo = "Rút khỏi lớp: hồ sơ đoàn sinh bị xoá";
-            ghiDanh.Status = EnrollmentRules.Statuses.DropOut;
-            ghiDanh.EndDate = ngayXoa;
-            ghiDanh.Note = string.IsNullOrWhiteSpace(ghiDanh.Note)
-                ? lyDo
-                : $"{ghiDanh.Note} | {lyDo}";
-            ghiDanh.UpdatedAt = DateTime.UtcNow;
+            EnrollmentRules.Withdraw(ghiDanh, ngayXoa, "hồ sơ đoàn sinh bị xoá");
         }
 
         student.DeletedAt = DateTime.UtcNow;
