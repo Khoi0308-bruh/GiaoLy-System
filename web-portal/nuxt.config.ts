@@ -21,7 +21,9 @@ export default defineNuxtConfig({
   },
 
   routeRules: {
-    '/': { prerender: true },
+    // Trang chủ KHÔNG prerender: banner lấy từ DB khi render, nếu sinh sẵn lúc build
+    // thì banner bật/tắt trong quản trị chỉ hiện sau khi build lại. Dựng lại mỗi lượt
+    // truy cập (SSR) để banner mới hiện ngay; số liệu thống kê vẫn fetch ở client.
     // Các đường dẫn cũ (trước khi hợp nhất trang) chuyển hướng vĩnh viễn để liên kết đã chia sẻ không chết.
     '/news': { redirect: { to: '/tin-tuc', statusCode: 301 } },
     '/library': { redirect: { to: '/thu-vien', statusCode: 301 } },
