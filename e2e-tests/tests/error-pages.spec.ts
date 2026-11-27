@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { dangNhap } from './support/auth'
 import { boChanApi, chanApi, choTrangLoi503, moTrangLoi503, trangLoi } from './support/error-page'
+import { moTrangChiuNguoi } from './support/navigation'
 
 /**
  * Trang lỗi tự viết (`layer/app/error.vue`) thay cho trang mặc định của Nuxt.
@@ -56,7 +57,7 @@ test.describe('web-admin - trang lỗi', () => {
   })
 
   test('đường dẫn không tồn tại trả 404, không đá về đăng nhập', async () => {
-    await page.goto('/admin/khong-ton-tai')
+    await moTrangChiuNguoi(page, '/admin/khong-ton-tai')
 
     await expect(trangLoi(page).getByRole('heading', { name: 'Không tìm thấy trang' })).toBeVisible({
       timeout: 30_000

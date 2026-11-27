@@ -1,6 +1,7 @@
 import { test, expect } from '@playwright/test'
 import { dangNhapApi, donTaiKhoanHanChe, taoTaiKhoanHanChe } from './support/api'
 import { dangNhapBang, doiMatKhauLanDau } from './support/auth'
+import { moTrangChiuNguoi } from './support/navigation'
 
 /**
  * Phân quyền ở tầng trang: vai trò không có quyền `roles.view` mở /admin/vai-tro
@@ -28,7 +29,7 @@ test.describe('web-admin - phân quyền', () => {
       const vaoLai = await dangNhapBang(page, taiKhoan.username, MAT_KHAU_MOI)
       expect(vaoLai, 'Đăng nhập lại bằng mật khẩu mới phải thành công').toBe('vao')
 
-      await page.goto('/admin/vai-tro')
+      await moTrangChiuNguoi(page, '/admin/vai-tro')
       await expect(page.getByText(/chưa có quyền truy cập/i).first()).toBeVisible({ timeout: 30_000 })
       await expect(page.locator('h1').first()).not.toContainText('Vai trò & Ma trận Phân quyền')
     } finally {

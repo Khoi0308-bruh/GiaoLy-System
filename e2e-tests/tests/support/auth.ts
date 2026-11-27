@@ -1,5 +1,6 @@
 import fs from 'node:fs'
 import { expect, type Page } from '@playwright/test'
+import { moTrangChiuNguoi } from './navigation'
 
 /**
  * Thông tin đăng nhập lấy từ biến môi trường, không hard-code trong mã.
@@ -49,7 +50,8 @@ export async function dangNhapBang(
   username: string,
   password: string
 ): Promise<KetQuaDangNhap> {
-  await page.goto('/dang-nhap')
+  // Lượt điều hướng đầu tiên của cả lượt chạy nên phải chịu được biên dịch nguội.
+  await moTrangChiuNguoi(page, '/dang-nhap')
   const usernameInput = page.locator('input[autocomplete="username"]')
   // Dev server (và CI) biên dịch lần đầu nên trang có thể trắng vài chục giây.
   await expect(usernameInput).toBeVisible({ timeout: 60_000 })

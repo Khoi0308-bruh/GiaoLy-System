@@ -1,6 +1,7 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 import { API_BASE, dangNhap } from './support/auth'
 import { dangNhapApi } from './support/api'
+import { moTrangChiuNguoi } from './support/navigation'
 
 /**
  * Các trang quản trị tĩnh: tiêu đề phải đúng, không lọt banner lỗi/quyền.
@@ -62,7 +63,7 @@ test.describe('web-admin', () => {
     for (const [path, heading] of TRANG_CHINH) {
       // Tách từng trang thành một step để báo lỗi nêu đúng đường dẫn.
       await test.step(path, async () => {
-        await page.goto(path)
+        await moTrangChiuNguoi(page, path)
         await expect(page.locator('h1').first()).toContainText(heading, { timeout: 30_000 })
         await khongCoLoiTrenTrang(page)
       })
@@ -70,7 +71,7 @@ test.describe('web-admin', () => {
   })
 
   test('xem danh sách đoàn sinh', async () => {
-    await page.goto('/admin/doan-sinh')
+    await moTrangChiuNguoi(page, '/admin/doan-sinh')
     await expect(page.locator('h1').first()).toContainText('Danh sách đoàn sinh')
     await khongCoLoiTrenTrang(page)
 
@@ -87,7 +88,7 @@ test.describe('web-admin', () => {
     const ten = `E2E Tạo Mới ${Date.now().toString().slice(-6)}`
 
     try {
-      await page.goto('/admin/doan-sinh/them')
+      await moTrangChiuNguoi(page, '/admin/doan-sinh/them')
       await expect(page.locator('h1').first()).toContainText('Thêm đoàn sinh mới')
 
       await page.getByPlaceholder('Nhập họ và tên khai sinh...').fill(ten)

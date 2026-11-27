@@ -2,6 +2,7 @@ import { test, expect, type APIRequestContext, type BrowserContext, type Page } 
 import { API_BASE, dangNhap } from './support/auth'
 import { dangNhapApi } from './support/api'
 import { taoBanner, xoaBanner, type BannerDto } from './support/banners'
+import { moTrangChiuNguoi } from './support/navigation'
 
 /**
  * Trang quản trị banner phải đọc danh sách quản trị (`GET /api/v1/banners`, gồm
@@ -34,8 +35,10 @@ test.describe('web-admin - banner trang chủ', () => {
       r => r.request().method() === 'GET' && r.url().endsWith('/api/v1/banners'),
       { timeout: 60_000 }
     )
-    await page.goto('/admin/banner')
-    expect((await choDanhSach).status(), 'API danh sách quản trị phải trả 200').toBe(200)
+    // Lượt mở lại vì biên dịch nguội không được tạo promise bị từ chối mà không ai bắt.
+    const danhSach = choDanhSach.catch(() => null)
+    await moTrangChiuNguoi(page, '/admin/banner')
+    expect((await danhSach)?.status(), 'API danh sách quản trị phải trả 200').toBe(200)
   }
 
   /** Mở modal sửa của banner, trả về ô "Kích hoạt hiển thị". */

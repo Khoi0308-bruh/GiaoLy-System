@@ -1,6 +1,7 @@
 import { test, expect, type Page } from '@playwright/test'
 import { dangNhapApi } from './support/api'
 import { taoBanner, xoaBanner } from './support/banners'
+import { moTrangChiuNguoi } from './support/navigation'
 
 /**
  * Chờ Nuxt mount xong (SSR chỉ trả HTML tĩnh, submit form trước khi hydrate sẽ
@@ -30,7 +31,7 @@ test.describe('web-portal', () => {
   test.describe.configure({ timeout: 120_000 })
 
   test('trang chủ hiển thị khối tra cứu học vụ', async ({ page }) => {
-    await page.goto('/')
+    await moTrangChiuNguoi(page, '/')
     await expect(
       page.getByRole('heading', { name: 'Tra Cứu Điểm & Hồ Sơ Nhanh' })
     ).toBeVisible({ timeout: 30_000 })
@@ -115,7 +116,7 @@ test.describe('web-portal', () => {
   })
 
   test('tra cứu công khai báo không tìm thấy và nhắc nhập ngày sinh', async ({ page }) => {
-    await page.goto('/verify')
+    await moTrangChiuNguoi(page, '/verify')
     await expect(page.locator('h1').first()).toContainText('Tra Cứu Điểm Giáo Lý')
     await choHydration(page)
 

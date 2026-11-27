@@ -1,6 +1,7 @@
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 import { taoLopCoGhiDanh, dangNhapApi, donLopCoGhiDanh } from './support/api'
 import { dangNhap } from './support/auth'
+import { moTrangChiuNguoi } from './support/navigation'
 
 /**
  * Nhập điểm qua UI trên một lớp do test tự dựng (API fixtures) nên chạy được cả
@@ -28,7 +29,7 @@ test.describe('web-admin - sổ điểm', () => {
     const lop = await taoLopCoGhiDanh(request, token)
 
     try {
-      await page.goto(`/admin/lop/${lop.roomId}/diem-so`)
+      await moTrangChiuNguoi(page, `/admin/lop/${lop.roomId}/diem-so`)
       await expect(page.locator('h1').first()).toContainText('Sổ điểm lớp', { timeout: 30_000 })
 
       const oDiemMieng = page.getByLabel(`Miệng của ${lop.studentName}`)

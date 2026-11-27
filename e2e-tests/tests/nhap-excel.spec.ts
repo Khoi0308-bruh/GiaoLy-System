@@ -2,6 +2,7 @@ import path from 'node:path'
 import { test, expect, type BrowserContext, type Page } from '@playwright/test'
 import { API_BASE, dangNhap } from './support/auth'
 import { dangNhapApi } from './support/api'
+import { moTrangChiuNguoi } from './support/navigation'
 
 /**
  * Fixture `docs/fixtures/nhap-doan-sinh-co-loi.xlsx` có 5 dòng dữ liệu: dòng Excel
@@ -38,7 +39,7 @@ test.describe('web-admin - nhập đoàn sinh từ Excel', () => {
   })
 
   test('tệp có lỗi: bảng và thẻ mobile hiện đủ 4 dòng lỗi, hủy đợt xem trước', async ({ request }) => {
-    await page.goto('/admin/doan-sinh/nhap-excel')
+    await moTrangChiuNguoi(page, '/admin/doan-sinh/nhap-excel')
     await expect(page.locator('h1').first()).toContainText('Nhập đoàn sinh từ Excel', { timeout: 30_000 })
 
     await page.locator('input[type="file"]').setInputFiles(FILE_LOI)
