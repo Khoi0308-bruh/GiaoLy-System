@@ -76,7 +76,8 @@ dat('không có .output/public/_payload.json', !existsSync(path.join(mk, '_paylo
 
 // 4. Banner tạo qua API phải hiện ngay trên bản build, không cần build lại
 let child
-let banner
+let headers
+let bannerId = null
 try {
   child = spawn(process.execPath, [path.join('.output', 'server', 'index.mjs')], {
     cwd: PORTAL_DIR,
@@ -88,8 +89,7 @@ try {
 
   const tepMatKhau = path.join(E2E_DIR, 'playwright', '.auth', 'password.txt')
   if (!existsSync(tepMatKhau)) {
-    console.error('❌ thiếu playwright/.auth/password.txt — chạy `npx playwright test --project=setup` trước.')
-    process.exit(1)
+    throw new Error('thiếu playwright/.auth/password.txt — chạy `npx playwright test --project=setup` trước')
   }
   const password = readFileSync(tepMatKhau, 'utf8').trim()
   const dangNhap = await fetch(`${API}/api/v1/auth/login`, {
@@ -98,7 +98,7 @@ try {
     body: JSON.stringify({ username: process.env.E2E_USERNAME ?? 'admin', password })
   })
   if (!dat('đăng nhập API', dangNhap.ok, `HTTP ${dangNhap.status}`)) throw new Error('không đăng nhập được')
-  const headers = {
+  headers = {
     Authorization: `Bearer ${(await dangNhap.json()).accessToken}`,
     'content-type': 'application/json'
   }
@@ -116,16 +116,15 @@ try {
     })
   })
   if (!dat('tạo banner qua API', tao.status === 200, `HTTP ${tao.status}`)) throw new Error('không tạo được banner')
-  banner = await tao.json()
+  bannerId = (await tao.json()).id
 
   const htmlMoi = await (await fetch(`${BASE}/`)).text()
   dat('HTML bản build có banner vừa tạo (không build lại)', htmlMoi.includes(tieuDe))
   dat('HTML có link của banner', htmlMoi.includes('https://example.com/kiem-build'))
 
-  const xoa = await fetch(`${API}/api/v1/banners/${banner.id}`, { method: 'DELETE', headers })
-  const daXoa = xoa.status === 200
-  banner = daXoa ? null : banner
-  dat('xoá banner qua API', daXoa, `HTTP ${xoa.status}`)
+  const xoa = await fetch(`${API}/api/v1/banners/${bannerId}`, { method: 'DELETE', headers })
+  dat('xoá banner qua API', xoa.status === 200, `HTTP ${xoa.status}`)
+  if (xoa.status === 200) bannerId = null
 
   const htmlSau = await (await fetch(`${BASE}/`)).text()
   dat('sau khi xoá, HTML không còn banner đó', !htmlSau.includes(tieuDe))
@@ -133,6 +132,11 @@ try {
   hong.push(String(e.message ?? e))
 } finally {
   dungCay(child)
+  // Kiểm tra hỏng giữa đường thì banner còn sót lại trong DB dev — dọn nốt.
+  if (bannerId && headers) {
+    const don = await fetch(`${API}/api/v1/banners/${bannerId}`, { method: 'DELETE', headers })
+    console.log(`↩ dọn banner còn sót — HTTP ${don.status}`)
+  }
 }
 
 if (hong.length) {

@@ -25,14 +25,17 @@ const { data: apiBanners } = await useFetch<BannerItem[]>('/api/v1/public/banner
 // banner — vừa gây hiểu nhầm, vừa đẩy nội dung giả lên production.
 const bannerList = computed(() => apiBanners.value ?? [])
 
+// Chỉ slide đang hiển thị nằm trong cây trợ năng: các slide còn lại vẫn ở trong DOM
+// (chỉ bị dịch ra ngoài khung nhìn), nếu không ẩn thì trình đọc màn hình đọc lần lượt
+// mọi banner và phím Tab nhảy vào nút "Xem Chi Tiết" của slide vô hình.
+const dangChon = ref(0)
+
 // Tự chuyển slide là nội dung động kéo dài quá 5 giây nên phải có cách tạm dừng
 // (WCAG 2.2.2); mặc định đứng yên nếu người dùng bật "giảm chuyển động".
-//
-// Chỉ slide đang hiển thị nằm trong cây trợ năng; các slide còn lại tuy nằm ngoài
-// khung nhìn nhưng vẫn ở trong DOM, nếu không ẩn thì trình đọc màn hình sẽ đọc lần
-// lượt mọi banner và phím Tab còn nhảy vào nút "Xem Chi Tiết" của slide vô hình.
-const dangChon = ref(0)
 const tuDongChay = ref(true)
+const nhanTrinhChieu = computed(() =>
+  tuDongChay.value ? 'Tạm dừng trình chiếu banner' : 'Tiếp tục trình chiếu banner'
+)
 onMounted(() => {
   if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
     tuDongChay.value = false
@@ -111,7 +114,7 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
         <template #default="{ item, index }">
           <div
             class="relative w-full h-full group overflow-hidden"
-            :aria-hidden="dangChon !== index ? 'true' : undefined"
+            :aria-hidden="dangChon !== index"
             :inert="dangChon !== index"
           >
             <!-- Ảnh nền với hiệu ứng zoom -->
@@ -150,8 +153,7 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
                 </span>
               </div>
 
-              <!-- Tiêu đề serif lớn: chỉ là h2 để trang chủ giữ đúng một h1
-                   (mỗi slide một h1 thì trang có N h1, carousel lại nhân bản slide). -->
+              <!-- Tiêu đề serif lớn: chỉ là h2 để trang chủ giữ đúng một h1. -->
               <h2
                 class="font-serif font-black text-white leading-[1.1] tracking-tight drop-shadow-2xl mb-4"
                 style="font-size: clamp(1.75rem, 5vw, 3.5rem);"
@@ -199,8 +201,8 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
         v-if="bannerList.length > 1"
         type="button"
         class="absolute bottom-6 right-6 z-20 w-10 h-10 rounded-full flex items-center justify-center text-white border border-white/40 backdrop-blur-sm hover:bg-white/20 transition-colors"
-        :aria-label="tuDongChay ? 'Tạm dừng trình chiếu banner' : 'Tiếp tục trình chiếu banner'"
-        :title="tuDongChay ? 'Tạm dừng trình chiếu banner' : 'Tiếp tục trình chiếu banner'"
+        :aria-label="nhanTrinhChieu"
+        :title="nhanTrinhChieu"
         @click="tuDongChay = !tuDongChay"
       >
         <UIcon

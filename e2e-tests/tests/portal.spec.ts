@@ -93,8 +93,8 @@ test.describe('web-portal', () => {
       await expect(async () => {
         await page.goto('/')
         // Cả hai slide phải có mặt trong DOM, nếu không phép đếm dưới đây đúng một cách vô nghĩa.
-        await expect(page.locator('h2', { hasText: mot.title }), 'slide 1 có trong DOM').toHaveCount(1, { timeout: 20_000 })
-        await expect(page.locator('h2', { hasText: hai.title }), 'slide 2 có trong DOM').toHaveCount(1, { timeout: 20_000 })
+        await expect(page.locator('h2', { hasText: mot.title }), 'slide 1 có trong DOM').toHaveCount(1)
+        await expect(page.locator('h2', { hasText: hai.title }), 'slide 2 có trong DOM').toHaveCount(1)
       }).toPass({ timeout: 120_000 })
 
       // Carousel tự chuyển slide nên chờ tới lúc cây trợ năng ổn định thay vì đọc một lần;
