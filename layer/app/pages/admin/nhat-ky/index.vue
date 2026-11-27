@@ -94,6 +94,26 @@ function getActionBadge(action: string) {
   if (act.includes('UNLOCK')) return { label: action, color: 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300' }
   return { label: action, color: 'bg-stone-100 text-stone-700 dark:bg-stone-800 dark:text-stone-300' }
 }
+
+/** Tách ngày/giờ để cột Thời gian hẹp không phải cắt chuỗi. */
+/** 8 ký tự đầu của id bản ghi, dùng ở cả bảng và thẻ. */
+function shortId(id?: string | null) {
+  return id ? id.substring(0, 8) : ''
+}
+
+/** "13:33:59 25/11/2026" cho thẻ mobile. */
+function logStamp(iso: string) {
+  const t = logTime(iso)
+  return `${t.time} ${t.date}`
+}
+
+function logTime(iso: string) {
+  const d = new Date(iso)
+  return {
+    date: d.toLocaleDateString('vi-VN'),
+    time: d.toLocaleTimeString('vi-VN', { hour12: false })
+  }
+}
 </script>
 
 <template>
@@ -172,75 +192,118 @@ function getActionBadge(action: string) {
     </div>
 
     <!-- Bảng nhật ký -->
-    <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Thời gian</th>
-              <th class="p-4">Người thực hiện</th>
-              <th class="p-4 text-center">Thao tác</th>
-              <th class="p-4">Đối tượng tác động</th>
-              <th class="p-4">Địa chỉ IP</th>
-              <th class="p-4 text-right">Chi tiết</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="loading">
-              <td colspan="6" class="p-8 text-center text-sm text-stone-400 animate-pulse">
-                Đang tải nhật ký kiểm toán...
-              </td>
-            </tr>
-            <tr v-else-if="logs.length === 0">
-              <td colspan="6" class="p-8 text-center text-sm text-stone-500">
-                Không có dữ liệu nhật ký phù hợp với bộ lọc.
-              </td>
-            </tr>
-            <tr
-              v-for="l in logs"
-              :key="l.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
-            >
-              <td class="p-4 font-mono text-xs text-stone-500 whitespace-nowrap">
-                {{ new Date(l.occurredAt).toLocaleString('vi-VN') }}
-              </td>
-              <td class="p-4 font-medium text-stone-900 dark:text-stone-100 whitespace-nowrap">
-                {{ l.userName || 'Hệ thống / Anonymous' }}
-              </td>
-              <td class="p-4 text-center">
-                <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold" :class="getActionBadge(l.action).color">
-                  {{ getActionBadge(l.action).label }}
-                </span>
-              </td>
-              <td class="p-4 text-xs">
-                <span class="font-semibold text-stone-800 dark:text-stone-200">{{ l.entityType }}</span>
-                <span v-if="l.entityId" class="ml-1 font-mono text-stone-400">#{{ l.entityId.substring(0, 8) }}</span>
-              </td>
-              <td class="p-4 font-mono text-xs text-stone-400">
-                {{ l.ipAddress || '—' }}
-              </td>
-              <td class="p-4 text-right">
-                <UButton
-                  size="xs"
-                  variant="outline"
-                  icon="i-lucide-code"
-                  @click="openDiffModal(l)"
-                >
-                  Xem Diff
-                </UButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+    <ListTable
+      :columns="6"
+      :loading="loading"
+      :empty="logs.length === 0"
+      loading-text="Đang tải nhật ký kiểm toán…"
+      empty-title="Không có bản ghi nào"
+      empty-description="Không có dữ liệu nhật ký phù hợp với bộ lọc đang chọn."
+      :footer="totalPages > 1"
+    >
+      <template #head>
+        <th class="w-[21%] px-4 py-3">Thời gian</th>
+        <th class="w-[19%] px-4 py-3">Người thực hiện</th>
+        <th class="w-[13%] px-4 py-3">Thao tác</th>
+        <th class="w-[23%] px-4 py-3">Đối tượng</th>
+        <th class="w-[13%] px-4 py-3">IP</th>
+        <th class="w-[11%] px-3 py-3 text-right">Chi tiết</th>
+      </template>
 
-      <!-- Phân trang -->
-      <div v-if="totalPages > 1" class="border-t border-stone-100 p-4 flex items-center justify-between dark:border-stone-800">
-        <span class="text-xs text-stone-500">Trang {{ currentPage }} / {{ totalPages }}</span>
+      <template #rows>
+        <tr
+          v-for="l in logs"
+          :key="l.id"
+          class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+        >
+          <td class="px-4 py-3">
+            <p class="text-xs font-medium text-stone-700 dark:text-stone-300">{{ logTime(l.occurredAt).date }}</p>
+            <p class="mt-0.5 font-mono text-[11px] text-stone-400">{{ logTime(l.occurredAt).time }}</p>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <span class="block truncate font-medium text-stone-900 dark:text-stone-100" :title="l.userName || undefined">
+              {{ l.userName || 'Hệ thống' }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <span
+              class="rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="getActionBadge(l.action).color"
+            >
+              {{ getActionBadge(l.action).label }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <span class="block truncate font-semibold text-stone-800 dark:text-stone-200">{{ l.entityType }}</span>
+            <span v-if="l.entityId" class="mt-0.5 block truncate font-mono text-[11px] text-stone-400">
+              #{{ shortId(l.entityId) }}
+            </span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="block truncate font-mono text-[11px] text-stone-400" :title="l.ipAddress || undefined">
+              {{ l.ipAddress || '—' }}
+            </span>
+          </td>
+          <td class="px-3 py-3">
+            <div class="flex justify-end">
+              <UButton
+                size="xs"
+                variant="outline"
+                color="neutral"
+                icon="i-lucide-code"
+                :aria-label="`Xem chi tiết thay đổi #${l.id}`"
+                title="Xem Diff"
+                @click="openDiffModal(l)"
+              >
+                <span class="hidden xl:inline">Xem Diff</span>
+              </UButton>
+            </div>
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="l in logs" :key="l.id" class="space-y-1.5 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-medium text-stone-900 dark:text-stone-100">{{ l.userName || 'Hệ thống' }}</p>
+              <p class="font-mono text-[11px] text-stone-400">{{ logStamp(l.occurredAt) }}</p>
+            </div>
+            <span
+              class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="getActionBadge(l.action).color"
+            >
+              {{ getActionBadge(l.action).label }}
+            </span>
+          </div>
+          <p class="flex flex-wrap items-center gap-x-1.5 text-[11px] text-stone-500">
+            <span class="font-semibold text-stone-700 dark:text-stone-300">{{ l.entityType }}</span>
+            <span v-if="l.entityId" class="font-mono text-stone-400">#{{ shortId(l.entityId) }}</span>
+            <span v-if="l.ipAddress" class="font-mono text-stone-400">· {{ l.ipAddress }}</span>
+          </p>
+          <div class="flex justify-end">
+            <UButton
+              size="xs"
+              variant="outline"
+              color="neutral"
+              icon="i-lucide-code"
+              :aria-label="`Xem chi tiết thay đổi #${l.id}`"
+              @click="openDiffModal(l)"
+            >
+              Xem Diff
+            </UButton>
+          </div>
+        </div>
+      </template>
+
+      <template #footer>
+        <span class="tabular-nums">Trang {{ currentPage }} / {{ totalPages }}</span>
         <div class="flex items-center gap-1">
           <UButton
             size="xs"
             variant="ghost"
+            color="neutral"
+            aria-label="Trang trước"
             :disabled="currentPage <= 1"
             icon="i-lucide-chevron-left"
             @click="currentPage--; loadData()"
@@ -248,13 +311,15 @@ function getActionBadge(action: string) {
           <UButton
             size="xs"
             variant="ghost"
+            color="neutral"
+            aria-label="Trang sau"
             :disabled="currentPage >= totalPages"
             icon="i-lucide-chevron-right"
             @click="currentPage++; loadData()"
           />
         </div>
-      </div>
-    </div>
+      </template>
+    </ListTable>
 
     <!-- Modal Xem Chi Tiết Diff Old / New Values -->
     <UModal

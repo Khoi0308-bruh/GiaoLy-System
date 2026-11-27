@@ -346,113 +346,146 @@ const stats = computed(() => {
     </div>
 
     <!-- Bảng danh sách tài liệu -->
-    <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Tên tài liệu</th>
-              <th class="p-4">Chuyên mục</th>
-              <th class="p-4 text-center">Dung lượng</th>
-              <th class="p-4 text-center">Quyền hạn</th>
-              <th class="p-4">Người tải</th>
-              <th class="p-4">Ngày tải</th>
-              <th class="p-4 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="loading">
-              <td colspan="7" class="p-8 text-center text-sm text-stone-400 animate-pulse">
-                Đang tải danh sách tài liệu...
-              </td>
-            </tr>
-            <tr v-else-if="filteredDocuments.length === 0">
-              <td colspan="7" class="p-8 text-center text-sm text-stone-500">
-                Chưa có tài liệu nào trong chuyên mục này.
-              </td>
-            </tr>
-            <tr
-              v-for="doc in filteredDocuments"
-              :key="doc.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
-            >
-              <td class="p-4">
-                <div class="flex items-center gap-2.5">
-                  <UIcon :name="getFileIcon(doc.contentType, doc.fileName)" class="h-5 w-5 text-marian-600 dark:text-marian-400 flex-shrink-0" />
-                  <div>
-                    <span
-                      class="font-semibold text-stone-900 hover:text-marian-600 cursor-pointer dark:text-stone-100 dark:hover:text-marian-400"
-                      @click="handleDownload(doc)"
-                    >
-                      {{ doc.fileName }}
-                    </span>
-                    <div v-if="doc.tags" class="flex flex-wrap gap-1 mt-0.5">
-                      <span
-                        v-for="tag in doc.tags.split(',')"
-                        :key="tag"
-                        class="text-[10px] text-stone-400"
-                      >
-                        #{{ tag.trim() }}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              </td>
-              <td class="p-4 text-xs font-medium text-stone-600 dark:text-stone-300">
-                {{ doc.category }}
-              </td>
-              <td class="p-4 text-center font-mono text-xs text-stone-500 whitespace-nowrap">
-                {{ formatBytes(doc.fileSize) }}
-              </td>
-              <td class="p-4 text-center">
-                <span
-                  class="rounded-full px-2 py-0.5 text-xs font-semibold"
-                  :class="doc.accessLevel === 'Public' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300'"
+    <ListTable
+      :columns="7"
+      :loading="loading"
+      :empty="filteredDocuments.length === 0"
+      loading-text="Đang tải danh sách tài liệu..."
+      empty-title="Chưa có tài liệu nào"
+      empty-description="Chưa có tài liệu nào trong chuyên mục hoặc bộ lọc đang chọn."
+    >
+      <template #head>
+        <th class="w-[30%] px-4 py-3">Tên tài liệu</th>
+        <th class="w-[13%] px-4 py-3">Chuyên mục</th>
+        <th class="w-[11%] px-4 py-3 text-center">Dung lượng</th>
+        <th class="w-[11%] px-4 py-3 text-center">Quyền hạn</th>
+        <th class="w-[15%] px-4 py-3">Người tải</th>
+        <th class="w-[12%] px-4 py-3">Ngày tải</th>
+        <th class="w-20 px-3 py-3 text-right">Thao tác</th>
+      </template>
+
+      <template #rows>
+        <tr
+          v-for="doc in filteredDocuments"
+          :key="doc.id"
+          class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+        >
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-2.5">
+              <UIcon :name="getFileIcon(doc.contentType, doc.fileName)" class="size-5 shrink-0 text-marian-600 dark:text-marian-400" />
+              <span class="min-w-0">
+                <button
+                  type="button"
+                  class="block max-w-full truncate text-left font-semibold text-stone-900 hover:text-marian-600 dark:text-stone-100 dark:hover:text-marian-400"
+                  :title="doc.fileName"
+                  @click="handleDownload(doc)"
                 >
-                  {{ doc.accessLevel === 'Public' ? 'Công khai' : 'Nội bộ' }}
+                  {{ doc.fileName }}
+                </button>
+                <span v-if="doc.tags" class="mt-0.5 block truncate text-[10px] text-stone-400">
+                  {{ doc.tags.split(',').map(t => '#' + t.trim()).join(' ') }}
                 </span>
-              </td>
-              <td class="p-4 text-xs text-stone-600 dark:text-stone-300">
-                {{ doc.uploadedByName }}
-              </td>
-              <td class="p-4 text-xs text-stone-500 whitespace-nowrap">
-                {{ new Date(doc.createdAt).toLocaleDateString('vi-VN') }}
-              </td>
-              <td class="p-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-1">
-                  <UButton
-                    size="xs"
-                    color="primary"
-                    variant="ghost"
-                    icon="i-lucide-download"
-                    title="Tải xuống"
-                    @click="handleDownload(doc)"
-                  />
-                  <UButton
-                    v-if="can(PERMISSIONS.Documents.Update)"
-                    size="xs"
-                    variant="ghost"
-                    color="neutral"
-                    icon="i-lucide-pencil"
-                    title="Sửa thông tin"
-                    @click="openEditModal(doc)"
-                  />
-                  <UButton
-                    v-if="can(PERMISSIONS.Documents.Delete)"
-                    size="xs"
-                    variant="ghost"
-                    color="error"
-                    icon="i-lucide-trash-2"
-                    title="Xóa"
-                    @click="openDeleteModal(doc)"
-                  />
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+              </span>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <span class="block truncate font-medium text-stone-600 dark:text-stone-300">{{ doc.category }}</span>
+          </td>
+          <td class="px-4 py-3 text-center font-mono text-[11px] whitespace-nowrap text-stone-500">
+            {{ formatBytes(doc.fileSize) }}
+          </td>
+          <td class="px-4 py-3 text-center">
+            <span
+              class="rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="doc.accessLevel === 'Public' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300'"
+            >
+              {{ doc.accessLevel === 'Public' ? 'Công khai' : 'Nội bộ' }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <span class="block truncate text-stone-600 dark:text-stone-300">{{ doc.uploadedByName }}</span>
+          </td>
+          <td class="px-4 py-3 text-[11px] whitespace-nowrap text-stone-500">
+            {{ new Date(doc.createdAt).toLocaleDateString('vi-VN') }}
+          </td>
+          <td class="px-3 py-3">
+            <div class="flex items-center justify-end gap-0.5">
+              <UButton size="xs" variant="ghost" color="primary" icon="i-lucide-download" title="Tải xuống" @click="handleDownload(doc)" />
+              <UButton
+                v-if="can(PERMISSIONS.Documents.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                title="Sửa thông tin"
+                @click="openEditModal(doc)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Documents.Delete)"
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-lucide-trash-2"
+                title="Xóa"
+                @click="openDeleteModal(doc)"
+              />
+            </div>
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="doc in filteredDocuments" :key="doc.id" class="space-y-1.5 px-4 py-3">
+          <div class="flex items-start gap-2.5">
+            <UIcon :name="getFileIcon(doc.contentType, doc.fileName)" class="mt-0.5 size-5 shrink-0 text-marian-600 dark:text-marian-400" />
+            <div class="min-w-0 flex-1">
+              <button type="button" class="block max-w-full truncate text-left text-sm font-semibold text-stone-900 dark:text-stone-100" @click="handleDownload(doc)">
+                {{ doc.fileName }}
+              </button>
+              <p class="truncate text-[11px] text-stone-400">
+                {{ doc.category }} · {{ formatBytes(doc.fileSize) }}
+              </p>
+            </div>
+            <span
+              class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="doc.accessLevel === 'Public' ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-amber-50 text-amber-800 dark:bg-amber-950 dark:text-amber-300'"
+            >
+              {{ doc.accessLevel === 'Public' ? 'Công khai' : 'Nội bộ' }}
+            </span>
+          </div>
+          <p v-if="doc.tags" class="truncate text-[10px] text-stone-400">
+            {{ doc.tags.split(',').map(t => '#' + t.trim()).join(' ') }}
+          </p>
+          <div class="flex items-center justify-between gap-2">
+            <span class="truncate text-[11px] text-stone-500">
+              {{ doc.uploadedByName }} · {{ new Date(doc.createdAt).toLocaleDateString('vi-VN') }}
+            </span>
+            <div class="flex items-center gap-1">
+              <UButton size="xs" variant="ghost" color="primary" icon="i-lucide-download" title="Tải xuống" @click="handleDownload(doc)" />
+              <UButton
+                v-if="can(PERMISSIONS.Documents.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                title="Sửa thông tin"
+                @click="openEditModal(doc)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Documents.Delete)"
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-lucide-trash-2"
+                title="Xóa"
+                @click="openDeleteModal(doc)"
+              />
+            </div>
+          </div>
+        </div>
+      </template>
+    </ListTable>
+
 
     <!-- Modal Upload Tài Liệu -->
     <UModal v-model:open="uploadOpen" title="Tải lên tài liệu mới">

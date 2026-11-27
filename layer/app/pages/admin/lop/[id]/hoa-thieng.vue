@@ -303,129 +303,196 @@ const top3 = computed(() => leaderboard.value.slice(0, 3))
     </div>
 
     <!-- Tab 1: Bảng Xếp Hạng -->
-    <div v-if="activeTab === 'leaderboard'" class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-3 w-16 text-center">Hạng</th>
-              <th class="p-3">Mã ĐS</th>
-              <th class="p-3">Tên thánh & Họ tên</th>
-              <th class="p-3 text-center">Tổng điểm</th>
-              <th class="p-3 text-center">Số bông hoa</th>
-              <th class="p-3">Chi tiết việc lành</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="leaderboard.length === 0">
-              <td colspan="6" class="p-8 text-center text-sm text-stone-500">
-                Chưa có dữ liệu hoa thiêng nào trong lớp này.
-              </td>
-            </tr>
-            <tr
-              v-for="item in leaderboard"
-              :key="item.studentId"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+    <ListTable
+      v-if="activeTab === 'leaderboard'"
+      :columns="6"
+      :loading="loading"
+      :empty="leaderboard.length === 0"
+      loading-text="Đang tải bảng xếp hạng..."
+      empty-title="Chưa có dữ liệu hoa thiêng"
+      empty-description="Ghi nhận bông hoa thiêng đầu tiên để bảng xếp hạng có dữ liệu."
+    >
+      <template #head>
+        <th class="w-[10%] px-3 py-3 text-center">Hạng</th>
+        <th class="w-[13%] px-3 py-3">Mã ĐS</th>
+        <th class="w-[27%] px-3 py-3">Tên thánh &amp; Họ tên</th>
+        <th class="w-[12%] px-3 py-3 text-center">Tổng điểm</th>
+        <th class="w-[13%] px-3 py-3 text-center">Số bông</th>
+        <th class="w-[25%] px-3 py-3">Chi tiết việc lành</th>
+      </template>
+
+      <template #rows>
+        <tr v-for="item in leaderboard" :key="item.studentId" class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40">
+          <td class="px-3 py-3 text-center">
+            <span
+              class="inline-flex size-6 items-center justify-center rounded-full text-xs"
+              :class="item.rank === 1 ? 'bg-amber-400 font-black text-stone-900' : item.rank === 2 ? 'bg-stone-300 text-stone-800' : item.rank === 3 ? 'bg-amber-700 text-white' : 'text-stone-500'"
             >
-              <td class="p-3 text-center font-bold text-sm">
-                <span
-                  class="inline-flex h-6 w-6 items-center justify-center rounded-full text-xs"
-                  :class="item.rank === 1 ? 'bg-amber-400 text-stone-900 font-black' : item.rank === 2 ? 'bg-stone-300 text-stone-800' : item.rank === 3 ? 'bg-amber-700 text-white' : 'text-stone-500'"
-                >
-                  {{ item.rank }}
-                </span>
-              </td>
-              <td class="p-3 font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">
-                {{ item.studentCode }}
-              </td>
-              <td class="p-3 font-medium text-stone-900 dark:text-stone-100">
-                <NuxtLink :to="`/admin/doan-sinh/${item.studentId}`" class="hover:underline">
-                  {{ item.studentHolyName ? `${item.studentHolyName} ` : '' }}{{ item.studentFullName }}
+              {{ item.rank }}
+            </span>
+          </td>
+          <td class="px-3 py-3">
+            <span class="block truncate font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">{{ item.studentCode }}</span>
+          </td>
+          <td class="px-3 py-3">
+            <NuxtLink
+              :to="'/admin/doan-sinh/' + item.studentId"
+              class="block truncate font-medium text-stone-900 hover:underline dark:text-stone-100"
+              :title="(item.studentHolyName ? item.studentHolyName + ' ' : '') + item.studentFullName"
+            >
+              {{ item.studentHolyName ? item.studentHolyName + ' ' : '' }}{{ item.studentFullName }}
+            </NuxtLink>
+          </td>
+          <td class="px-3 py-3 text-center font-mono font-bold text-vatican-800 dark:text-vatican-300">{{ item.totalPoints }}</td>
+          <td class="px-3 py-3 text-center text-xs text-stone-600 dark:text-stone-400">{{ item.bouquetCount }} bông</td>
+          <td class="px-3 py-3">
+            <div class="flex flex-wrap gap-1">
+              <span
+                v-for="(pts, type) in item.pointsByType"
+                :key="type"
+                class="rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium whitespace-nowrap text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+              >
+                {{ type }}: {{ pts }}đ
+              </span>
+              <span v-if="!item.pointsByType || Object.keys(item.pointsByType).length === 0" class="text-[11px] text-stone-400">—</span>
+            </div>
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="item in leaderboard" :key="item.studentId" class="space-y-2 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex min-w-0 items-center gap-2">
+              <span
+                class="inline-flex size-6 shrink-0 items-center justify-center rounded-full text-xs"
+                :class="item.rank === 1 ? 'bg-amber-400 font-black text-stone-900' : item.rank === 2 ? 'bg-stone-300 text-stone-800' : item.rank === 3 ? 'bg-amber-700 text-white' : 'text-stone-500'"
+              >
+                {{ item.rank }}
+              </span>
+              <div class="min-w-0">
+                <NuxtLink :to="'/admin/doan-sinh/' + item.studentId" class="block truncate text-sm font-semibold text-stone-900 hover:underline dark:text-stone-100">
+                  {{ item.studentHolyName ? item.studentHolyName + ' ' : '' }}{{ item.studentFullName }}
                 </NuxtLink>
-              </td>
-              <td class="p-3 text-center font-bold font-mono text-vatican-800 dark:text-vatican-300">
-                {{ item.totalPoints }}
-              </td>
-              <td class="p-3 text-center text-xs text-stone-600 dark:text-stone-400">
-                {{ item.bouquetCount }} bông
-              </td>
-              <td class="p-3 text-xs text-stone-500">
-                <div class="flex flex-wrap gap-1.5">
-                  <span
-                    v-for="(pts, type) in item.pointsByType"
-                    :key="type"
-                    class="rounded bg-stone-100 px-2 py-0.5 text-[11px] font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-300"
-                  >
-                    {{ type }}: {{ pts }}đ
-                  </span>
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+                <p class="font-mono text-[11px] text-stone-400">{{ item.studentCode }}</p>
+              </div>
+            </div>
+            <div class="shrink-0 text-right">
+              <p class="font-mono text-sm font-bold text-vatican-800 dark:text-vatican-300">{{ item.totalPoints }}đ</p>
+              <p class="text-[11px] text-stone-400">{{ item.bouquetCount }} bông</p>
+            </div>
+          </div>
+          <div class="flex flex-wrap gap-1">
+            <span
+              v-for="(pts, type) in item.pointsByType"
+              :key="type"
+              class="rounded bg-stone-100 px-1.5 py-0.5 text-[10px] font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+            >
+              {{ type }}: {{ pts }}đ
+            </span>
+          </div>
+        </div>
+      </template>
+    </ListTable>
 
     <!-- Tab 2: Nhật Ký Ghi Nhận -->
-    <div v-else class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-3">Ngày</th>
-              <th class="p-3">Đoàn sinh</th>
-              <th class="p-3">Loại hoa thiêng</th>
-              <th class="p-3 text-center">Điểm</th>
-              <th class="p-3">Người ghi</th>
-              <th class="p-3">Ghi chú</th>
-              <th v-if="can(PERMISSIONS.Bouquets.Manage)" class="p-3 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="bouquets.length === 0">
-              <td colspan="7" class="p-8 text-center text-sm text-stone-500">
-                Chưa có nhật ký ghi nhận hoa thiêng.
-              </td>
-            </tr>
-            <tr
-              v-for="b in bouquets"
-              :key="b.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
-              :class="b.reversesBouquetId ? 'opacity-50 line-through bg-stone-50/50' : ''"
+    <ListTable
+      v-if="activeTab === 'history'"
+      :columns="7"
+      :loading="loading"
+      :empty="bouquets.length === 0"
+      loading-text="Đang tải nhật ký hoa thiêng..."
+      empty-title="Chưa có nhật ký ghi nhận"
+      empty-description="Mỗi bông hoa thiêng được ghi nhận sẽ xuất hiện ở đây."
+    >
+      <template #head>
+        <th class="w-[11%] px-3 py-3">Ngày</th>
+        <th class="w-[22%] px-3 py-3">Đoàn sinh</th>
+        <th class="w-[17%] px-3 py-3">Loại hoa thiêng</th>
+        <th class="w-[8%] px-3 py-3 text-center">Điểm</th>
+        <th class="w-[14%] px-3 py-3">Người ghi</th>
+        <th class="w-[18%] px-3 py-3">Ghi chú</th>
+        <th v-if="can(PERMISSIONS.Bouquets.Manage)" class="w-[10%] px-3 py-3 text-right"><span class="sr-only">Thao tác</span></th>
+      </template>
+
+      <template #rows>
+        <tr
+          v-for="b in bouquets"
+          :key="b.id"
+          class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+          :class="b.reversesBouquetId ? 'bg-stone-50/50 opacity-50 line-through' : ''"
+        >
+          <td class="px-3 py-3 text-xs whitespace-nowrap text-stone-600 dark:text-stone-400">{{ b.bouquetDate }}</td>
+          <td class="px-3 py-3">
+            <span class="block truncate font-medium text-stone-900 dark:text-stone-100">
+              {{ b.studentHolyName ? b.studentHolyName + ' ' : '' }}{{ b.studentFullName }}
+            </span>
+          </td>
+          <td class="px-3 py-3">
+            <span class="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+              <UIcon name="i-lucide-flower" class="size-3.5 text-rose-500" />
+              {{ b.bouquetType }}
+            </span>
+          </td>
+          <td class="px-3 py-3 text-center font-mono font-bold" :class="b.points > 0 ? 'text-emerald-600' : 'text-red-500'">
+            {{ b.points > 0 ? '+' + b.points : b.points }}
+          </td>
+          <td class="px-3 py-3">
+            <span class="block truncate text-xs text-stone-500">{{ b.givenByName }}</span>
+          </td>
+          <td class="px-3 py-3 text-xs">
+            <span v-if="b.note" class="block truncate text-stone-500" :title="b.note">{{ b.note }}</span>
+            <span v-else class="text-stone-400">—</span>
+          </td>
+          <td v-if="can(PERMISSIONS.Bouquets.Manage)" class="px-3 py-3 text-right">
+            <UButton
+              v-if="!b.reversesBouquetId && b.points > 0"
+              size="xs"
+              variant="ghost"
+              color="error"
+              icon="i-lucide-undo-2"
+              @click="openReverseModal(b)"
             >
-              <td class="p-3 text-xs text-stone-600 whitespace-nowrap">{{ b.bouquetDate }}</td>
-              <td class="p-3 font-medium text-stone-900 dark:text-stone-100 whitespace-nowrap">
-                {{ b.studentHolyName ? `${b.studentHolyName} ` : '' }}{{ b.studentFullName }}
-              </td>
-              <td class="p-3">
-                <span class="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300">
-                  <UIcon name="i-lucide-flower" class="h-3.5 w-3.5 text-rose-500" />
-                  {{ b.bouquetType }}
-                </span>
-              </td>
-              <td class="p-3 text-center font-mono font-bold" :class="b.points > 0 ? 'text-emerald-600' : 'text-red-500'">
-                {{ b.points > 0 ? `+${b.points}` : b.points }}
-              </td>
-              <td class="p-3 text-xs text-stone-500 whitespace-nowrap">{{ b.givenByName }}</td>
-              <td class="p-3 text-xs text-stone-500">{{ b.note || '—' }}</td>
-              <td v-if="can(PERMISSIONS.Bouquets.Manage)" class="p-3 text-right whitespace-nowrap">
-                <UButton
-                  v-if="!b.reversesBouquetId && b.points > 0"
-                  size="xs"
-                  variant="ghost"
-                  color="error"
-                  icon="i-lucide-undo-2"
-                  @click="openReverseModal(b)"
-                >
-                  Đảo ngược
-                </UButton>
-                <span v-else class="text-xs text-stone-400 italic">Đã đảo dòng</span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+              Đảo
+            </UButton>
+            <span v-else-if="b.reversesBouquetId" class="text-[11px] text-stone-400 italic">Đã đảo</span>
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="b in bouquets" :key="b.id" class="space-y-2 px-4 py-3" :class="b.reversesBouquetId ? 'opacity-50' : ''">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
+                {{ b.studentHolyName ? b.studentHolyName + ' ' : '' }}{{ b.studentFullName }}
+              </p>
+              <p class="text-[11px] text-stone-400">{{ b.bouquetDate }} · {{ b.givenByName }}</p>
+            </div>
+            <span class="shrink-0 font-mono text-sm font-bold" :class="b.points > 0 ? 'text-emerald-600' : 'text-red-500'">
+              {{ b.points > 0 ? '+' + b.points : b.points }}
+            </span>
+          </div>
+          <div class="flex items-center justify-between gap-2">
+            <span class="inline-flex items-center gap-1 rounded-md bg-stone-100 px-2 py-0.5 text-[11px] font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+              <UIcon name="i-lucide-flower" class="size-3.5 text-rose-500" />
+              {{ b.bouquetType }}
+            </span>
+            <UButton
+              v-if="can(PERMISSIONS.Bouquets.Manage) && !b.reversesBouquetId && b.points > 0"
+              size="xs"
+              variant="ghost"
+              color="error"
+              icon="i-lucide-undo-2"
+              @click="openReverseModal(b)"
+            >
+              Đảo ngược
+            </UButton>
+          </div>
+          <p v-if="b.note" class="text-[11px] text-stone-500">{{ b.note }}</p>
+        </div>
+      </template>
+    </ListTable>
 
     <!-- Modal Dâng Hoa Thiêng -->
     <UModal

@@ -312,7 +312,7 @@ async function handleExportReport() {
       <div
         v-for="b in branchReport.branches"
         :key="b.branchId"
-        class="rounded-2xl border border-stone-200 bg-white shadow-sm overflow-hidden dark:border-stone-800 dark:bg-stone-900"
+        class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900"
       >
         <div class="border-b border-stone-100 bg-stone-50 p-4 flex flex-wrap items-center justify-between gap-2 dark:border-stone-800 dark:bg-stone-800/60">
           <div>
@@ -343,32 +343,56 @@ async function handleExportReport() {
         </div>
 
         <!-- Bảng chi tiết các lớp trong ngành -->
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50/50 text-xs font-semibold text-stone-500 dark:bg-stone-800/30">
-              <tr>
-                <th class="p-3">Lớp học</th>
-                <th class="p-3">Cấp lớp</th>
-                <th class="p-3 text-center">Học sinh của ngành</th>
-                <th class="p-3 text-center">Nam</th>
-                <th class="p-3 text-center">Nữ</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-              <tr v-for="c in b.classes" :key="c.classRoomId" class="hover:bg-stone-50/50 dark:hover:bg-stone-800/30">
-                <td class="p-3 font-semibold text-stone-900 dark:text-stone-100">
-                  <NuxtLink :to="`/admin/lop/${c.classRoomId}`" class="hover:underline text-marian-600 dark:text-marian-400">
+                <ListTable
+          flat
+          :columns="5"
+          :loading="loading"
+          :empty="!b.classes || b.classes.length === 0"
+          loading-text="Đang tải số liệu lớp học..."
+          empty-title="Ngành này chưa có lớp học"
+        >
+          <template #head>
+            <th class="w-[32%] px-3 py-3">Lớp học</th>
+            <th class="w-[24%] px-3 py-3">Cấp lớp</th>
+            <th class="w-[18%] px-3 py-3 text-center">Học sinh</th>
+            <th class="w-[13%] px-3 py-3 text-center">Nam</th>
+            <th class="w-[13%] px-3 py-3 text-center">Nữ</th>
+          </template>
+
+          <template #rows>
+            <tr v-for="c in b.classes" :key="c.classRoomId" class="transition-colors hover:bg-stone-50/50 dark:hover:bg-stone-800/30">
+              <td class="px-3 py-3">
+                <NuxtLink :to="'/admin/lop/' + c.classRoomId" class="block truncate font-semibold text-marian-600 hover:underline dark:text-marian-400">
+                  {{ c.classRoomName }}
+                </NuxtLink>
+              </td>
+              <td class="px-3 py-3">
+                <span class="block truncate text-xs text-stone-500">{{ c.levelName }}</span>
+              </td>
+              <td class="px-3 py-3 text-center font-mono font-bold text-stone-800 dark:text-stone-200">{{ c.totalStudents }}</td>
+              <td class="px-3 py-3 text-center font-mono text-xs text-stone-600 dark:text-stone-400">{{ c.maleCount }}</td>
+              <td class="px-3 py-3 text-center font-mono text-xs text-stone-600 dark:text-stone-400">{{ c.femaleCount }}</td>
+            </tr>
+          </template>
+
+          <template #cards>
+            <div v-for="c in b.classes" :key="c.classRoomId" class="space-y-2 px-4 py-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <NuxtLink :to="'/admin/lop/' + c.classRoomId" class="block truncate text-sm font-semibold text-marian-600 hover:underline dark:text-marian-400">
                     {{ c.classRoomName }}
                   </NuxtLink>
-                </td>
-                <td class="p-3 text-xs text-stone-500">{{ c.levelName }}</td>
-                <td class="p-3 text-center font-mono font-bold text-stone-800 dark:text-stone-200">{{ c.totalStudents }}</td>
-                <td class="p-3 text-center font-mono text-xs text-stone-600 dark:text-stone-400">{{ c.maleCount }}</td>
-                <td class="p-3 text-center font-mono text-xs text-stone-600 dark:text-stone-400">{{ c.femaleCount }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <p class="truncate text-[11px] text-stone-400">{{ c.levelName }}</p>
+                </div>
+                <span class="shrink-0 font-mono text-sm font-bold text-stone-800 dark:text-stone-200">{{ c.totalStudents }} em</span>
+              </div>
+              <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-stone-500">
+                <span class="rounded bg-sky-50 px-1.5 py-0.5 font-semibold text-sky-700 dark:bg-sky-950 dark:text-sky-300">Nam: {{ c.maleCount }}</span>
+                <span class="rounded bg-rose-50 px-1.5 py-0.5 font-semibold text-rose-700 dark:bg-rose-950 dark:text-rose-300">Nữ: {{ c.femaleCount }}</span>
+              </p>
+            </div>
+          </template>
+        </ListTable>
       </div>
     </div>
 
@@ -408,51 +432,77 @@ async function handleExportReport() {
           <p class="text-xs text-stone-500">Cần liên hệ phụ huynh và bố trí giáo lý viên kèm cặp thêm</p>
         </div>
 
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-              <tr>
-                <th class="p-3">Mã ĐS</th>
-                <th class="p-3">Họ và tên</th>
-                <th class="p-3">Lớp học</th>
-                <th class="p-3 text-center">Học kỳ 1</th>
-                <th class="p-3 text-center">Học kỳ 2</th>
-                <th class="p-3 text-center">Thi cuối năm</th>
-                <th class="p-3 text-center">Điểm TB</th>
-                <th class="p-3 text-center">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-              <tr v-if="gradesReport.belowThresholdStudents.length === 0">
-                <td colspan="8" class="p-8 text-center text-sm text-stone-500">
-                  🎉 Toàn thể đoàn sinh đều đạt ngưỡng học lực và chuyên cần!
-                </td>
-              </tr>
-              <tr
-                v-for="s in gradesReport.belowThresholdStudents"
-                :key="s.studentId"
-                class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
-              >
-                <td class="p-3 font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">{{ s.studentCode }}</td>
-                <td class="p-3 font-medium text-stone-900 dark:text-stone-100">
-                  <NuxtLink :to="`/admin/doan-sinh/${s.studentId}`" class="hover:underline">
+                <ListTable
+          flat
+          :columns="8"
+          :loading="loading"
+          :empty="!gradesReport.belowThresholdStudents || gradesReport.belowThresholdStudents.length === 0"
+          loading-text="Đang tải danh sách dưới ngưỡng..."
+          empty-title="Không có đoàn sinh dưới ngưỡng"
+          empty-description="Toàn thể đoàn sinh đều đạt ngưỡng học lực và chuyên cần."
+        >
+          <template #head>
+            <th class="w-[9%] px-3 py-3">Mã ĐS</th>
+            <th class="w-[21%] px-3 py-3">Họ và tên</th>
+            <th class="w-[16%] px-3 py-3">Lớp học</th>
+            <th class="w-[9%] px-3 py-3 text-center">HK1</th>
+            <th class="w-[9%] px-3 py-3 text-center">HK2</th>
+            <th class="w-[9%] px-3 py-3 text-center">Thi</th>
+            <th class="w-[9%] px-3 py-3 text-center">Điểm TB</th>
+            <th class="w-[18%] px-3 py-3 text-center">Trạng thái</th>
+          </template>
+
+          <template #rows>
+            <tr v-for="s in gradesReport.belowThresholdStudents" :key="s.studentId" class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40">
+              <td class="px-3 py-3">
+                <span class="block truncate font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">{{ s.studentCode }}</span>
+              </td>
+              <td class="px-3 py-3">
+                <NuxtLink :to="'/admin/doan-sinh/' + s.studentId" class="block truncate font-medium text-stone-900 hover:underline dark:text-stone-100" :title="s.fullName">
+                  {{ s.fullName }}
+                </NuxtLink>
+              </td>
+              <td class="px-3 py-3">
+                <span class="block truncate text-xs text-stone-500">{{ s.classRoomName }}</span>
+              </td>
+              <td class="px-3 py-3 text-center font-mono text-xs">{{ s.semester1 ?? '—' }}</td>
+              <td class="px-3 py-3 text-center font-mono text-xs">{{ s.semester2 ?? '—' }}</td>
+              <td class="px-3 py-3 text-center font-mono text-xs">{{ s.finalExam ?? '—' }}</td>
+              <td class="px-3 py-3 text-center font-mono font-bold text-red-600">
+                {{ s.averageScore !== null && s.averageScore !== undefined ? s.averageScore.toFixed(1) : '—' }}
+              </td>
+              <td class="px-3 py-3 text-center">
+                <span class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-red-700 dark:bg-red-950 dark:text-red-300">
+                  {{ s.status || 'Chưa đạt' }}
+                </span>
+              </td>
+            </tr>
+          </template>
+
+          <template #cards>
+            <div v-for="s in gradesReport.belowThresholdStudents" :key="s.studentId" class="space-y-2 px-4 py-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <NuxtLink :to="'/admin/doan-sinh/' + s.studentId" class="block truncate text-sm font-semibold text-stone-900 hover:underline dark:text-stone-100">
                     {{ s.fullName }}
                   </NuxtLink>
-                </td>
-                <td class="p-3 text-xs text-stone-500">{{ s.classRoomName }}</td>
-                <td class="p-3 text-center font-mono text-xs">{{ s.semester1 ?? '—' }}</td>
-                <td class="p-3 text-center font-mono text-xs">{{ s.semester2 ?? '—' }}</td>
-                <td class="p-3 text-center font-mono text-xs">{{ s.finalExam ?? '—' }}</td>
-                <td class="p-3 text-center font-mono font-bold text-red-600">{{ s.averageScore?.toFixed(1) ?? '—' }}</td>
-                <td class="p-3 text-center">
-                  <span class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">
-                    {{ s.status || 'Chưa đạt' }}
-                  </span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <p class="truncate font-mono text-[11px] text-stone-400">{{ s.studentCode }} · {{ s.classRoomName }}</p>
+                </div>
+                <span class="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-red-700 dark:bg-red-950 dark:text-red-300">
+                  {{ s.status || 'Chưa đạt' }}
+                </span>
+              </div>
+              <p class="flex flex-wrap items-center gap-1.5 text-[11px] text-stone-500">
+                <span class="rounded bg-stone-100 px-1.5 py-0.5 font-mono dark:bg-stone-800 dark:text-stone-300">HK1: {{ s.semester1 ?? '—' }}</span>
+                <span class="rounded bg-stone-100 px-1.5 py-0.5 font-mono dark:bg-stone-800 dark:text-stone-300">HK2: {{ s.semester2 ?? '—' }}</span>
+                <span class="rounded bg-stone-100 px-1.5 py-0.5 font-mono dark:bg-stone-800 dark:text-stone-300">Thi: {{ s.finalExam ?? '—' }}</span>
+                <span class="rounded bg-red-50 px-1.5 py-0.5 font-mono font-bold text-red-600 dark:bg-red-950 dark:text-red-300">
+                  TB: {{ s.averageScore !== null && s.averageScore !== undefined ? s.averageScore.toFixed(1) : '—' }}
+                </span>
+              </p>
+            </div>
+          </template>
+        </ListTable>
       </div>
     </div>
 
@@ -485,32 +535,50 @@ async function handleExportReport() {
       </div>
 
       <!-- Bảng tóm tắt theo lớp -->
-      <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-              <tr>
-                <th class="p-4">Lớp học</th>
-                <th class="p-4 text-center">Tổng số em</th>
-                <th class="p-4 text-center">Lên lớp</th>
-                <th class="p-4 text-center">Ở lại lớp</th>
-                <th class="p-4 text-center">Tốt nghiệp</th>
-                <th class="p-4 text-center">Chờ duyệt</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-              <tr v-for="c in promotionReport.classSummaries" :key="c.classRoomId" class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40">
-                <td class="p-4 font-semibold text-stone-900 dark:text-stone-100">{{ c.classRoomName }}</td>
-                <td class="p-4 text-center font-mono font-bold">{{ c.totalStudents }}</td>
-                <td class="p-4 text-center font-mono text-emerald-600 font-semibold">{{ c.promotedCount }}</td>
-                <td class="p-4 text-center font-mono text-amber-600 font-semibold">{{ c.retainedCount }}</td>
-                <td class="p-4 text-center font-mono text-marian-600 font-semibold">{{ c.graduatedCount }}</td>
-                <td class="p-4 text-center font-mono text-stone-400">{{ c.pendingCount }}</td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+              <ListTable
+          :columns="6"
+          :loading="loading"
+          :empty="!promotionReport.classSummaries || promotionReport.classSummaries.length === 0"
+          loading-text="Đang tải tổng hợp lên lớp..."
+          empty-title="Chưa có dữ liệu tổng hợp"
+        >
+          <template #head>
+            <th class="w-[30%] px-3 py-3">Lớp học</th>
+            <th class="w-[14%] px-3 py-3 text-center">Tổng</th>
+            <th class="w-[14%] px-3 py-3 text-center">Lên lớp</th>
+            <th class="w-[14%] px-3 py-3 text-center">Ở lại</th>
+            <th class="w-[14%] px-3 py-3 text-center">Tốt nghiệp</th>
+            <th class="w-[14%] px-3 py-3 text-center">Chờ duyệt</th>
+          </template>
+
+          <template #rows>
+            <tr v-for="c in promotionReport.classSummaries" :key="c.classRoomId" class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40">
+              <td class="px-3 py-3">
+                <span class="block truncate font-semibold text-stone-900 dark:text-stone-100">{{ c.classRoomName }}</span>
+              </td>
+              <td class="px-3 py-3 text-center font-mono font-bold">{{ c.totalStudents }}</td>
+              <td class="px-3 py-3 text-center font-mono font-semibold text-emerald-600">{{ c.promotedCount }}</td>
+              <td class="px-3 py-3 text-center font-mono font-semibold text-amber-600">{{ c.retainedCount }}</td>
+              <td class="px-3 py-3 text-center font-mono font-semibold text-marian-600">{{ c.graduatedCount }}</td>
+              <td class="px-3 py-3 text-center font-mono text-stone-400">{{ c.pendingCount }}</td>
+            </tr>
+          </template>
+
+          <template #cards>
+            <div v-for="c in promotionReport.classSummaries" :key="c.classRoomId" class="space-y-2 px-4 py-3">
+              <div class="flex items-center justify-between gap-2">
+                <p class="min-w-0 truncate text-sm font-semibold text-stone-900 dark:text-stone-100">{{ c.classRoomName }}</p>
+                <span class="shrink-0 font-mono text-sm font-bold text-stone-800 dark:text-stone-200">{{ c.totalStudents }} em</span>
+              </div>
+              <p class="flex flex-wrap items-center gap-1.5 text-[11px]">
+                <span class="rounded bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">Lên lớp: {{ c.promotedCount }}</span>
+                <span class="rounded bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300">Ở lại: {{ c.retainedCount }}</span>
+                <span class="rounded bg-sky-50 px-1.5 py-0.5 font-semibold text-sky-700 dark:bg-sky-950 dark:text-sky-300">Tốt nghiệp: {{ c.graduatedCount }}</span>
+                <span class="rounded bg-stone-100 px-1.5 py-0.5 font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-400">Chờ duyệt: {{ c.pendingCount }}</span>
+              </p>
+            </div>
+          </template>
+        </ListTable>
     </div>
 
     <!-- TAB 4: THIẾU HỒ SƠ -->
@@ -529,61 +597,91 @@ async function handleExportReport() {
         </div>
       </div>
 
-      <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-              <tr>
-                <th class="p-4">Mã ĐS</th>
-                <th class="p-4">Tên thánh & Họ tên</th>
-                <th class="p-4">Ngành & Lớp</th>
-                <th class="p-4">Các thông tin còn thiếu</th>
-                <th class="p-4 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-              <tr v-if="missingReport.students.length === 0">
-                <td colspan="5" class="p-8 text-center text-sm text-stone-500">
-                  🎉 Tất cả hồ sơ đoàn sinh đều đầy đủ thông tin!
-                </td>
-              </tr>
-              <tr
-                v-for="s in missingReport.students"
-                :key="s.studentId"
-                class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
-              >
-                <td class="p-4 font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">{{ s.studentCode }}</td>
-                <td class="p-4 font-medium text-stone-900 dark:text-stone-100">
-                  {{ s.holyName ? `${s.holyName} ` : '' }}{{ s.fullName }}
-                </td>
-                <td class="p-4 text-xs text-stone-500">
-                  {{ s.branchName }} - {{ s.classRoomName || 'Chưa xếp lớp' }}
-                </td>
-                <td class="p-4">
-                  <div class="flex flex-wrap gap-1">
-                    <span
-                      v-for="r in s.missingReasons"
-                      :key="r"
-                      class="rounded bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700 dark:bg-red-950 dark:text-red-300"
-                    >
-                      {{ r }}
-                    </span>
-                  </div>
-                </td>
-                <td class="p-4 text-right">
-                  <NuxtLink
-                    :to="`/admin/doan-sinh/${s.studentId}`"
-                    class="inline-flex items-center gap-1 rounded bg-stone-100 px-2.5 py-1 text-xs font-medium text-stone-700 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-200"
+              <ListTable
+          :columns="5"
+          :loading="loading"
+          :empty="!missingReport.students || missingReport.students.length === 0"
+          loading-text="Đang tải danh sách thiếu hồ sơ..."
+          empty-title="Không còn hồ sơ nào thiếu"
+          empty-description="Tất cả hồ sơ đoàn sinh đều đầy đủ thông tin."
+        >
+          <template #head>
+            <th class="w-[10%] px-3 py-3">Mã ĐS</th>
+            <th class="w-[24%] px-3 py-3">Tên thánh &amp; Họ tên</th>
+            <th class="w-[20%] px-3 py-3">Ngành &amp; Lớp</th>
+            <th class="w-[32%] px-3 py-3">Còn thiếu</th>
+            <th class="w-[14%] px-3 py-3 text-right"><span class="sr-only">Thao tác</span></th>
+          </template>
+
+          <template #rows>
+            <tr v-for="s in missingReport.students" :key="s.studentId" class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40">
+              <td class="px-3 py-3">
+                <span class="block truncate font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">{{ s.studentCode }}</span>
+              </td>
+              <td class="px-3 py-3">
+                <NuxtLink
+                  :to="'/admin/doan-sinh/' + s.studentId"
+                  class="block truncate font-medium text-stone-900 hover:underline dark:text-stone-100"
+                  :title="(s.holyName ? s.holyName + ' ' : '') + s.fullName"
+                >
+                  {{ s.holyName ? s.holyName + ' ' : '' }}{{ s.fullName }}
+                </NuxtLink>
+              </td>
+              <td class="px-3 py-3">
+                <span class="block truncate text-xs text-stone-500">{{ s.branchName }} - {{ s.classRoomName || 'Chưa xếp lớp' }}</span>
+              </td>
+              <td class="px-3 py-3">
+                <div class="flex flex-wrap gap-1">
+                  <span
+                    v-for="r in s.missingReasons"
+                    :key="r"
+                    class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-medium text-red-700 dark:bg-red-950 dark:text-red-300"
                   >
-                    Bổ sung
-                    <UIcon name="i-lucide-arrow-right" class="h-3 w-3" />
+                    {{ r }}
+                  </span>
+                </div>
+              </td>
+              <td class="px-3 py-3 text-right">
+                <NuxtLink
+                  :to="'/admin/doan-sinh/' + s.studentId"
+                  class="inline-flex items-center gap-1 rounded bg-stone-100 px-2.5 py-1 text-[11px] font-medium whitespace-nowrap text-stone-700 hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-200"
+                >
+                  Bổ sung
+                  <UIcon name="i-lucide-arrow-right" class="size-3" />
+                </NuxtLink>
+              </td>
+            </tr>
+          </template>
+
+          <template #cards>
+            <div v-for="s in missingReport.students" :key="s.studentId" class="space-y-2 px-4 py-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <NuxtLink :to="'/admin/doan-sinh/' + s.studentId" class="block truncate text-sm font-semibold text-stone-900 hover:underline dark:text-stone-100">
+                    {{ s.holyName ? s.holyName + ' ' : '' }}{{ s.fullName }}
                   </NuxtLink>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+                  <p class="truncate font-mono text-[11px] text-stone-400">{{ s.studentCode }} · {{ s.branchName }} - {{ s.classRoomName || 'Chưa xếp lớp' }}</p>
+                </div>
+              </div>
+              <div class="flex flex-wrap gap-1">
+                <span
+                  v-for="r in s.missingReasons"
+                  :key="r"
+                  class="rounded bg-red-50 px-1.5 py-0.5 text-[10px] font-medium text-red-700 dark:bg-red-950 dark:text-red-300"
+                >
+                  {{ r }}
+                </span>
+              </div>
+              <NuxtLink
+                :to="'/admin/doan-sinh/' + s.studentId"
+                class="inline-flex w-full items-center justify-center gap-1 rounded bg-stone-100 px-2.5 py-1 text-[11px] font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-200"
+              >
+                Bổ sung hồ sơ
+                <UIcon name="i-lucide-arrow-right" class="size-3" />
+              </NuxtLink>
+            </div>
+          </template>
+        </ListTable>
     </div>
 
     <!-- Modal Xuất Báo Cáo Excel -->

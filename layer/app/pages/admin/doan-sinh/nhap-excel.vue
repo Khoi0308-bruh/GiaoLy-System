@@ -10,18 +10,24 @@ definePageMeta({
 
 interface ImportErrorItem {
   rowNumber: number
-  field?: string
   message: string
-  rawData?: Record<string, unknown>
+}
+
+/** Một dòng Excel trong báo cáo kiểm tra (API trả về `rowReports`, lỗi nằm trong từng dòng). */
+interface ImportRowReport {
+  rowIndex: number
+  status: 'Valid' | 'Warning' | 'Error'
+  errors: string[]
+  warnings: string[]
 }
 
 interface ImportPreviewResult {
   id: string
   totalRows: number
   validRows: number
-  invalidRows: number
-  errors: ImportErrorItem[]
-  status?: string
+  warningRows: number
+  errorRows: number
+  rowReports: ImportRowReport[]
 }
 
 const api = useApi()
@@ -37,6 +43,13 @@ const previewResult = ref<ImportPreviewResult | null>(null)
 const error = ref<ApiError | null>(null)
 const importSuccess = ref(false)
 const appliedCount = ref(0)
+
+// API gộp lỗi theo dòng; tách thành từng lỗi để bảng chi tiết hiển thị đúng số lượng.
+const previewErrors = computed<ImportErrorItem[]>(() =>
+  (previewResult.value?.rowReports ?? [])
+    .filter(row => row.status === 'Error')
+    .flatMap(row => row.errors.map(message => ({ rowNumber: row.rowIndex, message })))
+)
 
 async function downloadTemplate() {
   downloadingTemplate.value = true
@@ -269,43 +282,41 @@ function reset() {
           />
           <StatCard
             label="Dòng có lỗi (sẽ bị bỏ qua)"
-            :value="previewResult.invalidRows"
+            :value="previewResult.errorRows"
             icon="i-lucide-x-circle"
             class="border-t-red-500"
           />
         </div>
 
         <!-- Bảng danh sách dòng bị lỗi (nếu có) -->
-        <div v-if="previewResult.errors?.length" class="mt-6 space-y-3">
+        <div v-if="previewErrors.length" class="mt-6 space-y-3">
           <h3 class="text-sm font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5">
             <UIcon name="i-lucide-alert-circle" class="size-4" />
-            <span>Chi tiết các dòng bị lỗi ({{ previewResult.errors.length }} lỗi):</span>
+            <span>Chi tiết các dòng bị lỗi ({{ previewErrors.length }} lỗi):</span>
           </h3>
 
-          <div class="overflow-x-auto rounded-lg border border-red-200 bg-red-50/50 dark:border-red-900/50 dark:bg-red-950/20">
-            <table class="w-full text-left text-xs">
-              <thead class="border-b border-red-200 bg-red-100/50 font-semibold text-red-900 dark:border-red-900 dark:bg-red-900/40 dark:text-red-200">
-                <tr>
-                  <th class="px-3 py-2 text-center w-16">Dòng</th>
-                  <th class="px-3 py-2 w-36">Cột / Trường</th>
-                  <th class="px-3 py-2">Mô tả lỗi</th>
-                </tr>
-              </thead>
-              <tbody class="divide-y divide-red-200/60 dark:divide-red-900/40">
-                <tr v-for="err in previewResult.errors" :key="err.rowNumber">
-                  <td class="px-3 py-2 text-center font-bold text-red-700 dark:text-red-400">
-                    #{{ err.rowNumber }}
-                  </td>
-                  <td class="px-3 py-2 font-medium text-stone-800 dark:text-stone-200">
-                    {{ err.field || 'Toàn dòng' }}
-                  </td>
-                  <td class="px-3 py-2 text-red-800 dark:text-red-300">
-                    {{ err.message }}
-                  </td>
-                </tr>
-              </tbody>
-            </table>
-          </div>
+          <ListTable :columns="2">
+            <template #head>
+              <th class="w-[12%] px-3 py-2 text-center">Dòng</th>
+              <th class="px-3 py-2">Mô tả lỗi</th>
+            </template>
+
+            <template #rows>
+              <tr v-for="err in previewErrors" :key="err.rowNumber + '|' + err.message">
+                <td class="px-3 py-2 text-center font-mono text-xs font-bold text-red-700 dark:text-red-400">#{{ err.rowNumber }}</td>
+                <td class="px-3 py-2 text-xs text-red-800 dark:text-red-300">{{ err.message }}</td>
+              </tr>
+            </template>
+
+            <template #cards>
+              <div v-for="err in previewErrors" :key="err.rowNumber + '|' + err.message" class="space-y-1 px-4 py-3">
+                <p class="font-mono text-[11px] font-bold text-red-700 dark:text-red-400">
+                  Dòng #{{ err.rowNumber }}
+                </p>
+                <p class="text-[11px] text-red-800 dark:text-red-300">{{ err.message }}</p>
+              </div>
+            </template>
+          </ListTable>
         </div>
       </div>
     </div>

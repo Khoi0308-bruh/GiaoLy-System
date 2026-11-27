@@ -201,6 +201,17 @@ async function handleSavePermissions() {
     savingPerms.value = false
   }
 }
+
+/** Nhãn ngắn cho scopeType của vai trò; giá trị lạ thì giữ nguyên mã. */
+const SCOPE_LABELS: Record<string, string> = {
+  All: 'Toàn hệ thống',
+  Global: 'Toàn xứ',
+  Branch: 'Theo ngành',
+  Class: 'Theo lớp',
+  Classroom: 'Theo lớp',
+  Guardian: 'Theo phụ huynh'
+}
+const scopeLabel = (scope: string) => SCOPE_LABELS[scope] ?? scope
 </script>
 
 <template>
@@ -223,97 +234,152 @@ async function handleSavePermissions() {
 
     <ErrorState v-if="error" :error="error" @retry="loadData" />
 
-    <!-- Danh sách vai trò -->
-    <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Tên vai trò</th>
-              <th class="p-4">Mã vai trò</th>
-              <th class="p-4">Phạm vi tác động (Scope)</th>
-              <th class="p-4 text-center">Số quyền hạn</th>
-              <th class="p-4">Mô tả nhiệm vụ</th>
-              <th class="p-4 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="loading">
-              <td colspan="6" class="p-8 text-center text-sm text-stone-400 animate-pulse">
-                Đang tải danh sách vai trò...
-              </td>
-            </tr>
-            <tr
-              v-for="r in roles"
-              :key="r.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+    <!-- Danh sách vai trò: bảng ≥md (header dính khi cuộn), thẻ <md -->
+    <ListTable
+      :columns="5"
+      :loading="loading"
+      :empty="roles.length === 0"
+      loading-text="Đang tải danh sách vai trò..."
+      empty-title="Chưa có vai trò nào"
+      empty-description="Thêm vai trò đầu tiên rồi cấp quyền hạn cho vai trò đó."
+    >
+      <template #head>
+        <th class="w-[32%] px-4 py-3">Vai trò</th>
+        <th class="w-[17%] px-4 py-3">Phạm vi</th>
+        <th class="w-[9%] px-4 py-3 text-center">Quyền</th>
+        <th class="w-[22%] px-4 py-3">Mô tả nhiệm vụ</th>
+        <th class="w-[20%] px-3 py-3 text-right">Thao tác</th>
+      </template>
+
+      <template #rows>
+        <tr
+          v-for="r in roles"
+          :key="r.id"
+          class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+        >
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-1.5">
+              <strong class="truncate text-stone-900 dark:text-white">{{ r.name }}</strong>
+              <span
+                v-if="r.isSystem"
+                class="shrink-0 whitespace-nowrap rounded bg-stone-100 px-1.5 text-[10px] font-bold text-stone-600 dark:bg-stone-800 dark:text-stone-400"
+              >
+                Hệ thống
+              </span>
+            </div>
+            <span class="mt-0.5 block truncate font-mono text-[11px] text-stone-400">{{ r.code }}</span>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <span
+              class="rounded bg-stone-100 px-2 py-0.5 font-medium whitespace-nowrap text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+              :title="r.scopeType"
             >
-              <td class="p-4">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-stone-900 dark:text-stone-100">{{ r.name }}</span>
-                  <span
-                    v-if="r.isSystem"
-                    class="rounded bg-stone-100 px-1.5 py-0.2 text-[10px] font-bold text-stone-600 dark:bg-stone-800 dark:text-stone-400"
-                  >
-                    Hệ thống
-                  </span>
-                </div>
-              </td>
-              <td class="p-4 font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">
-                {{ r.code }}
-              </td>
-              <td class="p-4 text-xs">
-                <span class="rounded bg-stone-100 px-2 py-0.5 font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-300">
-                  {{ r.scopeType }}
+              {{ scopeLabel(r.scopeType) }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-center font-mono text-xs font-bold tabular-nums text-stone-800 dark:text-stone-200">
+            {{ r.permissions?.length || 0 }}
+          </td>
+          <td class="px-4 py-3 text-xs text-stone-500">
+            <span class="line-clamp-2" :title="r.description || undefined">{{ r.description || '—' }}</span>
+          </td>
+          <td class="px-3 py-3">
+            <div class="flex items-center justify-end gap-1">
+              <UButton
+                v-if="can(PERMISSIONS.Roles.Assign)"
+                size="xs"
+                variant="outline"
+                color="primary"
+                icon="i-lucide-shield-check"
+                :aria-label="`Phân quyền cho vai trò ${r.name}`"
+                title="Phân quyền"
+                @click="openPermModal(r)"
+              >
+                <span class="hidden xl:inline">Phân quyền</span>
+              </UButton>
+              <UButton
+                v-if="can(PERMISSIONS.Roles.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                :aria-label="`Sửa vai trò ${r.name}`"
+                title="Sửa vai trò"
+                @click="openEditModal(r)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Roles.Delete)"
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-lucide-trash-2"
+                :aria-label="`Xóa vai trò ${r.name}`"
+                :title="r.isSystem ? 'Không xóa được vai trò hệ thống' : 'Xóa vai trò'"
+                :disabled="r.isSystem"
+                @click="openDeleteModal(r)"
+              />
+            </div>
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="r in roles" :key="r.id" class="space-y-2 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <div class="flex items-center gap-1.5">
+                <strong class="truncate text-sm text-stone-900 dark:text-white">{{ r.name }}</strong>
+                <span
+                  v-if="r.isSystem"
+                  class="shrink-0 whitespace-nowrap rounded bg-stone-100 px-1.5 text-[10px] font-bold text-stone-600 dark:bg-stone-800 dark:text-stone-400"
+                >
+                  Hệ thống
                 </span>
-              </td>
-              <td class="p-4 text-center font-mono font-bold text-xs text-stone-800 dark:text-stone-200">
-                {{ r.permissions ? r.permissions.length : 0 }} quyền
-              </td>
-              <td class="p-4 text-xs text-stone-500">
-                {{ r.description || '—' }}
-              </td>
-              <td class="p-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-1">
-                  <!-- Gán quyền (roles.assign) -->
-                  <UButton
-                    v-if="can(PERMISSIONS.Roles.Assign)"
-                    size="xs"
-                    variant="outline"
-                    color="primary"
-                    icon="i-lucide-shield-check"
-                    @click="openPermModal(r)"
-                  >
-                    Phân quyền
-                  </UButton>
-
-                  <!-- Sửa vai trò (roles.update) -->
-                  <UButton
-                    v-if="can(PERMISSIONS.Roles.Update)"
-                    size="xs"
-                    variant="ghost"
-                    color="neutral"
-                    icon="i-lucide-pencil"
-                    @click="openEditModal(r)"
-                  />
-
-                  <!-- Xóa vai trò (roles.delete) -->
-                  <UButton
-                    v-if="can(PERMISSIONS.Roles.Delete)"
-                    size="xs"
-                    variant="ghost"
-                    color="error"
-                    icon="i-lucide-trash-2"
-                    :disabled="r.isSystem"
-                    @click="openDeleteModal(r)"
-                  />
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+              </div>
+              <span class="mt-0.5 block truncate font-mono text-[11px] text-stone-400">{{ r.code }}</span>
+            </div>
+            <span class="shrink-0 rounded bg-stone-100 px-2 py-0.5 text-[11px] font-medium whitespace-nowrap text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+              {{ scopeLabel(r.scopeType) }}
+            </span>
+          </div>
+          <p v-if="r.description" class="line-clamp-2 text-xs text-stone-500">{{ r.description }}</p>
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] tabular-nums text-stone-500">{{ r.permissions?.length || 0 }} quyền</span>
+            <div class="flex items-center gap-1">
+              <UButton
+                v-if="can(PERMISSIONS.Roles.Assign)"
+                size="xs"
+                variant="outline"
+                color="primary"
+                icon="i-lucide-shield-check"
+                @click="openPermModal(r)"
+              >
+                Phân quyền
+              </UButton>
+              <UButton
+                v-if="can(PERMISSIONS.Roles.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                :aria-label="`Sửa vai trò ${r.name}`"
+                @click="openEditModal(r)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Roles.Delete)"
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-lucide-trash-2"
+                :aria-label="`Xóa vai trò ${r.name}`"
+                :disabled="r.isSystem"
+                @click="openDeleteModal(r)"
+              />
+            </div>
+          </div>
+        </div>
+      </template>
+    </ListTable>
 
     <!-- Modal Phân Quyền (Permissions Matrix) -->
     <UModal

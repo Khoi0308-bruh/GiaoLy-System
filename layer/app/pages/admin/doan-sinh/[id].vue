@@ -757,36 +757,50 @@ onMounted(loadStudent)
 
       <!-- TAB 4: LỊCH SỬ GHI DANH -->
       <div v-if="activeTab === 'enrollments'" class="space-y-4">
-        <div class="overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-xs dark:border-stone-800 dark:bg-stone-900">
-          <table class="w-full text-left text-sm">
-            <thead class="border-b border-stone-200 bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-400">
-              <tr>
-                <th class="px-4 py-3">Niên khóa</th>
-                <th class="px-4 py-3">Lớp học</th>
-                <th class="px-4 py-3">Ghi chú</th>
-                <th class="px-4 py-3">Trạng thái</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-              <tr v-if="enrollments.length === 0">
-                <td colspan="4" class="p-6 text-center text-xs text-stone-400">
-                  Chưa có lịch sử ghi danh lớp học nào.
-                </td>
-              </tr>
-              <tr v-for="e in enrollments" :key="e.id">
-                <td class="px-4 py-3 font-medium">{{ e.academicYearName }}</td>
-                <td class="px-4 py-3">{{ e.classRoomName }}</td>
-                <td class="px-4 py-3 text-xs">
-                  <span v-if="e.note" class="text-stone-500">{{ e.note }}</span>
-                  <span v-else class="text-stone-400">–</span>
-                </td>
-                <td class="px-4 py-3">
-                  <StatusChip domain="enrollment" :value="e.status" />
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                <ListTable
+          :columns="4"
+          :loading="loading"
+          :empty="enrollments.length === 0"
+          loading-text="Đang tải lịch sử ghi danh..."
+          empty-title="Chưa có lịch sử ghi danh"
+          empty-description="Đoàn sinh này chưa được xếp vào lớp học nào."
+        >
+          <template #head>
+            <th class="w-[28%] px-4 py-3">Niên khóa</th>
+            <th class="w-[28%] px-4 py-3">Lớp học</th>
+            <th class="w-[28%] px-4 py-3">Ghi chú</th>
+            <th class="w-[16%] px-4 py-3">Trạng thái</th>
+          </template>
+
+          <template #rows>
+            <tr v-for="e in enrollments" :key="e.id" class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50">
+              <td class="px-4 py-3">
+                <span class="block truncate font-medium text-stone-900 dark:text-stone-100">{{ e.academicYearName }}</span>
+              </td>
+              <td class="px-4 py-3">
+                <span class="block truncate text-stone-700 dark:text-stone-300">{{ e.classRoomName }}</span>
+              </td>
+              <td class="px-4 py-3 text-xs">
+                <span v-if="e.note" class="block truncate text-stone-500" :title="e.note">{{ e.note }}</span>
+                <span v-else class="text-stone-400">–</span>
+              </td>
+              <td class="px-4 py-3">
+                <StatusChip domain="enrollment" :value="e.status" />
+              </td>
+            </tr>
+          </template>
+
+          <template #cards>
+            <div v-for="e in enrollments" :key="e.id" class="space-y-1.5 px-4 py-3">
+              <div class="flex items-start justify-between gap-2">
+                <p class="min-w-0 truncate text-sm font-semibold text-stone-900 dark:text-stone-100">{{ e.classRoomName }}</p>
+                <StatusChip domain="enrollment" :value="e.status" />
+              </div>
+              <p class="text-[11px] text-stone-400">{{ e.academicYearName }}</p>
+              <p v-if="e.note" class="text-[11px] text-stone-500">{{ e.note }}</p>
+            </div>
+          </template>
+        </ListTable>
       </div>
 
       <!-- TAB 5: GHI CHÚ MỤC VỤ -->

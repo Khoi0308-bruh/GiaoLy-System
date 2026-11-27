@@ -481,136 +481,220 @@ async function handleReversePayment() {
       </div>
 
       <!-- Bảng danh sách đăng ký -->
-      <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-              <tr>
-                <th class="p-3 w-10 text-center">STT</th>
-                <th class="p-3">Mã ĐS</th>
-                <th class="p-3">Tên thánh & Họ tên</th>
-                <th class="p-3">Lớp giáo lý</th>
-                <th class="p-3 text-center">Tổ / Đội</th>
-                <th class="p-3 text-right">Lệ phí</th>
-                <th class="p-3 text-right">Đã đóng</th>
-                <th class="p-3 text-right">Còn thiếu</th>
-                <th class="p-3 text-center">Trạng thái</th>
-                <th class="p-3 text-right">Hành động</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-              <tr v-if="filteredRegistrations.length === 0">
-                <td colspan="10" class="p-8 text-center text-sm text-stone-500">
-                  Không có đoàn sinh nào trong danh sách đăng ký.
-                </td>
-              </tr>
-              <tr
-                v-for="(r, idx) in filteredRegistrations"
-                :key="r.id"
-                class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
-                :class="r.status === 'Cancelled' ? 'opacity-50 line-through bg-stone-50/50' : ''"
+      <ListTable
+        :columns="10"
+        :loading="loading"
+        :empty="filteredRegistrations.length === 0"
+        loading-text="Đang tải danh sách đăng ký..."
+        empty-title="Chưa có đoàn sinh nào đăng ký"
+        empty-description="Đăng ký đoàn sinh đầu tiên cho sự kiện này."
+      >
+        <template #head>
+          <th class="w-[4%] px-2 py-3 text-center">#</th>
+          <th class="w-[9%] px-3 py-3">Mã ĐS</th>
+          <th class="w-[17%] px-3 py-3">Tên thánh &amp; Họ tên</th>
+          <th class="w-[10%] px-3 py-3">Lớp</th>
+          <th class="w-[7%] px-3 py-3 text-center">Tổ</th>
+          <th class="w-[10%] px-3 py-3 text-right">Lệ phí</th>
+          <th class="w-[10%] px-3 py-3 text-right">Đã thu</th>
+          <th class="w-[10%] px-3 py-3 text-right">Thiếu</th>
+          <th class="w-[13%] px-3 py-3 text-center">Trạng thái</th>
+          <th class="w-[10%] px-3 py-3 text-right"><span class="sr-only">Hành động</span></th>
+        </template>
+
+        <template #rows>
+          <tr
+            v-for="(r, idx) in filteredRegistrations"
+            :key="r.id"
+            class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+            :class="r.status === 'Cancelled' ? 'bg-stone-50/50 opacity-50 line-through' : ''"
+          >
+            <td class="px-3 py-3 text-center font-mono text-[11px] text-stone-400">{{ idx + 1 }}</td>
+            <td class="px-3 py-3">
+              <span class="block truncate font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">{{ r.studentCode }}</span>
+            </td>
+            <td class="px-3 py-3">
+              <NuxtLink
+                :to="'/admin/doan-sinh/' + r.studentId"
+                class="block truncate font-medium text-stone-900 hover:underline dark:text-stone-100"
+                :title="(r.studentHolyName ? r.studentHolyName + ' ' : '') + r.studentFullName"
               >
-                <td class="p-3 text-center text-xs text-stone-400 font-mono">{{ idx + 1 }}</td>
-                <td class="p-3 font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">
-                  {{ r.studentCode }}
-                </td>
-                <td class="p-3 font-medium text-stone-900 dark:text-stone-100 whitespace-nowrap">
-                  <NuxtLink :to="`/admin/doan-sinh/${r.studentId}`" class="hover:underline">
-                    {{ r.studentHolyName ? `${r.studentHolyName} ` : '' }}{{ r.studentFullName }}
-                  </NuxtLink>
-                </td>
-                <td class="p-3 text-xs text-stone-500">{{ r.classRoomName || '—' }}</td>
-                <td class="p-3 text-center text-xs font-semibold">
-                  <span v-if="r.teamNumber" class="rounded bg-stone-100 px-2 py-0.5 text-stone-700 dark:bg-stone-800 dark:text-stone-200">
-                    Tổ {{ r.teamNumber }}
-                  </span>
-                  <span v-else class="text-stone-400">—</span>
-                </td>
-                <td class="p-3 text-right font-mono text-xs font-semibold">{{ formatCurrency(r.eventFee) }}</td>
-                <td class="p-3 text-right font-mono text-xs font-bold text-emerald-600">
-                  {{ formatCurrency(r.totalPaid) }}
-                </td>
-                <td class="p-3 text-right font-mono text-xs font-bold" :class="r.remaining > 0 ? 'text-amber-600' : 'text-stone-400'">
-                  {{ formatCurrency(r.remaining) }}
-                </td>
-                <td class="p-3 text-center">
-                  <span
-                    v-if="r.status === 'Cancelled'"
-                    class="rounded-full bg-red-100 px-2 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-950 dark:text-red-300"
-                  >
-                    Đã hủy
-                  </span>
-                  <span
-                    v-else-if="r.isSettled"
-                    class="rounded-full bg-emerald-100 px-2 py-0.5 text-xs font-semibold text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                  >
-                    Đã hoàn tất
-                  </span>
-                  <span
-                    v-else-if="r.totalPaid > 0"
-                    class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-semibold text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                  >
-                    Còn thiếu
-                  </span>
-                  <span
-                    v-else
-                    class="rounded-full bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-600 dark:bg-stone-800 dark:text-stone-400"
-                  >
-                    Chưa đóng
-                  </span>
-                </td>
-                <td class="p-3 text-right whitespace-nowrap">
-                  <div class="flex items-center justify-end gap-1">
-                    <!-- Thu phí (camps.collect) -->
-                    <UButton
-                      v-if="can(PERMISSIONS.Camps.Collect) && r.status !== 'Cancelled' && !r.isSettled"
-                      size="xs"
-                      color="primary"
-                      icon="i-lucide-credit-card"
-                      @click="openPayModal(r)"
-                    >
-                      Thu phí
-                    </UButton>
+                {{ r.studentHolyName ? r.studentHolyName + ' ' : '' }}{{ r.studentFullName }}
+              </NuxtLink>
+            </td>
+            <td class="px-3 py-3">
+              <span class="block truncate text-xs text-stone-500">{{ r.classRoomName || '—' }}</span>
+            </td>
+            <td class="px-3 py-3 text-center text-xs">
+              <span v-if="r.teamNumber" class="rounded bg-stone-100 px-1.5 py-0.5 font-semibold whitespace-nowrap text-stone-700 dark:bg-stone-800 dark:text-stone-200">
+                Tổ {{ r.teamNumber }}
+              </span>
+              <span v-else class="text-stone-400">—</span>
+            </td>
+            <td class="px-3 py-3 text-right font-mono text-[11px] font-semibold whitespace-nowrap">{{ formatCurrency(r.eventFee) }}</td>
+            <td class="px-3 py-3 text-right font-mono text-[11px] font-bold whitespace-nowrap text-emerald-600">
+              {{ formatCurrency(r.totalPaid) }}
+            </td>
+            <td class="px-3 py-3 text-right font-mono text-[11px] font-bold whitespace-nowrap" :class="r.remaining > 0 ? 'text-amber-600' : 'text-stone-400'">
+              {{ formatCurrency(r.remaining) }}
+            </td>
+            <td class="px-3 py-3 text-center">
+              <span
+                v-if="r.status === 'Cancelled'"
+                class="rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-red-700 dark:bg-red-950 dark:text-red-300"
+              >
+                Đã hủy
+              </span>
+              <span
+                v-else-if="r.isSettled"
+                class="rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+              >
+                Đã hoàn tất
+              </span>
+              <span
+                v-else-if="r.totalPaid > 0"
+                class="rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+              >
+                Còn thiếu
+              </span>
+              <span
+                v-else
+                class="rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-stone-600 dark:bg-stone-800 dark:text-stone-400"
+              >
+                Chưa đóng
+              </span>
+            </td>
+            <td class="px-3 py-3 text-right">
+              <div class="flex items-center justify-end gap-0.5">
+                <UButton
+                  v-if="can(PERMISSIONS.Camps.Collect) && r.status !== 'Cancelled' && !r.isSettled"
+                  size="xs"
+                  variant="ghost"
+                  color="primary"
+                  icon="i-lucide-credit-card"
+                  title="Thu phí"
+                  @click="openPayModal(r)"
+                />
+                <UButton
+                  v-if="r.payments.length > 0"
+                  size="xs"
+                  variant="ghost"
+                  color="neutral"
+                  icon="i-lucide-history"
+                  title="Lịch sử phiếu thu"
+                  @click="openHistoryModal(r)"
+                />
+                <UButton
+                  v-if="can(PERMISSIONS.Camps.Register) && r.status !== 'Cancelled'"
+                  size="xs"
+                  variant="ghost"
+                  color="neutral"
+                  icon="i-lucide-pencil"
+                  title="Sửa tổ / ghi chú"
+                  @click="openEditRegModal(r)"
+                />
+                <UButton
+                  v-if="can(PERMISSIONS.Camps.Register) && r.status !== 'Cancelled'"
+                  size="xs"
+                  variant="ghost"
+                  color="error"
+                  icon="i-lucide-user-x"
+                  title="Hủy đăng ký"
+                  @click="openCancelRegModal(r)"
+                />
+              </div>
+            </td>
+          </tr>
+        </template>
 
-                    <!-- Lịch sử phiếu thu / Hoàn phí -->
-                    <UButton
-                      v-if="r.payments.length > 0"
-                      size="xs"
-                      variant="ghost"
-                      color="neutral"
-                      icon="i-lucide-history"
-                      title="Lịch sử phiếu thu"
-                      @click="openHistoryModal(r)"
-                    />
-
-                    <!-- Sửa tổ (camps.register) -->
-                    <UButton
-                      v-if="can(PERMISSIONS.Camps.Register) && r.status !== 'Cancelled'"
-                      size="xs"
-                      variant="ghost"
-                      color="neutral"
-                      icon="i-lucide-pencil"
-                      title="Sửa tổ / ghi chú"
-                      @click="openEditRegModal(r)"
-                    />
-
-                    <!-- Hủy đăng ký (camps.register) -->
-                    <UButton
-                      v-if="can(PERMISSIONS.Camps.Register) && r.status !== 'Cancelled'"
-                      size="xs"
-                      variant="ghost"
-                      color="error"
-                      icon="i-lucide-user-x"
-                      title="Hủy đăng ký"
-                      @click="openCancelRegModal(r)"
-                    />
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <template #cards>
+          <div v-for="(r, idx) in filteredRegistrations" :key="r.id" class="space-y-2 px-4 py-3" :class="r.status === 'Cancelled' ? 'opacity-50' : ''">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <NuxtLink :to="'/admin/doan-sinh/' + r.studentId" class="block truncate text-sm font-semibold text-stone-900 hover:underline dark:text-stone-100">
+                  {{ r.studentHolyName ? r.studentHolyName + ' ' : '' }}{{ r.studentFullName }}
+                </NuxtLink>
+                <p class="truncate font-mono text-[11px] text-stone-400">
+                  {{ idx + 1 }} · {{ r.studentCode }}<span v-if="r.classRoomName"> · {{ r.classRoomName }}</span>
+                </p>
+              </div>
+              <span
+                v-if="r.status === 'Cancelled'"
+                class="shrink-0 rounded-full bg-red-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-red-700 dark:bg-red-950 dark:text-red-300"
+              >
+                Đã hủy
+              </span>
+              <span
+                v-else-if="r.isSettled"
+                class="shrink-0 rounded-full bg-emerald-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
+              >
+                Đã hoàn tất
+              </span>
+              <span
+                v-else-if="r.totalPaid > 0"
+                class="shrink-0 rounded-full bg-amber-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-amber-800 dark:bg-amber-950 dark:text-amber-300"
+              >
+                Còn thiếu
+              </span>
+              <span
+                v-else
+                class="shrink-0 rounded-full bg-stone-100 px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap text-stone-600 dark:bg-stone-800 dark:text-stone-400"
+              >
+                Chưa đóng
+              </span>
+            </div>
+            <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-stone-500">
+              <span v-if="r.teamNumber" class="rounded bg-stone-100 px-1.5 py-0.5 font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+                Tổ {{ r.teamNumber }}
+              </span>
+              <span class="font-mono">Phí {{ formatCurrency(r.eventFee) }}</span>
+              <span class="font-mono text-emerald-600">Đã {{ formatCurrency(r.totalPaid) }}</span>
+              <span class="font-mono" :class="r.remaining > 0 ? 'font-bold text-amber-600' : ''">Thiếu {{ formatCurrency(r.remaining) }}</span>
+            </p>
+            <div class="flex flex-wrap items-center justify-end gap-1">
+              <UButton
+                v-if="can(PERMISSIONS.Camps.Collect) && r.status !== 'Cancelled' && !r.isSettled"
+                size="xs"
+                color="primary"
+                icon="i-lucide-credit-card"
+                @click="openPayModal(r)"
+              >
+                Thu phí
+              </UButton>
+              <UButton
+                v-if="r.payments.length > 0"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-history"
+                @click="openHistoryModal(r)"
+              >
+                Lịch sử
+              </UButton>
+              <UButton
+                v-if="can(PERMISSIONS.Camps.Register) && r.status !== 'Cancelled'"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                @click="openEditRegModal(r)"
+              >
+                Sửa
+              </UButton>
+              <UButton
+                v-if="can(PERMISSIONS.Camps.Register) && r.status !== 'Cancelled'"
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-lucide-user-x"
+                @click="openCancelRegModal(r)"
+              >
+                Hủy
+              </UButton>
+            </div>
+          </div>
+        </template>
+      </ListTable>
     </template>
 
     <!-- Modal Đăng Ký Đoàn Sinh Mới -->

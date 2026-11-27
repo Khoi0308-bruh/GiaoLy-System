@@ -376,131 +376,193 @@ const stats = computed(() => {
       </div>
     </div>
 
-    <!-- Bảng danh sách người dùng -->
-    <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Người dùng</th>
-              <th class="p-4">Liên hệ</th>
-              <th class="p-4">Vai trò & Phạm vi</th>
-              <th class="p-4 text-center">Trạng thái</th>
-              <th class="p-4">Đăng nhập cuối</th>
-              <th class="p-4 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="loading">
-              <td colspan="6" class="p-8 text-center text-sm text-stone-400 animate-pulse">
-                Đang tải danh sách người dùng...
-              </td>
-            </tr>
-            <tr v-else-if="users.length === 0">
-              <td colspan="6" class="p-8 text-center text-sm text-stone-500">
-                Không tìm thấy tài khoản người dùng nào.
-              </td>
-            </tr>
-            <tr
-              v-for="u in users"
-              :key="u.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
-              :class="!u.isActive ? 'opacity-60 bg-stone-50/40' : ''"
+    <!-- Danh sách người dùng -->
+    <ListTable
+      :columns="6"
+      :loading="loading"
+      :empty="users.length === 0"
+      loading-text="Đang tải danh sách người dùng..."
+      empty-title="Không tìm thấy tài khoản nào"
+      empty-description="Thử đổi từ khoá tìm kiếm hoặc bộ lọc vai trò."
+    >
+      <template #head>
+        <th class="w-[22%] px-4 py-3">Người dùng</th>
+        <th class="w-[16%] px-4 py-3">Liên hệ</th>
+        <th class="w-[14%] px-4 py-3">Vai trò</th>
+        <th class="w-[13%] px-4 py-3 text-center">Trạng thái</th>
+        <th class="w-[17%] px-4 py-3">Đăng nhập cuối</th>
+        <th class="w-[18%] px-3 py-3 text-right">Thao tác</th>
+      </template>
+
+      <template #rows>
+        <tr
+          v-for="u in users"
+          :key="u.id"
+          class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+          :class="!u.isActive ? 'opacity-60' : ''"
+        >
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              <span class="grid size-9 shrink-0 place-items-center rounded-full bg-marian-100 text-xs font-bold text-marian-800 dark:bg-marian-900/50 dark:text-marian-200">
+                {{ u.fullName.charAt(0) }}
+              </span>
+              <span class="min-w-0">
+                <strong class="block truncate text-stone-900 dark:text-stone-100" :title="`${u.christianName || ''} ${u.fullName}`.trim()">
+                  {{ u.christianName ? `${u.christianName} ` : '' }}{{ u.fullName }}
+                </strong>
+                <span class="block truncate font-mono text-[11px] text-stone-400">@{{ u.username }}</span>
+              </span>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-xs text-stone-500">
+            <p class="truncate">{{ u.email || '—' }}</p>
+            <p v-if="u.phoneNumber" class="truncate">{{ u.phoneNumber }}</p>
+          </td>
+          <td class="px-4 py-3">
+            <span
+              class="inline-block max-w-full truncate rounded bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300"
+              :title="u.roleName"
             >
-              <td class="p-4">
-                <div class="flex items-center gap-3">
-                  <div class="flex h-9 w-9 items-center justify-center rounded-full bg-marian-100 text-marian-800 font-bold dark:bg-marian-900/50 dark:text-marian-200">
-                    {{ u.fullName.charAt(0) }}
-                  </div>
-                  <div>
-                    <p class="font-bold text-stone-900 dark:text-stone-100">
-                      {{ u.christianName ? `${u.christianName} ` : '' }}{{ u.fullName }}
-                    </p>
-                    <p class="font-mono text-xs text-stone-400">@{{ u.username }}</p>
-                  </div>
-                </div>
-              </td>
-              <td class="p-4 text-xs text-stone-500">
-                <p v-if="u.email">{{ u.email }}</p>
-                <p v-if="u.phoneNumber">{{ u.phoneNumber }}</p>
-                <p v-if="!u.email && !u.phoneNumber" class="text-stone-400">—</p>
-              </td>
-              <td class="p-4">
-                <span class="inline-block rounded-md bg-stone-100 px-2 py-0.5 text-xs font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300">
-                  {{ u.roleName }}
-                </span>
-                <span v-if="u.scopeType" class="ml-1 text-[10px] text-stone-400">
-                  ({{ u.scopeType }})
-                </span>
-              </td>
-              <td class="p-4 text-center">
-                <div class="inline-flex flex-col items-center gap-0.5">
-                  <span
-                    class="rounded-full px-2 py-0.5 text-[11px] font-semibold"
-                    :class="u.isActive ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'"
-                  >
-                    {{ u.isActive ? 'Hoạt động' : 'Vô hiệu hóa' }}
-                  </span>
-                  <span v-if="u.mustChangePassword" class="text-[10px] text-amber-600 font-medium">
-                    (Cần đổi MK)
-                  </span>
-                </div>
-              </td>
-              <td class="p-4 text-xs text-stone-500 whitespace-nowrap">
-                {{ u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleString('vi-VN') : 'Chưa đăng nhập' }}
-              </td>
-              <td class="p-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-1">
-                  <!-- Gán vai trò (users.assign-role) -->
-                  <UButton
-                    v-if="can(PERMISSIONS.Users.AssignRole)"
-                    size="xs"
-                    variant="ghost"
-                    color="neutral"
-                    icon="i-lucide-shield"
-                    title="Gán vai trò & phạm vi"
-                    @click="openAssignRoleModal(u)"
-                  />
+              {{ u.roleName }}
+            </span>
+            <span v-if="u.scopeType" class="mt-0.5 block text-[10px] text-stone-400">{{ u.scopeType }}</span>
+          </td>
+          <td class="px-4 py-3 text-center">
+            <div class="inline-flex flex-col items-center gap-0.5">
+              <span
+                class="rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+                :class="u.isActive ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'"
+              >
+                {{ u.isActive ? 'Hoạt động' : 'Vô hiệu hóa' }}
+              </span>
+              <span v-if="u.mustChangePassword" class="text-[10px] font-medium text-amber-600">(Cần đổi MK)</span>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-[11px] text-stone-500">
+            <span class="block truncate">
+              {{ u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('vi-VN') : 'Chưa đăng nhập' }}
+            </span>
+          </td>
+          <td class="px-3 py-3">
+            <div class="flex items-center justify-end gap-0.5">
+              <UButton
+                v-if="can(PERMISSIONS.Users.AssignRole)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-shield"
+                title="Gán vai trò & phạm vi"
+                @click="openAssignRoleModal(u)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Users.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                title="Chỉnh sửa thông tin"
+                @click="openEditModal(u)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Users.ResetPassword)"
+                size="xs"
+                variant="ghost"
+                color="warning"
+                icon="i-lucide-key-round"
+                title="Đặt lại mật khẩu"
+                @click="handleResetPassword(u)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Users.Delete)"
+                size="xs"
+                variant="ghost"
+                :color="u.isActive ? 'error' : 'success'"
+                :icon="u.isActive ? 'i-lucide-lock' : 'i-lucide-unlock'"
+                :title="u.isActive ? 'Vô hiệu hóa' : 'Kích hoạt lại'"
+                @click="toggleUserStatus(u)"
+              />
+            </div>
+          </td>
+        </tr>
+      </template>
 
-                  <!-- Sửa thông tin (users.update) -->
-                  <UButton
-                    v-if="can(PERMISSIONS.Users.Update)"
-                    size="xs"
-                    variant="ghost"
-                    color="neutral"
-                    icon="i-lucide-pencil"
-                    title="Chỉnh sửa thông tin"
-                    @click="openEditModal(u)"
-                  />
+      <template #cards>
+        <div v-for="u in users" :key="u.id" class="space-y-2 px-4 py-3" :class="!u.isActive ? 'opacity-60' : ''">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex min-w-0 items-center gap-2.5">
+              <span class="grid size-9 shrink-0 place-items-center rounded-full bg-marian-100 text-xs font-bold text-marian-800 dark:bg-marian-900/50 dark:text-marian-200">
+                {{ u.fullName.charAt(0) }}
+              </span>
+              <div class="min-w-0">
+                <p class="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">
+                  {{ u.christianName ? `${u.christianName} ` : '' }}{{ u.fullName }}
+                </p>
+                <p class="truncate font-mono text-[11px] text-stone-400">@{{ u.username }}</p>
+              </div>
+            </div>
+            <span
+              class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="u.isActive ? 'bg-emerald-50 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300'"
+            >
+              {{ u.isActive ? 'Hoạt động' : 'Vô hiệu hóa' }}
+            </span>
+          </div>
+          <p class="flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-stone-500">
+            <span class="rounded bg-stone-100 px-1.5 py-0.5 font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+              {{ u.roleName }}
+            </span>
+            <span v-if="u.scopeType">{{ u.scopeType }}</span>
+            <span v-if="u.email" class="truncate">{{ u.email }}</span>
+            <span v-if="u.phoneNumber">{{ u.phoneNumber }}</span>
+            <span v-if="u.mustChangePassword" class="font-medium text-amber-600">Cần đổi MK</span>
+          </p>
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] text-stone-400">
+              {{ u.lastLoginAt ? new Date(u.lastLoginAt).toLocaleDateString('vi-VN') : 'Chưa đăng nhập' }}
+            </span>
+            <div class="flex items-center gap-1">
+              <UButton
+                v-if="can(PERMISSIONS.Users.AssignRole)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-shield"
+                title="Gán vai trò & phạm vi"
+                @click="openAssignRoleModal(u)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Users.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                title="Chỉnh sửa thông tin"
+                @click="openEditModal(u)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Users.ResetPassword)"
+                size="xs"
+                variant="ghost"
+                color="warning"
+                icon="i-lucide-key-round"
+                title="Đặt lại mật khẩu"
+                @click="handleResetPassword(u)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Users.Delete)"
+                size="xs"
+                variant="ghost"
+                :color="u.isActive ? 'error' : 'success'"
+                :icon="u.isActive ? 'i-lucide-lock' : 'i-lucide-unlock'"
+                :title="u.isActive ? 'Vô hiệu hóa' : 'Kích hoạt lại'"
+                @click="toggleUserStatus(u)"
+              />
+            </div>
+          </div>
+        </div>
+      </template>
+    </ListTable>
 
-                  <!-- Đặt lại mật khẩu (users.reset-password) -->
-                  <UButton
-                    v-if="can(PERMISSIONS.Users.ResetPassword)"
-                    size="xs"
-                    variant="ghost"
-                    color="warning"
-                    icon="i-lucide-key-round"
-                    title="Đặt lại mật khẩu"
-                    @click="handleResetPassword(u)"
-                  />
-
-                  <!-- Vô hiệu hóa / Kích hoạt (users.delete) -->
-                  <UButton
-                    v-if="can(PERMISSIONS.Users.Delete)"
-                    size="xs"
-                    variant="ghost"
-                    :color="u.isActive ? 'error' : 'success'"
-                    :icon="u.isActive ? 'i-lucide-lock' : 'i-lucide-unlock'"
-                    :title="u.isActive ? 'Vô hiệu hóa' : 'Kích hoạt lại'"
-                    @click="toggleUserStatus(u)"
-                  />
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
 
     <!-- Modal Tạo Tài Khoản Mới -->
     <UModal v-model:open="createOpen" title="Tạo tài khoản người dùng mới">

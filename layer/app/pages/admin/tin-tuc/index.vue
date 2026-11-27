@@ -340,67 +340,102 @@ async function handleDeleteSource() {
     </div>
 
     <!-- Tab 2: Quản lý nguồn RSS -->
-    <div v-else class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Tên nguồn tin</th>
-              <th class="p-4">Đường dẫn RSS</th>
-              <th class="p-4 text-center">Số bài đã cào</th>
-              <th class="p-4 text-center">Trạng thái</th>
-              <th class="p-4">Ngày thêm</th>
-              <th v-if="can(PERMISSIONS.News.Update) || can(PERMISSIONS.News.Delete)" class="p-4 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="sources.length === 0">
-              <td colspan="6" class="p-8 text-center text-sm text-stone-500">
-                Chưa cấu hình nguồn RSS nào.
-              </td>
-            </tr>
-            <tr
-              v-for="s in sources"
-              :key="s.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+        <ListTable
+      :columns="6"
+      :loading="loading"
+      :empty="sources.length === 0"
+      loading-text="Đang tải nguồn tin RSS..."
+      empty-title="Chưa cấu hình nguồn RSS nào"
+      empty-description="Thêm nguồn tin để hệ thống tự động cào bài định kỳ."
+    >
+      <template #head>
+        <th class="w-[24%] px-4 py-3">Tên nguồn tin</th>
+        <th class="w-[38%] px-4 py-3">Đường dẫn RSS</th>
+        <th class="w-[10%] px-4 py-3 text-center">Số bài</th>
+        <th class="w-[12%] px-4 py-3 text-center">Trạng thái</th>
+        <th class="w-[8%] px-4 py-3">Ngày thêm</th>
+        <th class="w-[8%] px-4 py-3 text-right"><span class="sr-only">Thao tác</span></th>
+      </template>
+
+      <template #rows>
+        <tr v-for="s in sources" :key="s.id" class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40">
+          <td class="px-4 py-3">
+            <span class="block truncate font-semibold text-stone-900 dark:text-stone-100" :title="s.name">{{ s.name }}</span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="block truncate font-mono text-[11px] text-stone-500" :title="s.rssUrl">{{ s.rssUrl }}</span>
+          </td>
+          <td class="px-4 py-3 text-center font-mono font-bold text-marian-600 dark:text-marian-400">{{ s.articleCount }}</td>
+          <td class="px-4 py-3 text-center">
+            <span
+              class="rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="s.isActive ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-stone-100 text-stone-500 dark:bg-stone-800'"
             >
-              <td class="p-4 font-bold text-stone-900 dark:text-stone-100">{{ s.name }}</td>
-              <td class="p-4 font-mono text-xs text-stone-500 break-all">{{ s.rssUrl }}</td>
-              <td class="p-4 text-center font-mono font-bold text-marian-600 dark:text-marian-400">{{ s.articleCount }}</td>
-              <td class="p-4 text-center">
-                <span
-                  class="rounded-full px-2 py-0.5 text-xs font-semibold"
-                  :class="s.isActive ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-stone-100 text-stone-500 dark:bg-stone-800'"
-                >
-                  {{ s.isActive ? 'Đang lấy tin' : 'Tạm dừng' }}
-                </span>
-              </td>
-              <td class="p-4 text-xs text-stone-400 whitespace-nowrap">{{ new Date(s.createdAt).toLocaleDateString('vi-VN') }}</td>
-              <td v-if="can(PERMISSIONS.News.Update) || can(PERMISSIONS.News.Delete)" class="p-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-1">
-                  <UButton
-                    v-if="can(PERMISSIONS.News.Update)"
-                    size="xs"
-                    variant="ghost"
-                    color="neutral"
-                    icon="i-lucide-pencil"
-                    @click="openEditSourceModal(s)"
-                  />
-                  <UButton
-                    v-if="can(PERMISSIONS.News.Delete)"
-                    size="xs"
-                    variant="ghost"
-                    color="error"
-                    icon="i-lucide-trash-2"
-                    @click="openDeleteSourceModal(s)"
-                  />
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+              {{ s.isActive ? 'Đang lấy tin' : 'Tạm dừng' }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-[11px] text-stone-400">{{ new Date(s.createdAt).toLocaleDateString('vi-VN') }}</td>
+          <td class="px-4 py-3 text-right">
+            <div class="flex items-center justify-end gap-1">
+              <UButton
+                v-if="can(PERMISSIONS.News.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                @click.stop="openEditSourceModal(s)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.News.Delete)"
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-lucide-trash-2"
+                @click.stop="openDeleteSourceModal(s)"
+              />
+            </div>
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="s in sources" :key="s.id" class="space-y-2 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <p class="min-w-0 truncate text-sm font-semibold text-stone-900 dark:text-stone-100">{{ s.name }}</p>
+            <span
+              class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="s.isActive ? 'bg-emerald-50 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300' : 'bg-stone-100 text-stone-500 dark:bg-stone-800'"
+            >
+              {{ s.isActive ? 'Đang lấy tin' : 'Tạm dừng' }}
+            </span>
+          </div>
+          <p class="truncate font-mono text-[11px] text-stone-500">{{ s.rssUrl }}</p>
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] text-stone-400">
+              {{ s.articleCount }} bài · {{ new Date(s.createdAt).toLocaleDateString('vi-VN') }}
+            </span>
+            <div class="flex items-center gap-1">
+              <UButton
+                v-if="can(PERMISSIONS.News.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                @click="openEditSourceModal(s)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.News.Delete)"
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-lucide-trash-2"
+                @click="openDeleteSourceModal(s)"
+              />
+            </div>
+          </div>
+        </div>
+      </template>
+    </ListTable>
 
     <!-- Modal Thêm / Sửa Nguồn RSS -->
     <UModal

@@ -176,101 +176,122 @@ const stats = computed(() => {
         <p class="text-xs text-stone-500">Mỗi đợt kết nối giữa một niên khóa kết thúc và một niên khóa mới</p>
       </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Chuyển tiếp Niên khóa</th>
-              <th class="p-4">Trạng thái</th>
-              <th class="p-4 text-center">Tổng số em</th>
-              <th class="p-4 text-center">Chờ duyệt</th>
-              <th class="p-4 text-center">Đã duyệt</th>
-              <th class="p-4 text-center">Từ chối</th>
-              <th class="p-4 text-center">Cần xem lại</th>
-              <th class="p-4">Người tạo & Ngày tạo</th>
-              <th class="p-4 text-right">Hành động</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="loading">
-              <td colspan="9" class="p-8 text-center text-sm text-stone-400 animate-pulse">
-                Đang tải dữ liệu các đợt xét lên lớp...
-              </td>
-            </tr>
-            <tr v-else-if="batches.length === 0">
-              <td colspan="9" class="p-10 text-center text-sm text-stone-500">
-                <UIcon name="i-lucide-inbox" class="mx-auto mb-2 h-8 w-8 text-stone-400" />
-                <p>Chưa có đợt xét lên lớp nào được tạo.</p>
-                <UButton
-                  v-if="can(PERMISSIONS.Promotion.Create)"
-                  size="sm"
-                  variant="outline"
-                  class="mt-3"
-                  @click="openCreateModal"
-                >
-                  Tạo đợt xét đầu tiên
-                </UButton>
-              </td>
-            </tr>
-            <tr
-              v-for="b in batches"
-              :key="b.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+          <ListTable
+      flat
+      :columns="9"
+      :loading="loading"
+      :empty="batches.length === 0"
+      loading-text="Đang tải dữ liệu các đợt xét lên lớp..."
+      empty-title="Chưa có đợt xét lên lớp nào"
+      empty-description="Nhấn Tạo đợt xét mới để hệ thống tổng hợp đề xuất lên lớp từ niên khóa vừa qua."
+    >
+      <template #head>
+        <th class="w-[16%] px-4 py-3">Niên khóa</th>
+        <th class="w-[10%] px-4 py-3">Trạng thái</th>
+        <th class="w-[7%] px-4 py-3 text-center">Tổng</th>
+        <th class="w-[9%] px-4 py-3 text-center">Chờ duyệt</th>
+        <th class="w-[9%] px-4 py-3 text-center">Đã duyệt</th>
+        <th class="w-[9%] px-4 py-3 text-center">Từ chối</th>
+        <th class="w-[11%] px-4 py-3 text-center">Cần xem lại</th>
+        <th class="w-[16%] px-4 py-3">Người tạo</th>
+        <th class="w-[13%] px-4 py-3 text-right">Hành động</th>
+      </template>
+
+      <template #rows>
+        <tr v-for="b in batches" :key="b.id" class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40">
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-1.5 text-[13px]">
+              <span class="truncate font-semibold text-stone-800 dark:text-stone-100">{{ b.sourceYearName }}</span>
+              <UIcon name="i-lucide-arrow-right" class="size-3 shrink-0 text-stone-400" />
+              <span class="truncate font-semibold text-marian-600 dark:text-marian-400">{{ b.targetYearName }}</span>
+            </div>
+          </td>
+          <td class="px-4 py-3">
+            <StatusChip domain="draft" :value="b.status" />
+          </td>
+          <td class="px-4 py-3 text-center font-mono font-bold text-stone-800 dark:text-stone-200">
+            {{ b.totalStudents }}
+          </td>
+          <td class="px-4 py-3 text-center font-mono">
+            <span v-if="b.pendingCount > 0" class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+              {{ b.pendingCount }}
+            </span>
+            <span v-else class="text-xs text-stone-400">0</span>
+          </td>
+          <td class="px-4 py-3 text-center font-mono">
+            <span v-if="b.approvedCount > 0" class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+              {{ b.approvedCount }}
+            </span>
+            <span v-else class="text-xs text-stone-400">0</span>
+          </td>
+          <td class="px-4 py-3 text-center font-mono">
+            <span v-if="b.rejectedCount > 0" class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">
+              {{ b.rejectedCount }}
+            </span>
+            <span v-else class="text-xs text-stone-400">0</span>
+          </td>
+          <td class="px-4 py-3 text-center font-mono">
+            <span v-if="b.staleCount > 0" class="inline-block rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+              ⚠️ {{ b.staleCount }}
+            </span>
+            <span v-else class="text-xs text-stone-400">0</span>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <p class="truncate font-medium text-stone-700 dark:text-stone-300">{{ b.creatorName || 'Quản trị viên' }}</p>
+            <p class="text-[11px] text-stone-400">{{ new Date(b.createdAt).toLocaleDateString('vi-VN') }}</p>
+          </td>
+          <td class="px-4 py-3 text-right">
+            <NuxtLink
+              :to="'/admin/len-lop/' + b.id"
+              class="inline-flex items-center gap-1 rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-medium whitespace-nowrap text-stone-700 transition hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700"
             >
-              <td class="p-4">
-                <div class="flex items-center gap-2">
-                  <span class="font-bold text-stone-800 dark:text-stone-100">{{ b.sourceYearName }}</span>
-                  <UIcon name="i-lucide-arrow-right" class="h-3.5 w-3.5 text-stone-400" />
-                  <span class="font-bold text-marian-600 dark:text-marian-400">{{ b.targetYearName }}</span>
-                </div>
-              </td>
-              <td class="p-4">
-                <StatusChip domain="draft" :value="b.status" />
-              </td>
-              <td class="p-4 text-center font-bold font-mono text-stone-800 dark:text-stone-200">
-                {{ b.totalStudents }}
-              </td>
-              <td class="p-4 text-center font-mono">
-                <span v-if="b.pendingCount > 0" class="rounded-full bg-amber-50 px-2 py-0.5 text-xs font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300">
-                  {{ b.pendingCount }}
-                </span>
-                <span v-else class="text-xs text-stone-400">0</span>
-              </td>
-              <td class="p-4 text-center font-mono">
-                <span v-if="b.approvedCount > 0" class="rounded-full bg-emerald-50 px-2 py-0.5 text-xs font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
-                  {{ b.approvedCount }}
-                </span>
-                <span v-else class="text-xs text-stone-400">0</span>
-              </td>
-              <td class="p-4 text-center font-mono">
-                <span v-if="b.rejectedCount > 0" class="rounded-full bg-red-50 px-2 py-0.5 text-xs font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">
-                  {{ b.rejectedCount }}
-                </span>
-                <span v-else class="text-xs text-stone-400">0</span>
-              </td>
-              <td class="p-4 text-center font-mono">
-                <span v-if="b.staleCount > 0" class="rounded-full bg-amber-100 px-2 py-0.5 text-xs font-black text-amber-800 animate-pulse dark:bg-amber-900 dark:text-amber-200">
-                  ⚠️ {{ b.staleCount }}
-                </span>
-                <span v-else class="text-xs text-stone-400">0</span>
-              </td>
-              <td class="p-4 text-xs text-stone-500 whitespace-nowrap">
-                <p class="font-medium text-stone-700 dark:text-stone-300">{{ b.creatorName || 'Quản trị viên' }}</p>
-                <p class="text-[11px] text-stone-400">{{ new Date(b.createdAt).toLocaleDateString('vi-VN') }}</p>
-              </td>
-              <td class="p-4 text-right whitespace-nowrap">
-                <NuxtLink
-                  :to="`/admin/len-lop/${b.id}`"
-                  class="inline-flex items-center gap-1 rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-medium text-stone-700 transition hover:bg-stone-200 dark:bg-stone-800 dark:text-stone-200 dark:hover:bg-stone-700"
-                >
-                  <span>{{ b.status === 'Draft' ? 'Duyệt đề xuất' : 'Xem kết quả' }}</span>
-                  <UIcon name="i-lucide-arrow-right" class="h-3.5 w-3.5" />
-                </NuxtLink>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              <span>{{ b.status === 'Draft' ? 'Duyệt' : 'Xem' }}</span>
+              <UIcon name="i-lucide-arrow-right" class="size-3.5" />
+            </NuxtLink>
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="b in batches" :key="b.id" class="space-y-2 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="flex min-w-0 items-center gap-1.5 text-sm">
+              <span class="truncate font-semibold text-stone-900 dark:text-stone-100">{{ b.sourceYearName }}</span>
+              <UIcon name="i-lucide-arrow-right" class="size-3 shrink-0 text-stone-400" />
+              <span class="truncate font-semibold text-marian-600 dark:text-marian-400">{{ b.targetYearName }}</span>
+            </div>
+            <StatusChip domain="draft" :value="b.status" />
+          </div>
+          <p class="text-[11px] text-stone-400">
+            {{ b.creatorName || 'Quản trị viên' }} · {{ new Date(b.createdAt).toLocaleDateString('vi-VN') }}
+          </p>
+          <p class="flex flex-wrap items-center gap-1.5 text-[11px]">
+            <span class="rounded bg-stone-100 px-1.5 py-0.5 font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+              {{ b.totalStudents }} em
+            </span>
+            <span v-if="b.pendingCount > 0" class="rounded bg-amber-50 px-1.5 py-0.5 font-semibold text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+              Chờ duyệt: {{ b.pendingCount }}
+            </span>
+            <span v-if="b.approvedCount > 0" class="rounded bg-emerald-50 px-1.5 py-0.5 font-semibold text-emerald-700 dark:bg-emerald-950 dark:text-emerald-300">
+              Đã duyệt: {{ b.approvedCount }}
+            </span>
+            <span v-if="b.rejectedCount > 0" class="rounded bg-red-50 px-1.5 py-0.5 font-semibold text-red-700 dark:bg-red-950 dark:text-red-300">
+              Từ chối: {{ b.rejectedCount }}
+            </span>
+            <span v-if="b.staleCount > 0" class="rounded bg-amber-100 px-1.5 py-0.5 font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+              ⚠️ Cần xem lại: {{ b.staleCount }}
+            </span>
+          </p>
+          <NuxtLink
+            :to="'/admin/len-lop/' + b.id"
+            class="inline-flex w-full items-center justify-center gap-1 rounded-lg bg-stone-100 px-3 py-1.5 text-xs font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-200"
+          >
+            <span>{{ b.status === 'Draft' ? 'Duyệt đề xuất' : 'Xem kết quả' }}</span>
+            <UIcon name="i-lucide-arrow-right" class="size-3.5" />
+          </NuxtLink>
+        </div>
+      </template>
+    </ListTable>
     </div>
 
     <!-- Modal Tạo Đợt Xét Mới -->

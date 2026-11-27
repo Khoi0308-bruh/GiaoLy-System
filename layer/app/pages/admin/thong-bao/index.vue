@@ -270,98 +270,136 @@ function getTypeBadge(type: string) {
     </div>
 
     <!-- Danh sách thông báo -->
-    <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Tiêu đề thông báo</th>
-              <th class="p-4 text-center">Loại</th>
-              <th class="p-4">Phạm vi nhận tin</th>
-              <th class="p-4">Người đăng</th>
-              <th class="p-4">Ngày đăng</th>
-              <th class="p-4">Hạn hiển thị</th>
-              <th class="p-4 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="loading">
-              <td colspan="7" class="p-8 text-center text-sm text-stone-400 animate-pulse">
-                Đang tải thông báo...
-              </td>
-            </tr>
-            <tr v-else-if="filteredAnnouncements.length === 0">
-              <td colspan="7" class="p-8 text-center text-sm text-stone-500">
-                Chưa có thông báo nào phù hợp.
-              </td>
-            </tr>
-            <tr
-              v-for="a in filteredAnnouncements"
-              :key="a.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+    <ListTable
+      :columns="7"
+      :loading="loading"
+      :empty="filteredAnnouncements.length === 0"
+      loading-text="Đang tải thông báo..."
+      empty-title="Chưa có thông báo nào"
+      empty-description="Chưa có thông báo nào phù hợp với bộ lọc hoặc từ khoá tìm kiếm."
+    >
+      <template #head>
+        <th class="w-[28%] px-4 py-3">Tiêu đề</th>
+        <th class="w-[11%] px-4 py-3 text-center">Loại</th>
+        <th class="w-[16%] px-4 py-3">Phạm vi nhận tin</th>
+        <th class="w-[15%] px-4 py-3">Người đăng</th>
+        <th class="w-[12%] px-4 py-3">Ngày đăng</th>
+        <th class="w-[12%] px-4 py-3">Hạn hiển thị</th>
+        <th class="w-[6%] px-3 py-3 text-right"><span class="sr-only">Thao tác</span></th>
+      </template>
+
+      <template #rows>
+        <tr
+          v-for="a in filteredAnnouncements"
+          :key="a.id"
+          class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+        >
+          <td class="px-4 py-3">
+            <button
+              type="button"
+              class="block max-w-full truncate text-left font-semibold text-stone-900 hover:text-marian-600 dark:text-stone-100 dark:hover:text-marian-400"
+              :title="a.title"
+              @click="openViewModal(a)"
             >
-              <td class="p-4">
-                <span
-                  class="font-semibold text-stone-900 hover:text-marian-600 cursor-pointer dark:text-stone-100 dark:hover:text-marian-400"
-                  @click="openViewModal(a)"
-                >
-                  {{ a.title }}
-                </span>
-              </td>
-              <td class="p-4 text-center">
-                <span class="rounded-full px-2.5 py-0.5 text-xs font-semibold" :class="getTypeBadge(a.announcementType).color">
-                  {{ getTypeBadge(a.announcementType).label }}
-                </span>
-              </td>
-              <td class="p-4 text-xs font-medium text-stone-700 dark:text-stone-300">
-                <span v-if="a.audience === 'Public'">Toàn giáo xứ</span>
-                <span v-else-if="a.audience === 'Branch'">Ngành {{ a.branchName }}</span>
-                <span v-else>Lớp {{ a.classRoomName }}</span>
-              </td>
-              <td class="p-4 text-xs text-stone-600 dark:text-stone-300">
-                {{ a.authorFullName }}
-              </td>
-              <td class="p-4 text-xs text-stone-500 whitespace-nowrap">
-                {{ new Date(a.publishedAt).toLocaleDateString('vi-VN') }}
-              </td>
-              <td class="p-4 text-xs text-stone-500 whitespace-nowrap">
-                {{ a.expiresAt ? new Date(a.expiresAt).toLocaleDateString('vi-VN') : 'Không thời hạn' }}
-              </td>
-              <td class="p-4 text-right whitespace-nowrap">
-                <div class="flex items-center justify-end gap-1">
-                  <UButton
-                    size="xs"
-                    variant="ghost"
-                    color="neutral"
-                    icon="i-lucide-eye"
-                    title="Xem nội dung"
-                    @click="openViewModal(a)"
-                  />
-                  <UButton
-                    v-if="can(PERMISSIONS.Announcements.Update)"
-                    size="xs"
-                    variant="ghost"
-                    color="neutral"
-                    icon="i-lucide-pencil"
-                    title="Chỉnh sửa"
-                    @click="openEditModal(a)"
-                  />
-                  <UButton
-                    v-if="can(PERMISSIONS.Announcements.Delete)"
-                    size="xs"
-                    variant="ghost"
-                    color="error"
-                    icon="i-lucide-trash-2"
-                    title="Xóa"
-                    @click="openDeleteModal(a)"
-                  />
-                </div>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+              {{ a.title }}
+            </button>
+          </td>
+          <td class="px-4 py-3 text-center">
+            <span class="rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap" :class="getTypeBadge(a.announcementType).color">
+              {{ getTypeBadge(a.announcementType).label }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <span class="block truncate font-medium text-stone-700 dark:text-stone-300">
+              <template v-if="a.audience === 'Public'">Toàn giáo xứ</template>
+              <template v-else-if="a.audience === 'Branch'">Ngành {{ a.branchName }}</template>
+              <template v-else>Lớp {{ a.classRoomName }}</template>
+            </span>
+          </td>
+          <td class="px-4 py-3 text-xs text-stone-600 dark:text-stone-300">
+            <span class="block truncate">{{ a.authorFullName }}</span>
+          </td>
+          <td class="px-4 py-3 text-[11px] whitespace-nowrap text-stone-500">
+            {{ new Date(a.publishedAt).toLocaleDateString('vi-VN') }}
+          </td>
+          <td class="px-4 py-3 text-[11px] whitespace-nowrap text-stone-500">
+            {{ a.expiresAt ? new Date(a.expiresAt).toLocaleDateString('vi-VN') : 'Không thời hạn' }}
+          </td>
+          <td class="px-3 py-3">
+            <div class="flex items-center justify-end gap-0.5">
+              <UButton size="xs" variant="ghost" color="neutral" icon="i-lucide-eye" title="Xem nội dung" @click="openViewModal(a)" />
+              <UButton
+                v-if="can(PERMISSIONS.Announcements.Update)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                title="Chỉnh sửa"
+                @click="openEditModal(a)"
+              />
+              <UButton
+                v-if="can(PERMISSIONS.Announcements.Delete)"
+                size="xs"
+                variant="ghost"
+                color="error"
+                icon="i-lucide-trash-2"
+                title="Xóa"
+                @click="openDeleteModal(a)"
+              />
+            </div>
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="a in filteredAnnouncements" :key="a.id" class="space-y-1.5 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <button
+              type="button"
+              class="min-w-0 truncate text-left text-sm font-semibold text-stone-900 dark:text-stone-100"
+              @click="openViewModal(a)"
+            >
+              {{ a.title }}
+            </button>
+            <span class="shrink-0 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap" :class="getTypeBadge(a.announcementType).color">
+              {{ getTypeBadge(a.announcementType).label }}
+            </span>
+          </div>
+          <p class="text-[11px] text-stone-500">
+            <template v-if="a.audience === 'Public'">Toàn giáo xứ</template>
+            <template v-else-if="a.audience === 'Branch'">Ngành {{ a.branchName }}</template>
+            <template v-else>Lớp {{ a.classRoomName }}</template>
+            · {{ a.authorFullName }}
+          </p>
+          <p class="text-[11px] text-stone-400">
+            {{ new Date(a.publishedAt).toLocaleDateString('vi-VN') }}
+            · {{ a.expiresAt ? 'hết hạn ' + new Date(a.expiresAt).toLocaleDateString('vi-VN') : 'không thời hạn' }}
+          </p>
+          <div class="flex justify-end gap-1">
+            <UButton size="xs" variant="ghost" color="neutral" icon="i-lucide-eye" title="Xem nội dung" @click="openViewModal(a)" />
+            <UButton
+              v-if="can(PERMISSIONS.Announcements.Update)"
+              size="xs"
+              variant="ghost"
+              color="neutral"
+              icon="i-lucide-pencil"
+              title="Chỉnh sửa"
+              @click="openEditModal(a)"
+            />
+            <UButton
+              v-if="can(PERMISSIONS.Announcements.Delete)"
+              size="xs"
+              variant="ghost"
+              color="error"
+              icon="i-lucide-trash-2"
+              title="Xóa"
+              @click="openDeleteModal(a)"
+            />
+          </div>
+        </div>
+      </template>
+    </ListTable>
+
 
     <!-- Modal Xem Chi Tiết Thông Báo -->
     <UModal v-model:open="viewOpen" :title="selectedAnnouncement?.title || 'Thông báo'">

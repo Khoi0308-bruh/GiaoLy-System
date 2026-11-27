@@ -169,63 +169,90 @@ onMounted(loadRequirements)
     </div>
 
     <!-- Bảng danh sách yêu cầu -->
-    <div v-if="filteredList.length === 0 && !loading">
-      <EmptyState title="Chưa có yêu cầu nào" description="Nhấn Thêm yêu cầu để thiết lập tiêu chuẩn cho bí tích này." />
-    </div>
+            <ListTable
+      :columns="6"
+      :loading="loading"
+      :empty="filteredList.length === 0"
+      loading-text="Đang tải yêu cầu bí tích..."
+      empty-title="Chưa có yêu cầu nào"
+      empty-description="Nhấn Thêm yêu cầu để thiết lập tiêu chuẩn cho bí tích này."
+    >
+      <template #head>
+        <th class="w-[12%] px-4 py-3">Mã</th>
+        <th class="w-[16%] px-4 py-3">Bí tích</th>
+        <th class="w-[38%] px-4 py-3">Tiêu chuẩn / Yêu cầu</th>
+        <th class="w-[16%] px-4 py-3">Tính chất</th>
+        <th class="w-[9%] px-4 py-3 text-center">Thứ tự</th>
+        <th class="w-[9%] px-4 py-3 text-right"><span class="sr-only">Thao tác</span></th>
+      </template>
 
-    <div v-else class="overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-xs dark:border-stone-800 dark:bg-stone-900">
-      <table class="w-full text-left text-sm">
-        <thead class="border-b border-stone-200 bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-400">
-          <tr>
-            <th class="px-4 py-3">Mã</th>
-            <th class="px-4 py-3">Bí tích</th>
-            <th class="px-4 py-3">Tiêu chuẩn / Yêu cầu</th>
-            <th class="px-4 py-3">Tính chất</th>
-            <th class="px-4 py-3 text-center">Thứ tự</th>
-            <th class="px-4 py-3 text-right">Thao tác</th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-          <tr v-for="r in filteredList" :key="r.id" class="hover:bg-stone-50 dark:hover:bg-stone-800/50">
-            <td class="px-4 py-3 font-mono text-xs font-bold text-marian-700 dark:text-marian-400">
-              {{ r.code }}
-            </td>
-            <td class="px-4 py-3 text-xs">
-              <UBadge variant="subtle" color="primary" size="xs">
-                {{ r.sacramentType }}
-              </UBadge>
-            </td>
-            <td class="px-4 py-3">
-              <strong class="text-stone-900 dark:text-white block">{{ r.name }}</strong>
-              <span v-if="r.description" class="text-xs text-stone-500">{{ r.description }}</span>
-            </td>
-            <td class="px-4 py-3 text-xs">
-              <span
-                class="rounded px-2 py-0.5 font-medium"
-                :class="r.isMandatory ? 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'"
-              >
-                {{ r.isMandatory ? 'Bắt buộc' : 'Khuyến nghị' }}
-              </span>
-            </td>
-            <td class="px-4 py-3 text-center text-xs text-stone-400">
-              #{{ r.sortOrder }}
-            </td>
-            <td class="px-4 py-3 text-right">
-              <UButton
-                v-if="permissions.can(PERMISSIONS.Sacraments.ManageRequirements)"
-                size="xs"
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-pencil"
-                @click="openEditModal(r)"
-              >
-                Sửa
-              </UButton>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
+      <template #rows>
+        <tr v-for="r in filteredList" :key="r.id" class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50">
+          <td class="px-4 py-3">
+            <span class="block truncate font-mono text-xs font-bold text-marian-700 dark:text-marian-400">{{ r.code }}</span>
+          </td>
+          <td class="px-4 py-3">
+            <UBadge variant="subtle" color="primary" size="xs">
+              {{ r.sacramentType }}
+            </UBadge>
+          </td>
+          <td class="px-4 py-3">
+            <strong class="block truncate text-stone-900 dark:text-white" :title="r.name">{{ r.name }}</strong>
+            <span v-if="r.description" class="block truncate text-xs text-stone-500">{{ r.description }}</span>
+          </td>
+          <td class="px-4 py-3">
+            <span
+              class="rounded px-2 py-0.5 text-[11px] font-medium whitespace-nowrap"
+              :class="r.isMandatory ? 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'"
+            >
+              {{ r.isMandatory ? 'Bắt buộc' : 'Khuyến nghị' }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-center text-xs text-stone-400">#{{ r.sortOrder }}</td>
+          <td class="px-4 py-3 text-right">
+            <UButton
+              v-if="permissions.can(PERMISSIONS.Sacraments.ManageRequirements)"
+              size="xs"
+              variant="ghost"
+              color="neutral"
+              icon="i-lucide-pencil"
+              @click="openEditModal(r)"
+            />
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="r in filteredList" :key="r.id" class="space-y-2 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">{{ r.name }}</p>
+              <p class="font-mono text-[11px] text-marian-700 dark:text-marian-400">{{ r.code }} · #{{ r.sortOrder }}</p>
+            </div>
+            <UBadge variant="subtle" color="primary" size="xs">
+              {{ r.sacramentType }}
+            </UBadge>
+          </div>
+          <p v-if="r.description" class="text-[11px] text-stone-500">{{ r.description }}</p>
+          <div class="flex items-center justify-between gap-2">
+            <span
+              class="rounded px-2 py-0.5 text-[11px] font-medium"
+              :class="r.isMandatory ? 'bg-red-50 text-red-700 dark:bg-red-950 dark:text-red-300' : 'bg-stone-100 text-stone-600 dark:bg-stone-800 dark:text-stone-400'"
+            >
+              {{ r.isMandatory ? 'Bắt buộc' : 'Khuyến nghị' }}
+            </span>
+            <UButton
+              v-if="permissions.can(PERMISSIONS.Sacraments.ManageRequirements)"
+              size="xs"
+              variant="ghost"
+              color="neutral"
+              icon="i-lucide-pencil"
+              @click="openEditModal(r)"
+            />
+          </div>
+        </div>
+      </template>
+    </ListTable>
 
     <!-- MODAL THÊM / SỬA YÊU CẦU -->
     <UModal v-model:open="modalOpen" :title="isEditing ? 'Sửa yêu cầu bí tích' : 'Thêm yêu cầu bí tích mới'">

@@ -197,6 +197,33 @@ const branchOptions = computed(() => [
   ...branches.value.map(b => ({ label: `Ngành ${b.name}`, value: String(b.id) }))
 ])
 
+
+const totalPages = computed(() => Math.max(1, Math.ceil(total.value / pageSize)))
+
+/** Số trang rút gọn: luôn có trang đầu/cuối và tối đa 5 trang quanh trang hiện tại (null = dấu "…"). */
+const pageItems = computed<(number | null)[]>(() => {
+  const last = totalPages.value
+  if (last <= 7) return Array.from({ length: last }, (_, i) => i + 1)
+  const start = Math.max(2, Math.min(page.value - 2, last - 4))
+  const end = Math.min(last - 1, Math.max(page.value + 2, 5))
+  const items: (number | null)[] = [1]
+  if (start > 2) items.push(null)
+  for (let p = start; p <= end; p++) items.push(p)
+  if (end < last - 1) items.push(null)
+  items.push(last)
+  return items
+})
+
+/** Dòng phụ dưới tên: mã hồ sơ và tuổi, bỏ phần nào thiếu. */
+function subLine(row: StudentRow) {
+  const age = ageOf(row.birthDate)
+  return [maHienThi(row), age === null ? null : `${age} tuổi`].filter(Boolean).join(' · ')
+}
+
+/** "1–20 / 183" cho dòng phân trang. */
+const rangeLabel = computed(() => rows.value.length
+  ? `${(page.value - 1) * pageSize + 1}–${(page.value - 1) * pageSize + rows.value.length} / ${total.value}`
+  : `0 / ${total.value}`)
 </script>
 
 <template>
@@ -295,119 +322,165 @@ const branchOptions = computed(() => [
 
     <ErrorState :error="error" @retry="load" />
 
-    <!-- Bảng đoàn sinh -->
-    <div class="overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-xs dark:border-stone-800 dark:bg-stone-900">
-      <table class="w-full min-w-[860px] text-left text-sm">
-        <thead class="border-b border-stone-200 bg-stone-50 text-[11px] font-semibold tracking-wide text-stone-500 uppercase dark:border-stone-800 dark:bg-stone-950 dark:text-stone-400">
-          <tr>
-            <th class="px-4 py-3">Mã</th>
-            <th class="px-4 py-3">Đoàn sinh</th>
-            <th class="px-4 py-3 text-center">Tuổi</th>
-            <th class="px-4 py-3">Ngành › Lớp</th>
-            <th class="px-4 py-3">Phụ huynh</th>
-            <th class="px-4 py-3">Trạng thái</th>
-            <th class="px-3 py-3"><span class="sr-only">Chi tiết</span></th>
-          </tr>
-        </thead>
-        <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-          <tr v-if="loading">
-            <td colspan="7" class="p-8 text-center text-stone-500">
-              <UIcon name="i-lucide-loader-2" class="size-6 animate-spin mx-auto mb-2 text-marian-600" />
-              <span>Đang tải danh sách đoàn sinh...</span>
-            </td>
-          </tr>
-          <tr v-else-if="rows.length === 0">
-            <td colspan="7" class="p-8">
-              <EmptyState
-                title="Không tìm thấy đoàn sinh nào"
-                description="Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái. Bạn chỉ thấy đoàn sinh trong phạm vi phân công của mình."
-              />
-            </td>
-          </tr>
-          <tr
-            v-for="row in rows"
-            v-else
-            :key="row.id"
-            class="cursor-pointer transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
-            @click="navigateTo(`/admin/doan-sinh/${row.id}`)"
-          >
-            <td class="px-4 py-3 font-mono text-xs font-bold whitespace-nowrap text-marian-700 dark:text-marian-400">
-              {{ maHienThi(row) }}
-            </td>
-            <td class="px-4 py-3">
-              <div class="flex items-center gap-3">
-                <span class="grid size-9 shrink-0 place-items-center rounded-full bg-marian-50 text-xs font-bold text-marian-700 dark:bg-marian-950 dark:text-marian-300">
-                  {{ chuDau(row) }}
+    <!-- Danh sách đoàn sinh: bảng ≥md (header dính khi cuộn), thẻ <md -->
+    <ListTable
+      :columns="5"
+      :loading="loading"
+      :empty="rows.length === 0"
+      loading-text="Đang tải danh sách đoàn sinh..."
+      empty-title="Không tìm thấy đoàn sinh nào"
+      empty-description="Thử thay đổi từ khóa tìm kiếm hoặc bộ lọc trạng thái. Bạn chỉ thấy đoàn sinh trong phạm vi phân công của mình."
+      :footer="total > pageSize"
+    >
+      <template #head>
+        <th class="w-[36%] px-4 py-3">Đoàn sinh</th>
+        <th class="w-[21%] px-4 py-3">Ngành › Lớp</th>
+        <th class="w-[23%] px-4 py-3">Phụ huynh</th>
+        <th class="w-[15%] px-4 py-3">Trạng thái</th>
+        <th class="w-10 px-3 py-3"><span class="sr-only">Mở hồ sơ</span></th>
+      </template>
+
+      <template #rows>
+        <tr
+          v-for="row in rows"
+          :key="row.id"
+          class="cursor-pointer transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+          @click="navigateTo(`/admin/doan-sinh/${row.id}`)"
+        >
+          <td class="px-4 py-3">
+            <div class="flex items-center gap-3">
+              <span class="grid size-9 shrink-0 place-items-center rounded-full bg-marian-50 text-xs font-bold text-marian-700 dark:bg-marian-950 dark:text-marian-300">
+                {{ chuDau(row) }}
+              </span>
+              <span class="min-w-0">
+                <span v-if="row.holyName" class="block truncate text-[11px] font-semibold text-vatican-600 dark:text-vatican-400">
+                  {{ row.holyName }}
                 </span>
-                <span class="min-w-0">
-                  <span v-if="row.holyName" class="mb-0.5 block text-[11px] font-semibold text-vatican-600 dark:text-vatican-400">
-                    {{ row.holyName }}
-                  </span>
-                  <strong class="block truncate text-stone-900 dark:text-white">{{ tenHienThi(row) }}</strong>
+                <strong class="block truncate text-stone-900 dark:text-white">{{ tenHienThi(row) }}</strong>
+                <span class="mt-0.5 block truncate font-mono text-[11px] text-stone-400">{{ subLine(row) }}</span>
+              </span>
+            </div>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <span v-if="row.className" class="line-clamp-2 font-medium text-stone-700 dark:text-stone-200">
+              <template v-if="row.branchName">{{ row.branchName }} › </template>{{ row.className }}
+            </span>
+            <span v-else class="rounded bg-amber-50 px-1.5 py-0.5 whitespace-nowrap text-amber-700 dark:bg-amber-950 dark:text-amber-300">
+              Chưa xếp lớp
+            </span>
+          </td>
+          <td class="px-4 py-3 text-xs">
+            <div class="truncate font-medium text-stone-800 dark:text-stone-200">
+              {{ row.primaryGuardianName || '–' }}
+            </div>
+            <MaskedField
+              :value="row.primaryGuardianPhone"
+              :permission="PERMISSIONS.Students.ViewContact"
+              placeholder="Đã ẩn SĐT"
+            />
+            <div v-if="row.area" class="mt-0.5 truncate text-[11px] text-stone-400">
+              Giáo họ {{ row.area }}
+            </div>
+          </td>
+          <td class="px-4 py-3">
+            <StatusChip domain="student" :value="row.status" />
+          </td>
+          <td class="px-3 py-3 text-right">
+            <!-- Thêm menu thao tác trong hàng ở đây thì phải @click.stop trên chính nút mở
+                 menu, nếu không sự kiện nổi bọt lên <tr> và trang điều hướng mất. -->
+            <UButton
+              size="xs"
+              variant="ghost"
+              color="neutral"
+              icon="i-lucide-chevron-right"
+              :aria-label="`Mở hồ sơ ${tenHienThi(row)}`"
+              @click.stop="navigateTo(`/admin/doan-sinh/${row.id}`)"
+            />
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <NuxtLink
+          v-for="row in rows"
+          :key="row.id"
+          :to="`/admin/doan-sinh/${row.id}`"
+          class="flex items-start gap-3 px-4 py-3 hover:bg-stone-50 dark:hover:bg-stone-800/50"
+        >
+          <span class="grid size-10 shrink-0 place-items-center rounded-full bg-marian-50 text-sm font-bold text-marian-700 dark:bg-marian-950 dark:text-marian-300">
+            {{ chuDau(row) }}
+          </span>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-start justify-between gap-2">
+              <span class="min-w-0">
+                <span v-if="row.holyName" class="block truncate text-[11px] font-semibold text-vatican-600 dark:text-vatican-400">
+                  {{ row.holyName }}
                 </span>
-              </div>
-            </td>
-            <td class="px-4 py-3 text-center text-xs tabular-nums">
-              {{ ageOf(row.birthDate) ?? '–' }}
-            </td>
-            <td class="px-4 py-3 text-xs">
-              <span v-if="row.className" class="rounded bg-stone-100 px-2 py-0.5 font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-200">
+                <strong class="block truncate text-sm text-stone-900 dark:text-white">{{ tenHienThi(row) }}</strong>
+              </span>
+              <StatusChip domain="student" :value="row.status" class="shrink-0" />
+            </div>
+            <div class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-stone-500">
+              <span class="font-mono">{{ subLine(row) }}</span>
+              <span v-if="row.className" class="rounded bg-stone-100 px-1.5 py-0.5 font-medium text-stone-700 dark:bg-stone-800 dark:text-stone-200">
                 {{ row.branchName ? `${row.branchName} › ` : '' }}{{ row.className }}
               </span>
               <span v-else class="rounded bg-amber-50 px-1.5 py-0.5 text-amber-700 dark:bg-amber-950 dark:text-amber-300">
                 Chưa xếp lớp
               </span>
-            </td>
-            <td class="px-4 py-3 text-xs">
-              <div class="font-medium text-stone-800 dark:text-stone-200">
-                {{ row.primaryGuardianName || '–' }}
-              </div>
+            </div>
+            <div v-if="row.primaryGuardianName || row.primaryGuardianPhone" class="mt-1 flex flex-wrap items-center gap-x-2 gap-y-0.5 text-[11px] text-stone-500">
+              <UIcon name="i-lucide-phone" class="size-3 shrink-0" />
+              <span class="truncate">{{ row.primaryGuardianName || 'Phụ huynh' }}</span>
               <MaskedField
                 :value="row.primaryGuardianPhone"
                 :permission="PERMISSIONS.Students.ViewContact"
                 placeholder="Đã ẩn SĐT"
               />
-              <div v-if="row.area" class="mt-0.5 text-[11px] text-stone-400">
-                Giáo họ {{ row.area }}
-              </div>
-            </td>
-            <td class="px-4 py-3">
-              <StatusChip domain="student" :value="row.status" />
-            </td>
-            <td class="px-3 py-3 text-right">
-              <UButton
-                size="xs"
-                variant="ghost"
-                color="neutral"
-                icon="i-lucide-chevron-right"
-                @click.stop="navigateTo(`/admin/doan-sinh/${row.id}`)"
-              />
-            </td>
-          </tr>
-        </tbody>
-      </table>
+              <span v-if="row.area" class="text-stone-400">· Giáo họ {{ row.area }}</span>
+            </div>
+          </div>
+          <UIcon name="i-lucide-chevron-right" class="mt-1.5 size-4 shrink-0 text-stone-300" />
+        </NuxtLink>
+      </template>
 
-      <!-- Phân trang -->
-      <div v-if="total > pageSize" class="flex items-center justify-between border-t border-stone-200 p-3 text-xs text-stone-500 dark:border-stone-800">
-        <span>Hiển thị {{ rows.length }} / {{ total }} đoàn sinh</span>
-        <div class="flex gap-1">
+      <template #footer>
+        <span class="tabular-nums">Hiển thị {{ rangeLabel }} đoàn sinh</span>
+        <nav class="flex items-center gap-1" aria-label="Phân trang danh sách đoàn sinh">
           <UButton
             size="xs"
-            variant="outline"
-            :disabled="page <= 1"
+            variant="ghost"
+            color="neutral"
             icon="i-lucide-chevron-left"
+            aria-label="Trang trước"
+            :disabled="page <= 1"
             @click="page--"
           />
-          <span class="px-2 py-1 font-semibold tabular-nums">Trang {{ page }} / {{ Math.max(1, Math.ceil(total / pageSize)) }}</span>
+          <template v-for="(p, i) in pageItems" :key="`${p ?? 'gap'}-${i}`">
+            <span v-if="p === null" class="px-1 text-stone-400">…</span>
+            <UButton
+              v-else
+              size="xs"
+              :variant="p === page ? 'solid' : 'ghost'"
+              :color="p === page ? 'primary' : 'neutral'"
+              class="min-w-7 justify-center tabular-nums"
+              :aria-current="p === page ? 'page' : undefined"
+              @click="page = p"
+            >
+              {{ p }}
+            </UButton>
+          </template>
           <UButton
             size="xs"
-            variant="outline"
-            :disabled="page * pageSize >= total"
+            variant="ghost"
+            color="neutral"
             icon="i-lucide-chevron-right"
+            aria-label="Trang sau"
+            :disabled="page >= totalPages"
             @click="page++"
           />
-        </div>
-      </div>
-    </div>
+        </nav>
+      </template>
+    </ListTable>
   </div>
 </template>

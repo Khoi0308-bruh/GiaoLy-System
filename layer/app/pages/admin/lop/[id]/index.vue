@@ -541,71 +541,98 @@ onMounted(loadClassroom)
         </div>
 
         <!-- Bảng danh sách ghi danh -->
-        <div class="mt-4 overflow-x-auto rounded-xl border border-stone-200 dark:border-stone-800">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/60 dark:text-stone-300">
-              <tr>
-                <th class="p-3 w-12 text-center">STT</th>
-                <th class="p-3">Mã ĐS</th>
-                <th class="p-3">Tên thánh & Họ tên</th>
-                <th class="p-3">Trạng thái</th>
-                <th class="p-3">Ngày bắt đầu</th>
-                <th class="p-3">Ghi chú</th>
-                <th v-if="can(PERMISSIONS.Enrollments.Manage)" class="p-3 text-right">Thao tác</th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-              <tr v-if="enrollments.length === 0">
-                <td colspan="7" class="p-8 text-center text-sm text-stone-500">
-                  Lớp học chưa có đoàn sinh nào. Nhấn "Xếp đoàn sinh vào lớp" để bắt đầu.
-                </td>
-              </tr>
-              <tr
-                v-for="(e, idx) in enrollments"
-                :key="e.id"
-                class="hover:bg-stone-50/80 dark:hover:bg-stone-800/30"
-              >
-                <td class="p-3 text-center text-xs text-stone-400 font-mono">{{ idx + 1 }}</td>
-                <td class="p-3 font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">
-                  {{ e.studentCode }}
-                </td>
-                <td class="p-3 font-medium text-stone-900 dark:text-stone-100">
-                  <NuxtLink :to="`/admin/doan-sinh/${e.studentId}`" class="hover:underline">
-                    {{ e.holyName ? `${e.holyName} ` : '' }}{{ e.fullName }}
+                <ListTable
+          flat
+          :columns="7"
+          :loading="loading"
+          :empty="enrollments.length === 0"
+          loading-text="Đang tải danh sách ghi danh..."
+          empty-title="Lớp học chưa có đoàn sinh nào"
+          empty-description="Nhấn Xếp đoàn sinh vào lớp để bắt đầu."
+        >
+          <template #head>
+            <th class="w-[5%] px-2 py-3 text-center">#</th>
+            <th class="w-[11%] px-3 py-3">Mã ĐS</th>
+            <th class="w-[26%] px-3 py-3">Tên thánh &amp; Họ tên</th>
+            <th class="w-[13%] px-3 py-3">Trạng thái</th>
+            <th class="w-[12%] px-3 py-3">Bắt đầu</th>
+            <th class="w-[18%] px-3 py-3">Ghi chú</th>
+            <th v-if="can(PERMISSIONS.Enrollments.Manage)" class="w-[15%] px-3 py-3 text-right">Thao tác</th>
+          </template>
+
+          <template #rows>
+            <tr
+              v-for="(e, idx) in enrollments"
+              :key="e.id"
+              class="transition-colors hover:bg-stone-50/80 dark:hover:bg-stone-800/30"
+            >
+              <td class="px-3 py-3 text-center font-mono text-[11px] text-stone-400">{{ idx + 1 }}</td>
+              <td class="px-3 py-3">
+                <span class="block truncate font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">{{ e.studentCode }}</span>
+              </td>
+              <td class="px-3 py-3">
+                <NuxtLink :to="'/admin/doan-sinh/' + e.studentId" class="block truncate font-medium text-stone-900 hover:underline dark:text-stone-100" :title="(e.holyName ? e.holyName + ' ' : '') + e.fullName">
+                  {{ e.holyName ? e.holyName + ' ' : '' }}{{ e.fullName }}
+                </NuxtLink>
+              </td>
+              <td class="px-3 py-3">
+                <StatusChip domain="enrollment" :value="e.status" />
+              </td>
+              <td class="px-3 py-3 text-xs whitespace-nowrap text-stone-500">{{ e.startDate }}</td>
+              <td class="px-3 py-3 text-xs">
+                <span v-if="e.note" class="block truncate text-stone-500" :title="e.note">{{ e.note }}</span>
+                <span v-else class="text-stone-400">—</span>
+              </td>
+              <td v-if="can(PERMISSIONS.Enrollments.Manage)" class="px-3 py-3 text-right">
+                <div v-if="e.status === 'Active'" class="flex items-center justify-end gap-1">
+                  <UButton
+                    size="xs"
+                    variant="ghost"
+                    color="neutral"
+                    icon="i-lucide-arrow-right-left"
+                    title="Chuyển lớp"
+                    @click="openTransferModal(e)"
+                  />
+                  <UButton
+                    size="xs"
+                    variant="ghost"
+                    color="error"
+                    icon="i-lucide-user-minus"
+                    title="Rút lớp"
+                    @click="openWithdrawModal(e)"
+                  />
+                </div>
+                <span v-else class="text-[11px] text-stone-400 italic">Đã kết thúc</span>
+              </td>
+            </tr>
+          </template>
+
+          <template #cards>
+            <div v-for="(e, idx) in enrollments" :key="e.id" class="space-y-2 px-4 py-3">
+              <div class="flex items-start justify-between gap-2">
+                <div class="min-w-0">
+                  <NuxtLink :to="'/admin/doan-sinh/' + e.studentId" class="block truncate text-sm font-semibold text-stone-900 hover:underline dark:text-stone-100">
+                    {{ e.holyName ? e.holyName + ' ' : '' }}{{ e.fullName }}
                   </NuxtLink>
-                </td>
-                <td class="p-3">
-                  <StatusChip domain="enrollment" :value="e.status" />
-                </td>
-                <td class="p-3 text-xs text-stone-500">{{ e.startDate }}</td>
-                <td class="p-3 text-xs text-stone-500">{{ e.note || '—' }}</td>
-                <td v-if="can(PERMISSIONS.Enrollments.Manage)" class="p-3 text-right">
-                  <div v-if="e.status === 'Active'" class="flex items-center justify-end gap-1.5">
-                    <UButton
-                      size="xs"
-                      variant="ghost"
-                      color="neutral"
-                      icon="i-lucide-arrow-right-left"
-                      @click="openTransferModal(e)"
-                    >
-                      Chuyển lớp
-                    </UButton>
-                    <UButton
-                      size="xs"
-                      variant="ghost"
-                      color="error"
-                      icon="i-lucide-user-minus"
-                      @click="openWithdrawModal(e)"
-                    >
-                      Rút lớp
-                    </UButton>
-                  </div>
-                  <span v-else class="text-xs text-stone-400 italic">Đã kết thúc</span>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
+                  <p class="font-mono text-[11px] text-stone-400">{{ idx + 1 }} · {{ e.studentCode }} · {{ e.startDate }}</p>
+                </div>
+                <StatusChip domain="enrollment" :value="e.status" />
+              </div>
+              <p v-if="e.note" class="text-[11px] text-stone-500">{{ e.note }}</p>
+              <div v-if="can(PERMISSIONS.Enrollments.Manage)" class="flex items-center justify-end gap-1">
+                <template v-if="e.status === 'Active'">
+                  <UButton size="xs" variant="ghost" color="neutral" icon="i-lucide-arrow-right-left" @click="openTransferModal(e)">
+                    Chuyển lớp
+                  </UButton>
+                  <UButton size="xs" variant="ghost" color="error" icon="i-lucide-user-minus" @click="openWithdrawModal(e)">
+                    Rút lớp
+                  </UButton>
+                </template>
+                <span v-else class="text-[11px] text-stone-400 italic">Đã kết thúc</span>
+              </div>
+            </div>
+          </template>
+        </ListTable>
       </div>
     </template>
 

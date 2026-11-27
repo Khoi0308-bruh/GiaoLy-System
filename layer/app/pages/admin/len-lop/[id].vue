@@ -371,12 +371,13 @@ function getOutcomeLabel(outcome: string) {
           icon="i-lucide-x-circle"
           :class="batch.rejectedCount > 0 ? 'text-red-500' : ''"
         />
-        <StatCard
-          label="Trạng thái đợt"
-          :value="batch.status === 'Draft' ? 'Đang xét' : batch.status === 'Applied' ? 'Đã áp dụng' : 'Đã hủy'"
-          icon="i-lucide-tag"
-          :class="batch.status === 'Applied' ? 'text-primary-600' : ''"
-        />
+        <div class="block rounded-xl border border-stone-200 border-t-4 border-t-vatican-500 bg-parchment p-4 dark:border-stone-700 dark:bg-stone-900">
+          <div class="flex min-w-0 items-start justify-between gap-2">
+            <StatusChip domain="draft" :value="batch.status" />
+            <UIcon name="i-lucide-tag" class="size-6 shrink-0 text-vatican-500/80" aria-hidden="true" />
+          </div>
+          <div class="mt-2 text-sm font-medium text-stone-700 dark:text-stone-300">Trạng thái đợt</div>
+        </div>
       </div>
 
       <!-- Bộ lọc và tìm kiếm -->
@@ -424,129 +425,169 @@ function getOutcomeLabel(outcome: string) {
       </div>
 
       <!-- Bảng danh sách đề xuất -->
-      <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-        <div class="overflow-x-auto">
-          <table class="w-full text-left text-sm">
-            <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-              <tr>
-                <th class="p-3 w-10 text-center">STT</th>
-                <th class="p-3">Mã ĐS</th>
-                <th class="p-3">Tên thánh & Họ tên</th>
-                <th class="p-3">Lớp hiện tại</th>
-                <th class="p-3 text-center">ĐTB / Vắng</th>
-                <th class="p-3 text-center">Đề xuất</th>
-                <th class="p-3">Lớp đích dự kiến</th>
-                <th class="p-3 text-center">Trạng thái duyệt</th>
-                <th v-if="batch.status === 'Draft' && can(PERMISSIONS.Promotion.Decide)" class="p-3 text-right">
-                  Hành động
-                </th>
-              </tr>
-            </thead>
-            <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-              <tr v-if="loading">
-                <td colspan="9" class="p-8 text-center text-sm text-stone-400 animate-pulse">
-                  Đang tải danh sách đề xuất...
-                </td>
-              </tr>
-              <tr v-else-if="filteredDrafts.length === 0">
-                <td colspan="9" class="p-8 text-center text-sm text-stone-500">
-                  Không có đề xuất nào khớp với điều kiện lọc.
-                </td>
-              </tr>
-              <tr
-                v-for="(d, idx) in filteredDrafts"
-                :key="d.id"
-                class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
-                :class="d.isStale ? 'bg-amber-50/40 dark:bg-amber-950/20' : ''"
-              >
-                <td class="p-3 text-center text-xs text-stone-400 font-mono">{{ idx + 1 }}</td>
-                <td class="p-3 font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">
-                  {{ d.studentCode }}
-                </td>
-                <td class="p-3 font-medium text-stone-900 dark:text-stone-100 whitespace-nowrap">
-                  <NuxtLink :to="`/admin/doan-sinh/${d.studentId}`" class="hover:underline">
-                    {{ d.holyName ? `${d.holyName} ` : '' }}{{ d.fullName }}
-                  </NuxtLink>
-                </td>
-                <td class="p-3 text-xs text-stone-600 dark:text-stone-300">
-                  <p class="font-semibold">{{ d.fromClassRoomName }}</p>
-                  <p class="text-[11px] text-stone-400">{{ d.fromClassLevelName }}</p>
-                </td>
-                <td class="p-3 text-center font-mono text-xs whitespace-nowrap">
-                  <p class="font-bold text-stone-800 dark:text-stone-200">
-                    ĐTB: {{ d.gpa?.toFixed(1) ?? '—' }}
-                  </p>
-                  <p class="text-[11px] text-stone-400">
-                    Chuyên cần: {{ d.attendanceRate ? `${d.attendanceRate}%` : '—' }}
-                  </p>
-                </td>
-                <td class="p-3 text-center">
-                  <span
-                    class="inline-block rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                    :class="getOutcomeLabel(d.outcome).color"
-                  >
-                    {{ getOutcomeLabel(d.outcome).text }}
-                  </span>
-                </td>
-                <td class="p-3 text-xs">
-                  <div class="flex items-center gap-1.5">
-                    <span v-if="d.suggestedClassRoomName" class="font-semibold text-stone-800 dark:text-stone-200">
-                      {{ d.suggestedClassRoomName }}
-                    </span>
-                    <span v-else class="italic text-stone-400">Chưa xếp lớp</span>
+            <ListTable
+        :columns="9"
+        :loading="loading"
+        :empty="filteredDrafts.length === 0"
+        loading-text="Đang tải danh sách đề xuất..."
+        empty-title="Không có đề xuất nào khớp bộ lọc"
+        empty-description="Thử đổi từ khoá tìm kiếm hoặc bộ lọc trạng thái."
+      >
+        <template #head>
+          <th class="w-[4%] px-2 py-3 text-center">#</th>
+          <th class="w-[9%] px-3 py-3">Mã ĐS</th>
+          <th class="w-[18%] px-3 py-3">Tên thánh &amp; Họ tên</th>
+          <th class="w-[14%] px-3 py-3">Lớp hiện tại</th>
+          <th class="w-[11%] px-3 py-3 text-center">ĐTB/CC</th>
+          <th class="w-[12%] px-3 py-3 text-center">Đề xuất</th>
+          <th class="w-[16%] px-3 py-3">Lớp đích</th>
+          <th class="w-[10%] px-3 py-3 text-center">Duyệt</th>
+          <th v-if="batch.status === 'Draft' && can(PERMISSIONS.Promotion.Decide)" class="w-[10%] px-3 py-3 text-right"><span class="sr-only">Hành động</span></th>
+        </template>
 
-                    <button
-                      v-if="batch.status === 'Draft' && can(PERMISSIONS.Promotion.Decide)"
-                      type="button"
-                      class="text-marian-600 hover:text-marian-700 dark:text-marian-400"
-                      title="Chọn lại lớp đích"
-                      @click="openTargetClassModal(d)"
-                    >
-                      <UIcon name="i-lucide-pencil" class="h-3 w-3" />
-                    </button>
-                  </div>
-                </td>
-                <td class="p-3 text-center">
-                  <div class="inline-flex flex-col items-center gap-0.5">
-                    <StatusChip domain="draft" :value="d.status" />
-                    <span
-                      v-if="d.isStale"
-                      class="rounded bg-amber-100 px-1.5 py-0.2 text-[10px] font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200"
-                    >
-                      Stale
-                    </span>
-                  </div>
-                </td>
-                <td v-if="batch.status === 'Draft' && can(PERMISSIONS.Promotion.Decide)" class="p-3 text-right whitespace-nowrap">
-                  <div class="flex items-center justify-end gap-1">
-                    <UButton
-                      size="xs"
-                      variant="ghost"
-                      color="primary"
-                      icon="i-lucide-check"
-                      :title="d.status === 'Approved' ? 'Duyệt lại' : 'Duyệt đề xuất'"
-                      @click="handleApprove(d)"
-                    >
-                      Duyệt
-                    </UButton>
-                    <UButton
-                      v-if="d.status === 'Pending'"
-                      size="xs"
-                      variant="ghost"
-                      color="error"
-                      icon="i-lucide-x"
-                      title="Từ chối đề xuất"
-                      @click="openRejectModal(d)"
-                    >
-                      Từ chối
-                    </UButton>
-                  </div>
-                </td>
-              </tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+        <template #rows>
+          <tr
+            v-for="(d, idx) in filteredDrafts"
+            :key="d.id"
+            class="transition-colors hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+            :class="d.isStale ? 'bg-amber-50/40 dark:bg-amber-950/20' : ''"
+          >
+            <td class="px-3 py-3 text-center font-mono text-[11px] text-stone-400">{{ idx + 1 }}</td>
+            <td class="px-3 py-3">
+              <span class="block truncate font-mono text-xs font-semibold text-marian-600 dark:text-marian-400">{{ d.studentCode }}</span>
+            </td>
+            <td class="px-3 py-3">
+              <NuxtLink
+                :to="'/admin/doan-sinh/' + d.studentId"
+                class="block truncate font-medium text-stone-900 hover:underline dark:text-stone-100"
+                :title="(d.holyName ? d.holyName + ' ' : '') + d.fullName"
+              >
+                {{ d.holyName ? d.holyName + ' ' : '' }}{{ d.fullName }}
+              </NuxtLink>
+            </td>
+            <td class="px-3 py-3 text-xs">
+              <p class="truncate font-semibold text-stone-700 dark:text-stone-300">{{ d.fromClassRoomName }}</p>
+              <p class="truncate text-[10px] text-stone-400">{{ d.fromClassLevelName }}</p>
+            </td>
+            <td class="px-3 py-3 text-center font-mono text-[11px] whitespace-nowrap">
+              <p class="font-bold text-stone-800 dark:text-stone-200">ĐTB: {{ d.gpa !== null && d.gpa !== undefined ? d.gpa.toFixed(1) : '—' }}</p>
+              <p class="text-[10px] text-stone-400">CC: {{ d.attendanceRate ? d.attendanceRate + '%' : '—' }}</p>
+            </td>
+            <td class="px-3 py-3 text-center">
+              <span class="inline-block rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap" :class="getOutcomeLabel(d.outcome).color">
+                {{ getOutcomeLabel(d.outcome).text }}
+              </span>
+            </td>
+            <td class="px-3 py-3 text-xs">
+              <div class="flex items-center gap-1">
+                <span v-if="d.suggestedClassRoomName" class="truncate font-semibold text-stone-800 dark:text-stone-200">
+                  {{ d.suggestedClassRoomName }}
+                </span>
+                <span v-else class="truncate text-[11px] text-stone-400 italic">Chưa xếp lớp</span>
+                <button
+                  v-if="batch.status === 'Draft' && can(PERMISSIONS.Promotion.Decide)"
+                  type="button"
+                  class="shrink-0 text-marian-600 hover:text-marian-700 dark:text-marian-400"
+                  title="Chọn lại lớp đích"
+                  @click="openTargetClassModal(d)"
+                >
+                  <UIcon name="i-lucide-pencil" class="size-3" />
+                </button>
+              </div>
+            </td>
+            <td class="px-3 py-3 text-center">
+              <div class="inline-flex flex-col items-center gap-0.5">
+                <StatusChip domain="draft" :value="d.status" />
+                <span v-if="d.isStale" class="rounded bg-amber-100 px-1.5 text-[10px] font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                  Stale
+                </span>
+              </div>
+            </td>
+            <td v-if="batch.status === 'Draft' && can(PERMISSIONS.Promotion.Decide)" class="px-3 py-3 text-right">
+              <div class="flex items-center justify-end gap-0.5">
+                <UButton
+                  size="xs"
+                  variant="ghost"
+                  color="primary"
+                  icon="i-lucide-check"
+                  :title="d.status === 'Approved' ? 'Duyệt lại' : 'Duyệt đề xuất'"
+                  @click="handleApprove(d)"
+                />
+                <UButton
+                  v-if="d.status === 'Pending'"
+                  size="xs"
+                  variant="ghost"
+                  color="error"
+                  icon="i-lucide-x"
+                  title="Từ chối đề xuất"
+                  @click="openRejectModal(d)"
+                />
+              </div>
+            </td>
+          </tr>
+        </template>
+
+        <template #cards>
+          <div v-for="(d, idx) in filteredDrafts" :key="d.id" class="space-y-2 px-4 py-3" :class="d.isStale ? 'bg-amber-50/40 dark:bg-amber-950/20' : ''">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <NuxtLink :to="'/admin/doan-sinh/' + d.studentId" class="block truncate text-sm font-semibold text-stone-900 hover:underline dark:text-stone-100">
+                  {{ d.holyName ? d.holyName + ' ' : '' }}{{ d.fullName }}
+                </NuxtLink>
+                <p class="truncate font-mono text-[11px] text-stone-400">
+                  {{ idx + 1 }} · {{ d.studentCode }} · {{ d.fromClassRoomName }}
+                </p>
+              </div>
+              <StatusChip domain="draft" :value="d.status" />
+            </div>
+            <p class="flex flex-wrap items-center gap-x-2 gap-y-1 text-[11px] text-stone-500">
+              <span class="rounded bg-stone-100 px-1.5 py-0.5 font-mono font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+                ĐTB {{ d.gpa !== null && d.gpa !== undefined ? d.gpa.toFixed(1) : '—' }}
+              </span>
+              <span class="rounded bg-stone-100 px-1.5 py-0.5 font-mono font-semibold text-stone-700 dark:bg-stone-800 dark:text-stone-300">
+                CC {{ d.attendanceRate ? d.attendanceRate + '%' : '—' }}
+              </span>
+              <span class="rounded-full px-2 py-0.5 font-semibold whitespace-nowrap" :class="getOutcomeLabel(d.outcome).color">
+                {{ getOutcomeLabel(d.outcome).text }}
+              </span>
+              <span v-if="d.isStale" class="rounded bg-amber-100 px-1.5 py-0.5 font-bold text-amber-800 dark:bg-amber-900 dark:text-amber-200">
+                Cần xem lại
+              </span>
+            </p>
+            <div class="flex items-center justify-between gap-2">
+              <span class="flex min-w-0 items-center gap-1 text-[11px] text-stone-500">
+                <span class="shrink-0">Lớp đích:</span>
+                <span v-if="d.suggestedClassRoomName" class="truncate font-semibold text-stone-800 dark:text-stone-200">{{ d.suggestedClassRoomName }}</span>
+                <span v-else class="italic">Chưa xếp lớp</span>
+                <button
+                  v-if="batch.status === 'Draft' && can(PERMISSIONS.Promotion.Decide)"
+                  type="button"
+                  class="shrink-0 text-marian-600 dark:text-marian-400"
+                  title="Chọn lại lớp đích"
+                  @click="openTargetClassModal(d)"
+                >
+                  <UIcon name="i-lucide-pencil" class="size-3" />
+                </button>
+              </span>
+              <div v-if="batch.status === 'Draft' && can(PERMISSIONS.Promotion.Decide)" class="flex shrink-0 items-center gap-1">
+                <UButton size="xs" variant="ghost" color="primary" icon="i-lucide-check" @click="handleApprove(d)">
+                  Duyệt
+                </UButton>
+                <UButton
+                  v-if="d.status === 'Pending'"
+                  size="xs"
+                  variant="ghost"
+                  color="error"
+                  icon="i-lucide-x"
+                  @click="openRejectModal(d)"
+                >
+                  Từ chối
+                </UButton>
+              </div>
+            </div>
+          </div>
+        </template>
+      </ListTable>
     </template>
 
     <!-- Modal Từ Chối Đề Xuất -->

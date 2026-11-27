@@ -249,6 +249,15 @@ function formatDuration(run: JobRunItem) {
   const seconds = totalSeconds % 60
   return seconds ? `${minutes} phút ${seconds} giây` : `${minutes} phút`
 }
+/** Tách ngày/giờ để cột Thời gian hẹp không phải cắt giữa chuỗi. */
+function splitDateTime(iso?: string | null) {
+  if (!iso) return { date: '—', time: '—' }
+  const d = new Date(iso)
+  return {
+    date: d.toLocaleDateString('vi-VN'),
+    time: d.toLocaleTimeString('vi-VN', { hour12: false })
+  }
+}
 </script>
 
 <template>
@@ -322,14 +331,16 @@ function formatDuration(run: JobRunItem) {
       </div>
     </div>
 
-    <!-- Bộ lọc + lịch sử chạy -->
-    <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="flex flex-col gap-3 border-b border-stone-100 p-4 sm:flex-row sm:items-center sm:justify-between dark:border-stone-800">
+    <!-- Bộ lọc lịch sử chạy -->
+    <div class="rounded-xl border border-stone-200 bg-white shadow-xs dark:border-stone-800 dark:bg-stone-900">
+      <div class="flex flex-col gap-3 p-4 sm:flex-row sm:items-center sm:justify-between">
         <div>
           <h2 class="font-display text-lg font-bold text-stone-900 dark:text-stone-100">
             Lịch Sử Chạy
           </h2>
-          <p class="text-xs text-stone-500">Bao gồm cả lượt chạy tự động (theo lịch hoặc khi khởi động) và lượt chạy tay.</p>
+          <p class="text-xs text-stone-500">
+            Bao gồm cả lượt chạy tự động (theo lịch hoặc khi khởi động) và lượt chạy tay.
+          </p>
         </div>
         <div class="flex flex-wrap items-center gap-3">
           <select
@@ -346,91 +357,112 @@ function formatDuration(run: JobRunItem) {
           </span>
         </div>
       </div>
+    </div>
 
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Tác vụ</th>
-              <th class="p-4">Bắt đầu</th>
-              <th class="p-4">Kết thúc</th>
-              <th class="p-4">Thời lượng</th>
-              <th class="p-4 text-center">Trạng thái</th>
-              <th class="p-4">Nguồn kích hoạt</th>
-              <th class="p-4">Thông điệp kết quả</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="loading">
-              <td colspan="7" class="animate-pulse p-8 text-center text-sm text-stone-400">
-                Đang tải lịch sử tác vụ nền…
-              </td>
-            </tr>
-            <tr v-else-if="jobRuns.length === 0">
-              <td colspan="7" class="p-8 text-center text-sm text-stone-500">
-                Chưa có lượt chạy nào phù hợp với bộ lọc.
-              </td>
-            </tr>
-            <tr
-              v-for="run in jobRuns"
-              :key="run.id"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+    <ListTable
+      :columns="5"
+      :loading="loading"
+      :empty="jobRuns.length === 0"
+      loading-text="Đang tải lịch sử tác vụ nền…"
+      empty-title="Chưa có lượt chạy nào"
+      empty-description="Chưa có lượt chạy phù hợp với bộ lọc tác vụ đang chọn."
+      :footer="totalPages > 1"
+    >
+      <template #head>
+        <th class="w-[30%] px-4 py-3">Tác vụ</th>
+        <th class="w-[22%] px-4 py-3">Thời gian</th>
+        <th class="w-[16%] px-4 py-3">Trạng thái</th>
+        <th class="w-[13%] px-4 py-3">Nguồn</th>
+        <th class="w-[19%] px-4 py-3">Thông điệp</th>
+      </template>
+
+      <template #rows>
+        <tr
+          v-for="run in jobRuns"
+          :key="run.id"
+          class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+        >
+          <td class="px-4 py-3">
+            <p class="truncate font-semibold text-stone-900 dark:text-stone-100">{{ jobTitle(run.jobName) }}</p>
+            <p class="mt-0.5 truncate font-mono text-[11px] text-stone-400">{{ run.jobName }}</p>
+          </td>
+          <td
+            class="px-4 py-3 text-xs text-stone-500"
+            :title="`${formatDateTime(run.startedAt)} → ${run.finishedAt ? formatDateTime(run.finishedAt) : 'chưa xong'}`"
+          >
+            <p class="truncate text-[11px] text-stone-400">{{ splitDateTime(run.startedAt).date }}</p>
+            <p class="mt-0.5 truncate font-mono text-[11px]">
+              {{ splitDateTime(run.startedAt).time }} · {{ formatDuration(run) }}
+            </p>
+          </td>
+          <td class="px-4 py-3">
+            <span
+              class="inline-block rounded-full px-1.5 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="statusMeta(run.status).cls"
             >
-              <td class="p-4">
-                <p class="font-semibold text-stone-900 dark:text-stone-100">{{ jobTitle(run.jobName) }}</p>
-                <p class="font-mono text-[11px] text-stone-400">{{ run.jobName }}</p>
-              </td>
-              <td class="whitespace-nowrap p-4 font-mono text-xs text-stone-500">
-                {{ formatDateTime(run.startedAt) }}
-              </td>
-              <td class="whitespace-nowrap p-4 font-mono text-xs text-stone-500">
-                {{ formatDateTime(run.finishedAt) }}
-              </td>
-              <td class="whitespace-nowrap p-4 font-mono text-xs text-stone-500">
-                {{ formatDuration(run) }}
-              </td>
-              <td class="p-4 text-center">
-                <span
-                  class="inline-flex items-center gap-1.5 rounded-full px-2.5 py-0.5 text-xs font-semibold"
-                  :class="statusMeta(run.status).cls"
-                >
-                  <span class="size-1.5 rounded-full" :class="statusMeta(run.status).dot" />
-                  {{ statusMeta(run.status).label }}
-                </span>
-              </td>
-              <td class="whitespace-nowrap p-4 text-xs text-stone-600 dark:text-stone-300">
-                {{ triggerLabel(run.lockedBy) }}
-              </td>
-              <td class="p-4 text-xs text-stone-600 dark:text-stone-300">
-                <span class="line-clamp-2 max-w-[360px]" :title="run.message || undefined">
-                  {{ run.message || '—' }}
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+              {{ statusMeta(run.status).label }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-[11px] text-stone-600 dark:text-stone-300">
+            <span class="block truncate" :title="triggerLabel(run.lockedBy)">{{ triggerLabel(run.lockedBy) }}</span>
+          </td>
+          <td class="px-4 py-3 text-xs text-stone-600 dark:text-stone-300">
+            <span class="line-clamp-2" :title="run.message || undefined">{{ run.message || '—' }}</span>
+          </td>
+        </tr>
+      </template>
 
-      <div v-if="totalPages > 1" class="flex items-center justify-between border-t border-stone-100 p-4 dark:border-stone-800">
-        <span class="text-xs text-stone-500">Trang {{ currentPage }} / {{ totalPages }}</span>
+      <template #cards>
+        <div v-for="run in jobRuns" :key="run.id" class="space-y-1.5 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <div class="min-w-0">
+              <p class="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">{{ jobTitle(run.jobName) }}</p>
+              <p class="truncate font-mono text-[11px] text-stone-400">{{ run.jobName }}</p>
+            </div>
+            <span
+              class="inline-flex shrink-0 items-center gap-1 rounded-full px-2 py-0.5 text-[11px] font-semibold whitespace-nowrap"
+              :class="statusMeta(run.status).cls"
+            >
+              {{ statusMeta(run.status).label }}
+            </span>
+          </div>
+          <p class="font-mono text-[11px] text-stone-500">
+            {{ formatDateTime(run.startedAt) }}
+            {{ run.finishedAt ? `→ ${formatDateTime(run.finishedAt)}` : '→ chưa xong' }}
+            · {{ formatDuration(run) }}
+          </p>
+          <p class="flex items-center gap-1 text-[11px] text-stone-500">
+            <UIcon name="i-lucide-zap" class="size-3 shrink-0" />
+            {{ triggerLabel(run.lockedBy) }}
+          </p>
+          <p v-if="run.message" class="line-clamp-2 text-xs text-stone-500">{{ run.message }}</p>
+        </div>
+      </template>
+
+      <template #footer>
+        <span class="tabular-nums">Trang {{ currentPage }} / {{ totalPages }}</span>
         <div class="flex items-center gap-1">
           <UButton
             size="xs"
             variant="ghost"
+            color="neutral"
             icon="i-lucide-chevron-left"
+            aria-label="Trang trước"
             :disabled="currentPage <= 1"
             @click="changePage(-1)"
           />
           <UButton
             size="xs"
             variant="ghost"
+            color="neutral"
             icon="i-lucide-chevron-right"
+            aria-label="Trang sau"
             :disabled="currentPage >= totalPages"
             @click="changePage(1)"
           />
         </div>
-      </div>
-    </div>
+      </template>
+    </ListTable>
 
     <!-- Xác nhận chạy tay -->
     <UModal

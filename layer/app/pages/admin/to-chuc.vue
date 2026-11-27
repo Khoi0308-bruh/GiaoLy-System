@@ -317,68 +317,84 @@ onMounted(loadData)
 
     <!-- TAB 2: DANH SÁCH CẤP LỚP -->
     <div v-else class="space-y-4">
-      <div v-if="classLevels.length === 0 && !loading">
-        <EmptyState title="Chưa có cấp lớp nào" description="Nhấn Thêm cấp lớp để bắt đầu lộ trình đào tạo giáo lý.">
-          <UButton v-if="permissions.can(PERMISSIONS.Org.Manage)" icon="i-lucide-plus" @click="openAddLevel">
-            Thêm cấp lớp
-          </UButton>
-        </EmptyState>
-      </div>
+                  <ListTable
+        :columns="6"
+        :loading="loading"
+        :empty="classLevels.length === 0"
+        loading-text="Đang tải cấp lớp..."
+        empty-title="Chưa có cấp lớp nào"
+        empty-description="Nhấn Thêm cấp lớp để bắt đầu lộ trình đào tạo giáo lý."
+      >
+        <template #head>
+          <th class="w-[12%] px-4 py-3">Mã</th>
+          <th class="w-[26%] px-4 py-3">Tên cấp lớp</th>
+          <th class="w-[20%] px-4 py-3">Ngành</th>
+          <th class="w-[24%] px-4 py-3">Cấp kế tiếp</th>
+          <th class="w-[8%] px-4 py-3 text-center">Thứ tự</th>
+          <th class="w-[10%] px-4 py-3 text-right"><span class="sr-only">Thao tác</span></th>
+        </template>
 
-      <div v-else class="overflow-x-auto rounded-xl border border-stone-200 bg-white shadow-xs dark:border-stone-800 dark:bg-stone-900">
-        <table class="w-full text-left text-sm">
-          <thead class="border-b border-stone-200 bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:border-stone-800 dark:bg-stone-950 dark:text-stone-400">
-            <tr>
-              <th class="px-4 py-3">Mã</th>
-              <th class="px-4 py-3">Tên cấp lớp</th>
-              <th class="px-4 py-3">Ngành</th>
-              <th class="px-4 py-3">Cấp kế tiếp</th>
-              <th class="px-4 py-3 text-center">Thứ tự</th>
-              <th class="px-4 py-3 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr
-              v-for="l in classLevels"
-              :key="l.id"
-              class="hover:bg-stone-50 dark:hover:bg-stone-800/50"
-            >
-              <td class="px-4 py-3 font-semibold text-stone-900 dark:text-white">
-                {{ l.code }}
-              </td>
-              <td class="px-4 py-3">
-                <strong>{{ l.name }}</strong>
-              </td>
-              <td class="px-4 py-3 text-stone-600 dark:text-stone-300">
-                <UBadge variant="subtle" color="primary" size="xs">
-                  {{ getBranchName(l.branchId) }}
-                </UBadge>
-              </td>
-              <td class="px-4 py-3 text-xs text-stone-500">
-                <span class="inline-flex items-center gap-1">
-                  <UIcon name="i-lucide-arrow-right" class="size-3 text-stone-400" />
-                  <span>{{ getNextLevelName(l.nextLevelId) }}</span>
-                </span>
-              </td>
-              <td class="px-4 py-3 text-center text-xs text-stone-400">
-                #{{ l.sortOrder }}
-              </td>
-              <td class="px-4 py-3 text-right">
-                <UButton
-                  v-if="permissions.can(PERMISSIONS.Org.Manage)"
-                  size="xs"
-                  variant="ghost"
-                  color="neutral"
-                  icon="i-lucide-pencil"
-                  @click="openEditLevel(l)"
-                >
-                  Sửa
-                </UButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
+        <template #rows>
+          <tr v-for="l in classLevels" :key="l.id" class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50">
+            <td class="px-4 py-3">
+              <span class="block truncate font-mono text-xs font-semibold text-stone-900 dark:text-white">{{ l.code }}</span>
+            </td>
+            <td class="px-4 py-3">
+              <span class="block truncate font-semibold text-stone-900 dark:text-stone-100" :title="l.name">{{ l.name }}</span>
+            </td>
+            <td class="px-4 py-3">
+              <UBadge variant="subtle" color="primary" size="xs">
+                {{ getBranchName(l.branchId) }}
+              </UBadge>
+            </td>
+            <td class="px-4 py-3 text-xs text-stone-500">
+              <span class="flex items-center gap-1">
+                <UIcon name="i-lucide-arrow-right" class="size-3 shrink-0 text-stone-400" />
+                <span class="truncate">{{ getNextLevelName(l.nextLevelId) }}</span>
+              </span>
+            </td>
+            <td class="px-4 py-3 text-center text-xs text-stone-400">#{{ l.sortOrder }}</td>
+            <td class="px-4 py-3 text-right">
+              <UButton
+                v-if="permissions.can(PERMISSIONS.Org.Manage)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                @click="openEditLevel(l)"
+              />
+            </td>
+          </tr>
+        </template>
+
+        <template #cards>
+          <div v-for="l in classLevels" :key="l.id" class="space-y-2 px-4 py-3">
+            <div class="flex items-start justify-between gap-2">
+              <div class="min-w-0">
+                <p class="truncate text-sm font-semibold text-stone-900 dark:text-stone-100">{{ l.name }}</p>
+                <p class="font-mono text-[11px] text-stone-400">{{ l.code }} · #{{ l.sortOrder }}</p>
+              </div>
+              <UBadge variant="subtle" color="primary" size="xs">
+                {{ getBranchName(l.branchId) }}
+              </UBadge>
+            </div>
+            <div class="flex items-center justify-between gap-2">
+              <span class="flex min-w-0 items-center gap-1 text-[11px] text-stone-500">
+                <UIcon name="i-lucide-arrow-right" class="size-3 shrink-0 text-stone-400" />
+                <span class="truncate">{{ getNextLevelName(l.nextLevelId) }}</span>
+              </span>
+              <UButton
+                v-if="permissions.can(PERMISSIONS.Org.Manage)"
+                size="xs"
+                variant="ghost"
+                color="neutral"
+                icon="i-lucide-pencil"
+                @click="openEditLevel(l)"
+              />
+            </div>
+          </div>
+        </template>
+      </ListTable>
     </div>
 
     <!-- MODAL THÊM / SỬA NGÀNH -->

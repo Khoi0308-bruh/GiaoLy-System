@@ -104,63 +104,81 @@ async function handleSaveSetting() {
     </div>
 
     <!-- Bảng danh sách cấu hình -->
-    <div class="rounded-2xl border border-stone-200 bg-white shadow-sm dark:border-stone-800 dark:bg-stone-900">
-      <div class="overflow-x-auto">
-        <table class="w-full text-left text-sm">
-          <thead class="bg-stone-50 text-xs font-semibold uppercase text-stone-600 dark:bg-stone-800/70 dark:text-stone-300">
-            <tr>
-              <th class="p-4">Tham số cấu hình</th>
-              <th class="p-4">Giá trị hiện tại</th>
-              <th class="p-4">Mô tả nghiệp vụ</th>
-              <th class="p-4">Cập nhật cuối</th>
-              <th v-if="can(PERMISSIONS.Settings.Manage)" class="p-4 text-right">Thao tác</th>
-            </tr>
-          </thead>
-          <tbody class="divide-y divide-stone-100 dark:divide-stone-800">
-            <tr v-if="loading">
-              <td colspan="5" class="p-8 text-center text-sm text-stone-400 animate-pulse">
-                Đang tải danh sách tham số...
-              </td>
-            </tr>
-            <tr v-else-if="filteredSettings.length === 0">
-              <td colspan="5" class="p-8 text-center text-sm text-stone-500">
-                Không tìm thấy tham số cấu hình nào.
-              </td>
-            </tr>
-            <tr
-              v-for="s in filteredSettings"
-              :key="s.key"
-              class="hover:bg-stone-50/70 dark:hover:bg-stone-800/40"
+    <ListTable
+      :columns="can(PERMISSIONS.Settings.Manage) ? 5 : 4"
+      :loading="loading"
+      :empty="filteredSettings.length === 0"
+      loading-text="Đang tải danh sách tham số..."
+      empty-title="Không tìm thấy tham số cấu hình nào"
+      empty-description="Thử đổi từ khoá tìm kiếm."
+    >
+      <template #head>
+        <th class="w-[26%] px-4 py-3">Tham số</th>
+        <th class="w-[16%] px-4 py-3">Giá trị</th>
+        <th class="w-[28%] px-4 py-3">Mô tả</th>
+        <th class="w-[16%] px-4 py-3">Cập nhật</th>
+        <th v-if="can(PERMISSIONS.Settings.Manage)" class="w-[14%] px-3 py-3 text-right">Thao tác</th>
+      </template>
+
+      <template #rows>
+        <tr
+          v-for="s in filteredSettings"
+          :key="s.key"
+          class="transition-colors hover:bg-stone-50 dark:hover:bg-stone-800/50"
+        >
+          <td class="px-4 py-3 font-mono text-xs font-bold">
+            <span class="block truncate text-stone-900 dark:text-stone-100" :title="s.key">{{ s.key }}</span>
+          </td>
+          <td class="px-4 py-3">
+            <span class="inline-block max-w-full truncate rounded bg-stone-100 px-2 py-0.5 font-mono text-xs font-bold text-marian-600 dark:bg-stone-800 dark:text-marian-400" :title="s.value">
+              {{ s.value }}
+            </span>
+          </td>
+          <td class="px-4 py-3 text-xs text-stone-600 dark:text-stone-300">
+            <span class="line-clamp-2" :title="s.description || undefined">{{ s.description || '—' }}</span>
+          </td>
+          <td class="px-4 py-3 text-[11px] whitespace-nowrap text-stone-400">
+            {{ new Date(s.updatedAt).toLocaleDateString('vi-VN') }}
+          </td>
+          <td v-if="can(PERMISSIONS.Settings.Manage)" class="px-3 py-3 text-right">
+            <UButton
+              size="xs"
+              variant="outline"
+              color="neutral"
+              icon="i-lucide-pencil"
+              title="Sửa giá trị"
+              @click="openEditModal(s)"
+            />
+          </td>
+        </tr>
+      </template>
+
+      <template #cards>
+        <div v-for="s in filteredSettings" :key="s.key" class="space-y-1.5 px-4 py-3">
+          <div class="flex items-start justify-between gap-2">
+            <p class="min-w-0 truncate font-mono text-xs font-bold text-stone-900 dark:text-stone-100">{{ s.key }}</p>
+            <span class="max-w-[45%] shrink-0 truncate rounded bg-stone-100 px-2 py-0.5 font-mono text-[11px] font-bold text-marian-600 dark:bg-stone-800 dark:text-marian-400">
+              {{ s.value }}
+            </span>
+          </div>
+          <p v-if="s.description" class="line-clamp-2 text-xs text-stone-500">{{ s.description }}</p>
+          <div class="flex items-center justify-between gap-2">
+            <span class="text-[11px] text-stone-400">{{ new Date(s.updatedAt).toLocaleDateString('vi-VN') }}</span>
+            <UButton
+              v-if="can(PERMISSIONS.Settings.Manage)"
+              size="xs"
+              variant="outline"
+              color="neutral"
+              icon="i-lucide-pencil"
+              @click="openEditModal(s)"
             >
-              <td class="p-4 font-mono font-bold text-xs text-stone-900 dark:text-stone-100">
-                {{ s.key }}
-              </td>
-              <td class="p-4 font-mono font-bold text-xs text-marian-600 dark:text-marian-400">
-                <span class="rounded bg-stone-100 px-2.5 py-1 dark:bg-stone-800">
-                  {{ s.value }}
-                </span>
-              </td>
-              <td class="p-4 text-xs text-stone-600 dark:text-stone-300 max-w-md">
-                {{ s.description || '—' }}
-              </td>
-              <td class="p-4 text-xs text-stone-400 whitespace-nowrap">
-                {{ new Date(s.updatedAt).toLocaleString('vi-VN') }}
-              </td>
-              <td v-if="can(PERMISSIONS.Settings.Manage)" class="p-4 text-right whitespace-nowrap">
-                <UButton
-                  size="xs"
-                  variant="outline"
-                  icon="i-lucide-pencil"
-                  @click="openEditModal(s)"
-                >
-                  Sửa giá trị
-                </UButton>
-              </td>
-            </tr>
-          </tbody>
-        </table>
-      </div>
-    </div>
+              Sửa giá trị
+            </UButton>
+          </div>
+        </div>
+      </template>
+    </ListTable>
+
 
     <!-- Modal Sửa Giá Trị Cấu Hình -->
     <UModal
