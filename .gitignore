@@ -35,6 +35,9 @@ artifacts/
 msbuild.log
 *.binlog
 
+# Tệp tài liệu người dùng tải lên (lưu trên đĩa khi chạy API, không commit)
+GiaoLy.API/App_Data/
+
 # ── Node / Nuxt ──────────────────────────────────────────────────────
 node_modules/
 .pnpm-store/
