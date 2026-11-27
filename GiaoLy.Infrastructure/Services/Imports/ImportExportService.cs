@@ -248,6 +248,10 @@ public class ImportExportService : IImportExportService
             {
                 errors.Add("Ngày sinh bắt buộc phải có và phải đúng định dạng ngày (dd/MM/yyyy).");
             }
+            else if (birthDate.Value < StudentBirthDateRules.MinBirthDate)
+            {
+                errors.Add($"Ngày sinh ({birthDate.Value:dd/MM/yyyy}) không hợp lệ. Vui lòng nhập ngày sinh thực tế của em (sau 01/01/1900).");
+            }
             else if (birthDate.Value > today)
             {
                 errors.Add($"Ngày sinh ({birthDate.Value:dd/MM/yyyy}) không thể ở tương lai.");
