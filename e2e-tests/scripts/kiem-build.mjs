@@ -15,10 +15,11 @@
  * Cần API dev đang chạy và mật khẩu admin đã chốt ở playwright/.auth/password.txt
  * (chạy `npx playwright test --project=setup` một lần nếu chưa có).
  */
-import { spawn, spawnSync } from 'node:child_process'
+import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
+import { choSanSang, dangChay, dungCay, log, moServerBuild } from './support.mjs'
 
 const E2E_DIR = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..')
 const PORTAL_DIR = path.resolve(E2E_DIR, '..', 'web-portal')
@@ -29,41 +30,16 @@ const mk = path.join(PORTAL_DIR, '.output', 'public')
 
 const hong = []
 function dat(ten, ok, chiTiet = '') {
-  console.log(`${ok ? '✅' : '❌'} ${ten}${chiTiet ? ` — ${chiTiet}` : ''}`)
+  log(ok, ten, chiTiet)
   if (!ok) hong.push(ten)
   return ok
 }
-const ngu = ms => new Promise(r => setTimeout(r, ms))
-
-function dungCay(child) {
-  if (!child || child.exitCode !== null) return
-  if (process.platform === 'win32') {
-    spawnSync('taskkill', ['/pid', String(child.pid), '/T', '/F'], { stdio: 'ignore' })
-  } else {
-    child.kill('SIGTERM')
-  }
-}
-
-async function choSanSang(han = 90_000) {
-  const het = Date.now() + han
-  while (Date.now() < het) {
-    try {
-      const res = await fetch(`${BASE}/`)
-      if (res.status === 200) return true
-    } catch { /* chưa lên */ }
-    await ngu(500)
-  }
-  return false
-}
 
 // 1. Dev server phải tắt: cùng thư mục .nuxt, build chồng lên dev dễ hỏng cả hai.
-try {
-  const res = await fetch('http://localhost:3001/', { signal: AbortSignal.timeout(3000) })
-  if (res.ok) {
-    console.error('❌ web-portal dev đang chạy ở cổng 3001. Tắt `pnpm run dev` rồi chạy lại.')
-    process.exit(1)
-  }
-} catch { /* đã tắt, tốt */ }
+if (await dangChay('http://localhost:3001/')) {
+  console.error('❌ web-portal dev đang chạy ở cổng 3001. Tắt `pnpm run dev` rồi chạy lại.')
+  process.exit(1)
+}
 
 // 2. Build
 console.log('\n▶ pnpm run build (web-portal)')
@@ -79,13 +55,11 @@ let child
 let headers
 let bannerId = null
 try {
-  child = spawn(process.execPath, [path.join('.output', 'server', 'index.mjs')], {
-    cwd: PORTAL_DIR,
-    env: { ...process.env, PORT: String(PORT), HOST: '127.0.0.1' },
-    stdio: 'inherit'
-  })
+  child = moServerBuild(PORTAL_DIR, PORT)
 
-  if (!dat(`bản build trả lời ở ${BASE}`, await choSanSang())) throw new Error('server không lên')
+  if (!dat(`bản build trả lời ở ${BASE}`, await choSanSang(`${BASE}/`, 90_000))) {
+    throw new Error('server không lên')
+  }
 
   const tepMatKhau = path.join(E2E_DIR, 'playwright', '.auth', 'password.txt')
   if (!existsSync(tepMatKhau)) {

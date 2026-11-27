@@ -5,7 +5,8 @@
   "main": "index.js",
   "scripts": {
     "test": "playwright test",
-    "kiem-build": "node scripts/kiem-build.mjs"
+    "kiem-build": "node scripts/kiem-build.mjs",
+    "test-build": "node scripts/test-build.mjs"
   },
   "keywords": [],
   "author": "",
