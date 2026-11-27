@@ -123,11 +123,10 @@ export async function taoLopCoGhiDanh(
 
 /**
  * Dọn lớp test đã dựng bằng `taoLopCoGhiDanh`, dùng đúng API như cách dọn banner
- * (mọi thứ là xoá mềm).
+ * (mọi thứ là xoá mềm): rút ghi danh → xoá đoàn sinh → xoá lớp.
  *
- * Lưu ý: lớp học KHÔNG xoá được — `ClassRoomService.DeleteClassRoomAsync` chặn xoá
- * lớp còn bất kỳ ghi danh nào, kể cả ghi danh đã rút, nên chỉ rút ghi danh rồi xoá
- * đoàn sinh; lớp ở lại (xem ghi chú trong báo cáo).
+ * Phải rút ghi danh trước: `ClassRoomService.DeleteClassRoomAsync` chặn xoá lớp còn
+ * ghi danh Active của đoàn sinh còn hồ sơ.
  */
 export async function donLopCoGhiDanh(
   request: APIRequestContext,
@@ -145,6 +144,9 @@ export async function donLopCoGhiDanh(
 
   const xoa = await request.delete(`${API_BASE}/api/v1/students/${fixture.studentId}`, { headers })
   expect([200, 404], 'xoá đoàn sinh test').toContain(xoa.status())
+
+  const xoaLop = await request.delete(`${API_BASE}/api/v1/classrooms/${fixture.roomId}`, { headers })
+  expect([200, 404], 'xoá lớp test').toContain(xoaLop.status())
 }
 
 /**
