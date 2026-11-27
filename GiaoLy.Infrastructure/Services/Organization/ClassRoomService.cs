@@ -177,10 +177,17 @@ public class ClassRoomService : IClassRoomService
             return Result.NotFound($"Không tìm thấy lớp học với Id '{id}'.");
         }
 
-        var hasEnrollments = await _db.Enrollments.AnyAsync(e => e.ClassRoomId == id, ct);
-        if (hasEnrollments)
+        // Chỉ ghi danh đang học (Active) của đoàn sinh còn hồ sơ mới chặn xoá. Rút lớp,
+        // chuyển lớp, tốt nghiệp, lên lớp, ở lại lớp là lịch sử của lớp cũ; còn ghi danh
+        // của đoàn sinh đã xoá mềm thì không còn ai theo học. Trước đây mọi dòng ghi danh
+        // đều chặn nên lớp cũ không bao giờ xoá được.
+        var hasActiveEnrollments = await _db.Enrollments
+            .AnyAsync(e => e.ClassRoomId == id
+                && e.Status == EnrollmentRules.Statuses.Active
+                && e.Student != null && e.Student.DeletedAt == null, ct);
+        if (hasActiveEnrollments)
         {
-            return Result.Validation("Không thể xóa lớp học đã có hồ sơ phân lớp / ghi danh. Vui lòng chuyển hoặc xóa ghi danh trước.");
+            return Result.Validation("Không thể xóa lớp học đang có đoàn sinh theo học. Vui lòng chuyển lớp hoặc rút ghi danh trước.");
         }
 
         classroom.DeletedAt = DateTime.UtcNow;
