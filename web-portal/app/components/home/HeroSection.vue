@@ -20,25 +20,18 @@ const { data: apiBanners } = await useFetch<BannerItem[]>('/api/v1/public/banner
   baseURL: config.public.apiBase
 })
 
-// Dữ liệu mẫu phong phú khi API chưa có hoặc đang tải
-const fallbackBanners: BannerItem[] = [
-  {
-    id: '1',
-    title: 'Khơi Nguồn Đức Tin – Đồng Hành Cùng Giới Trẻ',
-    subtitle: 'Năm học Giáo lý mới với chủ đề "Cầu Nguyện • Rước Lễ • Hy Sinh • Làm Tông Đồ"',
-    tag: '✨ NĂM HỌC MỚI',
-    tagColor: 'warning',
-    imageUrl: 'https://images.unsplash.com/photo-1438032005730-c779502df39b?q=80&w=2071&auto=format&fit=crop',
-    linkUrl: '/tin-tuc',
-    ctaText: 'Khám Phá Ngay'
-  }
-]
+// Không có banner nào đang bật thì không dựng hero: trước đây chỗ này rơi về một
+// banner mẫu (ảnh Unsplash) nên xoá hết banner trong quản trị mà trang chủ vẫn có
+// banner — vừa gây hiểu nhầm, vừa đẩy nội dung giả lên production.
+const bannerList = computed(() => apiBanners.value ?? [])
 
-const bannerList = computed(() => {
-  if (apiBanners.value && apiBanners.value.length > 0) {
-    return apiBanners.value
+// Tự chuyển slide là nội dung động kéo dài quá 5 giây nên phải có cách tạm dừng
+// (WCAG 2.2.2); mặc định đứng yên nếu người dùng bật "giảm chuyển động".
+const tuDongChay = ref(true)
+onMounted(() => {
+  if (window.matchMedia?.('(prefers-reduced-motion: reduce)').matches) {
+    tuDongChay.value = false
   }
-  return fallbackBanners
 })
 
 const searchQuery = ref('')
@@ -87,6 +80,7 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
          HERO BANNER — Cinematic Edge-to-Edge
     ══════════════════════════════════════════════════════════════════ -->
     <div
+      v-if="bannerList.length"
       class="relative w-full overflow-hidden shadow-2xl"
       style="box-shadow: 0 25px 60px rgba(26,58,107,0.25);"
     >
@@ -103,9 +97,9 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
           // theo tỉ lệ ảnh gốc và phần chữ (absolute inset-0) bị đẩy ra ngoài khung.
           item: 'relative w-full basis-full ps-0 select-none h-[520px] sm:h-[620px] md:h-[680px] lg:h-[740px]'
         }"
-        indicators
-        arrows
-        :autoplay="{ delay: 5500 }"
+        :indicators="bannerList.length > 1"
+        :arrows="bannerList.length > 1"
+        :autoplay="tuDongChay && bannerList.length > 1 ? { delay: 5500 } : false"
         loop
       >
         <template #default="{ item }">
@@ -146,13 +140,14 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
                 </span>
               </div>
 
-              <!-- Tiêu đề serif lớn -->
-              <h1
+              <!-- Tiêu đề serif lớn: chỉ là h2 để trang chủ giữ đúng một h1
+                   (mỗi slide một h1 thì trang có N h1, carousel lại nhân bản slide). -->
+              <h2
                 class="font-serif font-black text-white leading-[1.1] tracking-tight drop-shadow-2xl mb-4"
                 style="font-size: clamp(1.75rem, 5vw, 3.5rem);"
               >
                 {{ item.title }}
-              </h1>
+              </h2>
 
               <!-- Phụ đề -->
               <p
@@ -188,6 +183,21 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
           </div>
         </template>
       </UCarousel>
+
+      <!-- Tạm dừng / tiếp tục tự chuyển slide -->
+      <button
+        v-if="bannerList.length > 1"
+        type="button"
+        class="absolute bottom-6 right-6 z-20 w-10 h-10 rounded-full flex items-center justify-center text-white border border-white/40 backdrop-blur-sm hover:bg-white/20 transition-colors"
+        :aria-label="tuDongChay ? 'Tạm dừng trình chiếu banner' : 'Tiếp tục trình chiếu banner'"
+        :title="tuDongChay ? 'Tạm dừng trình chiếu banner' : 'Tiếp tục trình chiếu banner'"
+        @click="tuDongChay = !tuDongChay"
+      >
+        <UIcon
+          :name="tuDongChay ? 'i-heroicons-pause-20-solid' : 'i-heroicons-play-20-solid'"
+          class="w-5 h-5"
+        />
+      </button>
     </div>
 
     <!-- ══════════════════════════════════════════════════════════════
@@ -196,7 +206,10 @@ const branchStats = computed(() => publicStats.value?.branches ?? [])
          đáy cả khối wrapper (banner + thanh thống kê) nên thanh tra cứu trùm lên
          nhãn của 4 ô thống kê.
     ══════════════════════════════════════════════════════════════════ -->
-    <div class="relative -mt-7 mx-auto w-[92%] max-w-2xl z-30">
+    <div
+      class="relative mx-auto w-[92%] max-w-2xl z-30"
+      :class="bannerList.length ? '-mt-7' : 'mt-6'"
+    >
       <form
         class="relative p-2 rounded-2xl flex items-center gap-2 transition-all duration-500 focus-within:shadow-[0_15px_50px_rgba(201,169,110,0.3)]"
         style="

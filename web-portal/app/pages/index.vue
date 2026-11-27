@@ -13,6 +13,10 @@ useHead({
 
 <template>
   <div class="pb-16">
+    <!-- Tiêu đề cấp 1 duy nhất của trang: tiêu đề banner chỉ là h2 nên trang chủ
+         vẫn cần một h1 (ẩn thị giác, dành cho SEO/trình đọc màn hình). -->
+    <h1 class="sr-only">Giáo Lý Thiếu Nhi Thánh Thể – Trang Chủ</h1>
+
     <HeroSection />
 
     <!-- Nội dung chính (bọc khung tiêu chuẩn sang trọng) -->
