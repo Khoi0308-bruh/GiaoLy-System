@@ -229,9 +229,11 @@ public class StudentService : IStudentService
         }
 
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
-        if (request.BirthDate > today)
+        // DateOnly không nullable: client bỏ trống trường ngày sinh thì binder điền
+        // 01/01/0001, nên phải chặn cả giá trị mặc định chứ không chỉ ngày tương lai.
+        if (StudentBirthDateRules.GetError(request.BirthDate, today) is { } birthDateError)
         {
-            return Result.Validation<StudentDetailResponse>("Ngày sinh của đoàn sinh không thể ở tương lai.", "BirthDate");
+            return Result.Validation<StudentDetailResponse>(birthDateError, "BirthDate");
         }
 
         // Duplicate Check
@@ -430,9 +432,9 @@ public class StudentService : IStudentService
         if (request.HolyName != null) student.HolyName = request.HolyName.Trim();
         if (request.BirthDate.HasValue)
         {
-            if (request.BirthDate.Value > DateOnly.FromDateTime(DateTime.UtcNow))
+            if (StudentBirthDateRules.GetError(request.BirthDate.Value, DateOnly.FromDateTime(DateTime.UtcNow)) is { } birthDateError)
             {
-                return Result.Validation<StudentDetailResponse>("Ngày sinh không thể ở tương lai.", "BirthDate");
+                return Result.Validation<StudentDetailResponse>(birthDateError, "BirthDate");
             }
             student.BirthDate = request.BirthDate.Value.ToDateTime(TimeOnly.MinValue);
         }
@@ -528,10 +530,31 @@ public class StudentService : IStudentService
             return Result.NotFound("Không tìm thấy hồ sơ đoàn sinh.");
         }
 
+        // Xoá hồ sơ mà để lại ghi danh Active là ghi danh mồ côi: đoàn sinh không còn
+        // trong danh sách nên không ai rút lớp được, còn lớp thì bị giữ lại. Rút luôn ở
+        // đây theo đúng cách rút lớp thủ công (DropOut + ngày kết thúc + ghi chú lý do).
+        var ghiDanhDangHoc = await _db.Enrollments
+            .Where(e => e.StudentId == id && e.Status == EnrollmentRules.Statuses.Active)
+            .ToListAsync(ct);
+
+        var ngayXoa = DateOnly.FromDateTime(DateTime.UtcNow);
+        foreach (var ghiDanh in ghiDanhDangHoc)
+        {
+            const string lyDo = "Rút khỏi lớp: hồ sơ đoàn sinh bị xoá";
+            ghiDanh.Status = EnrollmentRules.Statuses.DropOut;
+            ghiDanh.EndDate = ngayXoa;
+            ghiDanh.Note = string.IsNullOrWhiteSpace(ghiDanh.Note)
+                ? lyDo
+                : $"{ghiDanh.Note} | {lyDo}";
+            ghiDanh.UpdatedAt = DateTime.UtcNow;
+        }
+
         student.DeletedAt = DateTime.UtcNow;
         await _db.SaveChangesAsync(ct);
 
-        _logger.LogInformation("Đã xóa mềm hồ sơ đoàn sinh: {Code} ({Id})", student.Code, id);
+        _logger.LogInformation(
+            "Đã xóa mềm hồ sơ đoàn sinh: {Code} ({Id}), rút {SoGhiDanh} ghi danh đang học",
+            student.Code, id, ghiDanhDangHoc.Count);
         return Result.Ok();
     }
 
