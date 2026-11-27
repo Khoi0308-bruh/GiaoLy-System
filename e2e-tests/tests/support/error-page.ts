@@ -16,9 +16,13 @@ export async function chanApi(page: Page) {
   await page.route(API_PATTERN, route => route.abort())
 }
 
-/** API sống lại. */
+/**
+ * API sống lại. Page/context có thể đã đóng (test trước đỏ, hết giờ) — khi đó không còn
+ * route để gỡ, và lỗi `page.unroute` chỉ che mất lỗi thật trong log, nên bỏ qua.
+ */
 export async function boChanApi(page: Page) {
-  await page.unroute(API_PATTERN)
+  if (page.isClosed()) return
+  await page.unroute(API_PATTERN).catch(() => undefined)
 }
 
 /** Đang hiện đúng trang 503, còn nút "Thử lại" và vẫn ở nguyên địa chỉ `path`. */
